@@ -259,10 +259,28 @@ class KimiClient:
 
             # If model returned tool calls
             if msg.tool_calls:
-                # Append the assistant message directly (per Moonshot docs).
-                # This preserves reasoning_content intact — "the model will
-                # decide which parts are necessary and forward them."
-                msgs.append(msg)
+                # Convert to plain dict for JSON serialization (SimpleNamespace
+                # from streaming is not serializable). Preserve full
+                # reasoning_content per Moonshot thinking model docs.
+                assistant_dict: dict[str, Any] = {
+                    "role": "assistant",
+                    "content": msg.content or "",
+                    "tool_calls": [
+                        {
+                            "id": tc.id,
+                            "type": "function",
+                            "function": {
+                                "name": tc.function.name,
+                                "arguments": tc.function.arguments,
+                            },
+                        }
+                        for tc in msg.tool_calls
+                    ],
+                }
+                reasoning = getattr(msg, "reasoning_content", None)
+                if reasoning:
+                    assistant_dict["reasoning_content"] = reasoning
+                msgs.append(assistant_dict)
 
                 # Execute each tool call and append results
                 for tc in msg.tool_calls:
