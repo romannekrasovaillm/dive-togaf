@@ -85,6 +85,7 @@ def main() -> None:
     kimi = KimiClient(
         model=args.model,
         temperature=args.temperature,
+        verbose=args.verbose,
     )
 
     sampler = PoolSampler(

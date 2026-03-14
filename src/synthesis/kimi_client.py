@@ -11,6 +11,9 @@ import logging
 import os
 import time
 import uuid
+from datetime import datetime
+from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 from openai import OpenAI
@@ -51,10 +54,12 @@ class KimiClient:
         base_url: str = DEFAULT_BASE_URL,
         temperature: float = 0.6,
         max_retries: int = 5,
+        verbose: bool = False,
     ):
         self.model = model
         self.temperature = temperature
         self.max_retries = max_retries
+        self.verbose = verbose
         self._client = OpenAI(
             api_key=_get_api_key(),
             base_url=base_url,
@@ -62,6 +67,72 @@ class KimiClient:
         )
         # Session-level cache key for prompt caching (per Moonshot docs)
         self._cache_key = f"dive-togaf-{uuid.uuid4().hex[:12]}"
+        self._call_seq = 0
+
+    # ------------------------------------------------------------------
+    # Prompt dump (verbose mode only)
+    # ------------------------------------------------------------------
+
+    def _dump_prompt(
+        self,
+        messages: list[dict[str, Any] | Any],
+        tools: list[dict[str, Any]] | None,
+        call_id: str,
+    ) -> None:
+        """Save full prompt to file for post-mortem analysis."""
+        if not self.verbose:
+            return
+
+        dump_dir = Path("output/prompt_dumps")
+        dump_dir.mkdir(parents=True, exist_ok=True)
+
+        timestamp = datetime.now().strftime("%H%M%S")
+        filename = dump_dir / f"{timestamp}_{call_id}.json"
+
+        # Serialize messages — handle both dicts and SDK objects
+        serializable_msgs = []
+        for m in messages:
+            if isinstance(m, dict):
+                serializable_msgs.append(m)
+            else:
+                # SDK object — extract fields
+                serializable_msgs.append({
+                    "role": getattr(m, "role", "unknown"),
+                    "content": getattr(m, "content", None),
+                    "reasoning_content_length": len(getattr(m, "reasoning_content", "") or ""),
+                    "has_tool_calls": bool(getattr(m, "tool_calls", None)),
+                })
+
+        payload_json = json.dumps(serializable_msgs, ensure_ascii=False, default=str)
+        payload_bytes = len(payload_json.encode("utf-8"))
+
+        dump = {
+            "timestamp": datetime.now().isoformat(),
+            "call_id": call_id,
+            "message_count": len(messages),
+            "messages_summary": [
+                {
+                    "role": m.get("role") if isinstance(m, dict) else getattr(m, "role", "?"),
+                    "content_length": len(str(m.get("content", "") if isinstance(m, dict) else getattr(m, "content", "") or "")),
+                    "has_tool_calls": ("tool_calls" in m) if isinstance(m, dict) else bool(getattr(m, "tool_calls", None)),
+                    "has_reasoning": bool(m.get("reasoning_content") if isinstance(m, dict) else getattr(m, "reasoning_content", None)),
+                }
+                for m in messages
+            ],
+            "full_messages": serializable_msgs,
+            "tool_count": len(tools) if tools else 0,
+            "total_payload_bytes": payload_bytes,
+            "token_estimate": payload_bytes // 4,
+        }
+
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(dump, f, ensure_ascii=False, indent=2, default=str)
+
+        logger.debug("Prompt dumped to %s", filename)
+
+    # ------------------------------------------------------------------
+    # Core API call
+    # ------------------------------------------------------------------
 
     def chat(
         self,
@@ -72,10 +143,7 @@ class KimiClient:
         max_tokens: int = 32768,
         stream: bool = False,
     ) -> ChatCompletion:
-        """Send a chat completion request, with optional tool definitions.
-
-        Returns the raw ChatCompletion object.
-        """
+        """Send a chat completion request, with optional tool definitions."""
         # Thinking models need >= 16000 tokens for reasoning_content + content
         if self.model in _FIXED_TEMP_MODELS or "thinking" in self.model:
             max_tokens = max(max_tokens, _THINKING_MIN_TOKENS)
@@ -95,27 +163,95 @@ class KimiClient:
         if stream:
             kwargs["stream"] = True
 
+        # --- Payload size logging ---
+        self._call_seq += 1
+        payload_json = json.dumps(messages, ensure_ascii=False, default=str)
+        payload_bytes = len(payload_json.encode("utf-8"))
+        token_est = payload_bytes // 4
+        logger.info(
+            "API call #%d: %d messages, %d bytes (~%dk tokens est.), tools: %d",
+            self._call_seq, len(messages), payload_bytes, token_est // 1000,
+            len(tools) if tools else 0,
+        )
+
+        # --- Prompt dump (verbose only) ---
+        call_id = f"call{self._call_seq}"
+        self._dump_prompt(messages, tools, call_id)
+
         last_err = None
         for attempt in range(1, self.max_retries + 1):
             try:
+                start = time.monotonic()
                 if stream:
-                    return self._handle_stream(kwargs)
-                response = self._client.chat.completions.create(**kwargs)
-                return response
+                    result = self._handle_stream(kwargs)
+                else:
+                    result = self._client.chat.completions.create(**kwargs)
+                elapsed = time.monotonic() - start
+
+                # --- Response logging ---
+                usage = getattr(result, "usage", None)
+                finish = result.choices[0].finish_reason if result.choices else "?"
+                if usage:
+                    logger.info(
+                        "API response #%d: %.1fs, finish=%s, prompt_tokens=%s, completion_tokens=%s, total=%s, cached=%s",
+                        self._call_seq, elapsed, finish,
+                        getattr(usage, "prompt_tokens", "?"),
+                        getattr(usage, "completion_tokens", "?"),
+                        getattr(usage, "total_tokens", "?"),
+                        getattr(usage, "cached_tokens", "?"),
+                    )
+                else:
+                    logger.info(
+                        "API response #%d: %.1fs, finish=%s (no usage data)",
+                        self._call_seq, elapsed, finish,
+                    )
+                return result
             except Exception as e:
                 last_err = e
-                # Don't retry client errors (400, 401, 403) — they won't self-heal
+                elapsed = time.monotonic() - start
+
+                # --- Enhanced error logging ---
+                error_info: dict[str, Any] = {
+                    "type": type(e).__name__,
+                    "message": str(e)[:300],
+                    "elapsed": f"{elapsed:.1f}s",
+                    "payload_bytes": payload_bytes,
+                    "message_count": len(messages),
+                }
                 status = getattr(e, "status_code", None)
+                if status:
+                    error_info["status_code"] = status
+                resp = getattr(e, "response", None)
+                if resp is not None:
+                    error_info["response_status"] = getattr(resp, "status_code", None)
+                    error_info["response_headers"] = {
+                        k: v for k, v in getattr(resp, "headers", {}).items()
+                        if k.lower() in ("retry-after", "x-ratelimit-remaining", "x-ratelimit-reset", "content-type")
+                    }
+                req = getattr(e, "request", None)
+                if req is not None:
+                    error_info["request_content_length"] = len(getattr(req, "content", b"") or b"")
+
+                # Don't retry client errors (400, 401, 403) — they won't self-heal
                 if status and 400 <= status < 500 and status != 429:
-                    logger.error("Kimi API fatal error (HTTP %d): %s", status, e)
+                    logger.error("Kimi API fatal error: %s", json.dumps(error_info, ensure_ascii=False, default=str))
                     raise
                 if attempt < self.max_retries:
                     wait = 2 ** attempt
-                    logger.warning("Kimi API attempt %d/%d failed: %s. Retry in %ds", attempt, self.max_retries, e, wait)
+                    logger.warning(
+                        "Kimi API attempt %d/%d failed: %s. Retry in %ds",
+                        attempt, self.max_retries,
+                        json.dumps(error_info, ensure_ascii=False, default=str),
+                        wait,
+                    )
                     time.sleep(wait)
         raise RuntimeError(f"Kimi API failed after {self.max_retries} attempts: {last_err}") from last_err
 
-    def _handle_stream(self, kwargs: dict[str, Any]) -> ChatCompletion:
+    # ------------------------------------------------------------------
+    # Streaming handler
+    # ------------------------------------------------------------------
+
+    def _handle_stream(self, kwargs: dict[str, Any]) -> Any:
         """Consume a streaming response and reconstruct a ChatCompletion-like object.
 
         Streaming avoids connection timeouts for long-running thinking responses.
@@ -133,7 +269,6 @@ class KimiClient:
 
         for chunk in stream:
             if not chunk.choices:
-                # Final usage-only chunk
                 if chunk.usage:
                     usage = chunk.usage
                 continue
@@ -145,16 +280,13 @@ class KimiClient:
             if chunk.choices[0].finish_reason:
                 finish_reason = chunk.choices[0].finish_reason
 
-            # Content
             if delta.content:
                 content_parts.append(delta.content)
 
-            # Reasoning content (thinking)
             rc = getattr(delta, "reasoning_content", None)
             if rc:
                 reasoning_parts.append(rc)
 
-            # Tool calls (accumulated by index)
             if delta.tool_calls:
                 for tc_delta in delta.tool_calls:
                     idx = tc_delta.index
@@ -172,9 +304,6 @@ class KimiClient:
                             entry["function"]["name"] += tc_delta.function.name
                         if tc_delta.function.arguments:
                             entry["function"]["arguments"] += tc_delta.function.arguments
-
-        # Build a mock ChatCompletion-like object
-        from types import SimpleNamespace
 
         tool_calls_list = None
         if tool_calls_map:
@@ -210,6 +339,10 @@ class KimiClient:
             usage=usage,
         )
 
+    # ------------------------------------------------------------------
+    # Convenience methods
+    # ------------------------------------------------------------------
+
     def chat_text(
         self,
         messages: list[dict[str, Any]],
@@ -233,7 +366,7 @@ class KimiClient:
 
         Uses streaming to avoid connection timeouts on long-running thinking
         responses. Per Moonshot docs for thinking models:
-        - Append the assistant message object directly (preserves reasoning_content)
+        - Preserve full reasoning_content
         - max_tokens >= 16000 for reasoning_content + content
         - stream = true to avoid timeouts
 
@@ -253,7 +386,6 @@ class KimiClient:
         msgs = list(messages)
 
         for round_num in range(max_rounds):
-            # Use streaming to prevent connection timeouts during long thinking
             resp = self.chat(
                 msgs, tools=tools, temperature=temperature,
                 max_tokens=max_tokens, stream=True,
@@ -261,7 +393,6 @@ class KimiClient:
             choice = resp.choices[0]
             msg = choice.message
 
-            # If model returned tool calls
             if msg.tool_calls:
                 # Convert to plain dict for JSON serialization (SimpleNamespace
                 # from streaming is not serializable). Preserve full
