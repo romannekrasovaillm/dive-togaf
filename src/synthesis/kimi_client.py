@@ -10,6 +10,7 @@ import json
 import logging
 import os
 import time
+import uuid
 from typing import Any
 
 from openai import OpenAI
@@ -23,6 +24,10 @@ DEFAULT_MODEL = "kimi-k2.5"
 # Models where temperature/top_p/n/presence_penalty/frequency_penalty cannot be modified
 _FIXED_TEMP_MODELS = {"kimi-k2.5"}
 
+# Limits to prevent context explosion in multi-round tool-calling loops
+_MAX_TOOL_RESULT_CHARS = 1500      # truncate tool result strings in messages
+_MAX_REASONING_CHARS = 500         # truncate reasoning_content echo-back
+
 
 def _get_api_key() -> str:
     key = os.environ.get("KIMI_API_KEY") or os.environ.get("MOONSHOT_API_KEY")
@@ -32,6 +37,13 @@ def _get_api_key() -> str:
             "Get your key at https://platform.moonshot.ai/"
         )
     return key
+
+
+def _truncate(s: str, max_len: int) -> str:
+    """Truncate a string and add ellipsis if too long."""
+    if len(s) <= max_len:
+        return s
+    return s[:max_len] + "... [truncated]"
 
 
 class KimiClient:
@@ -52,6 +64,8 @@ class KimiClient:
             base_url=base_url,
             timeout=120.0,
         )
+        # Session-level cache key for prompt caching (per Moonshot docs)
+        self._cache_key = f"dive-togaf-{uuid.uuid4().hex[:12]}"
 
     def chat(
         self,
@@ -60,6 +74,7 @@ class KimiClient:
         tool_choice: str | None = None,
         temperature: float | None = None,
         max_tokens: int = 4096,
+        stream: bool = False,
     ) -> ChatCompletion:
         """Send a chat completion request, with optional tool definitions.
 
@@ -69,6 +84,7 @@ class KimiClient:
             "model": self.model,
             "messages": messages,
             "max_completion_tokens": max_tokens,
+            "prompt_cache_key": self._cache_key,
         }
         # kimi-k2.5 does not allow temperature to be set
         if self.model not in _FIXED_TEMP_MODELS:
@@ -76,16 +92,19 @@ class KimiClient:
         if tools:
             kwargs["tools"] = tools
             kwargs["tool_choice"] = tool_choice or "auto"
+        if stream:
+            kwargs["stream"] = True
 
         last_err = None
         for attempt in range(1, self.max_retries + 1):
             try:
+                if stream:
+                    return self._handle_stream(kwargs)
                 response = self._client.chat.completions.create(**kwargs)
                 return response
             except Exception as e:
                 last_err = e
                 # Don't retry client errors (400, 401, 403) — they won't self-heal
-                err_str = str(e)
                 status = getattr(e, "status_code", None)
                 if status and 400 <= status < 500 and status != 429:
                     logger.error("Kimi API fatal error (HTTP %d): %s", status, e)
@@ -95,6 +114,101 @@ class KimiClient:
                     logger.warning("Kimi API attempt %d/%d failed: %s. Retry in %ds", attempt, self.max_retries, e, wait)
                     time.sleep(wait)
         raise RuntimeError(f"Kimi API failed after {self.max_retries} attempts: {last_err}") from last_err
+
+    def _handle_stream(self, kwargs: dict[str, Any]) -> ChatCompletion:
+        """Consume a streaming response and reconstruct a ChatCompletion-like object.
+
+        Streaming avoids connection timeouts for long-running thinking responses.
+        """
+        kwargs["stream_options"] = {"include_usage": True}
+        stream = self._client.chat.completions.create(**kwargs)
+
+        content_parts: list[str] = []
+        reasoning_parts: list[str] = []
+        tool_calls_map: dict[int, dict[str, Any]] = {}
+        finish_reason = None
+        model = ""
+        completion_id = ""
+        usage = None
+
+        for chunk in stream:
+            if not chunk.choices:
+                # Final usage-only chunk
+                if chunk.usage:
+                    usage = chunk.usage
+                continue
+
+            delta = chunk.choices[0].delta
+            completion_id = chunk.id or completion_id
+            model = chunk.model or model
+
+            if chunk.choices[0].finish_reason:
+                finish_reason = chunk.choices[0].finish_reason
+
+            # Content
+            if delta.content:
+                content_parts.append(delta.content)
+
+            # Reasoning content (thinking)
+            rc = getattr(delta, "reasoning_content", None)
+            if rc:
+                reasoning_parts.append(rc)
+
+            # Tool calls (accumulated by index)
+            if delta.tool_calls:
+                for tc_delta in delta.tool_calls:
+                    idx = tc_delta.index
+                    if idx not in tool_calls_map:
+                        tool_calls_map[idx] = {
+                            "id": tc_delta.id or "",
+                            "type": "function",
+                            "function": {"name": "", "arguments": ""},
+                        }
+                    entry = tool_calls_map[idx]
+                    if tc_delta.id:
+                        entry["id"] = tc_delta.id
+                    if tc_delta.function:
+                        if tc_delta.function.name:
+                            entry["function"]["name"] += tc_delta.function.name
+                        if tc_delta.function.arguments:
+                            entry["function"]["arguments"] += tc_delta.function.arguments
+
+        # Build a mock ChatCompletion-like object
+        from types import SimpleNamespace
+
+        tool_calls_list = None
+        if tool_calls_map:
+            tool_calls_list = []
+            for idx in sorted(tool_calls_map):
+                tc = tool_calls_map[idx]
+                tool_calls_list.append(SimpleNamespace(
+                    id=tc["id"],
+                    type="function",
+                    function=SimpleNamespace(
+                        name=tc["function"]["name"],
+                        arguments=tc["function"]["arguments"],
+                    ),
+                ))
+
+        message = SimpleNamespace(
+            role="assistant",
+            content="".join(content_parts) or None,
+            tool_calls=tool_calls_list,
+            reasoning_content="".join(reasoning_parts) or None,
+        )
+
+        choice = SimpleNamespace(
+            index=0,
+            message=message,
+            finish_reason=finish_reason,
+        )
+
+        return SimpleNamespace(
+            id=completion_id,
+            model=model,
+            choices=[choice],
+            usage=usage,
+        )
 
     def chat_text(
         self,
@@ -117,6 +231,10 @@ class KimiClient:
     ) -> tuple[str, list[dict[str, Any]]]:
         """Run a tool-calling loop until the model finishes or max_rounds reached.
 
+        Uses streaming to avoid connection timeouts on long-running thinking
+        responses. Truncates tool results and reasoning_content to keep the
+        context within manageable bounds.
+
         Args:
             messages: Conversation history.
             tools: OpenAI-format tool definitions.
@@ -132,17 +250,21 @@ class KimiClient:
         tool_call_log: list[dict[str, Any]] = []
         msgs = list(messages)
 
-        for _ in range(max_rounds):
-            resp = self.chat(msgs, tools=tools, temperature=temperature, max_tokens=max_tokens)
+        for round_num in range(max_rounds):
+            # Use streaming to prevent connection timeouts during long thinking
+            resp = self.chat(
+                msgs, tools=tools, temperature=temperature,
+                max_tokens=max_tokens, stream=True,
+            )
             choice = resp.choices[0]
             msg = choice.message
 
             # If model returned tool calls
             if msg.tool_calls:
-                # Append assistant message with tool calls.
-                # kimi-k2.5 has "thinking" enabled — the response includes
-                # reasoning_content which MUST be echoed back, otherwise
-                # the API returns 400 "reasoning_content is missing".
+                # Build assistant message echoed back to the API.
+                # kimi-k2.5 thinking mode requires reasoning_content field.
+                # IMPORTANT: truncate reasoning_content to prevent context
+                # explosion — each round adds thousands of thinking tokens.
                 assistant_msg: dict[str, Any] = {
                     "role": "assistant",
                     "content": msg.content or "",
@@ -158,10 +280,12 @@ class KimiClient:
                         for tc in msg.tool_calls
                     ],
                 }
-                # Preserve reasoning_content for thinking-enabled models
+                # Preserve reasoning_content (truncated) for thinking-enabled models
                 reasoning = getattr(msg, "reasoning_content", None)
                 if reasoning:
-                    assistant_msg["reasoning_content"] = reasoning
+                    assistant_msg["reasoning_content"] = _truncate(
+                        reasoning, _MAX_REASONING_CHARS,
+                    )
                 msgs.append(assistant_msg)
 
                 # Execute each tool call and append results
@@ -176,6 +300,7 @@ class KimiClient:
                     result = tool_executor(fn_name, fn_args)
                     result_str = json.dumps(result, ensure_ascii=False) if isinstance(result, (dict, list)) else str(result)
 
+                    # Full result goes to log (for evidence), truncated to API
                     tool_call_log.append({
                         "tool_name": fn_name,
                         "arguments": fn_args,
@@ -185,8 +310,13 @@ class KimiClient:
                     msgs.append({
                         "role": "tool",
                         "tool_call_id": tc.id,
-                        "content": result_str,
+                        "content": _truncate(result_str, _MAX_TOOL_RESULT_CHARS),
                     })
+
+                logger.info(
+                    "Round %d/%d: %d tool calls, message count: %d",
+                    round_num + 1, max_rounds, len(msg.tool_calls), len(msgs),
+                )
             else:
                 # Model finished — return final text
                 return msg.content or "", tool_call_log
