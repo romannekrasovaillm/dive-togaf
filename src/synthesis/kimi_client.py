@@ -132,8 +132,11 @@ class KimiClient:
 
             # If model returned tool calls
             if msg.tool_calls:
-                # Append assistant message with tool calls
-                msgs.append({
+                # Append assistant message with tool calls.
+                # kimi-k2.5 has "thinking" enabled — the response includes
+                # reasoning_content which MUST be echoed back, otherwise
+                # the API returns 400 "reasoning_content is missing".
+                assistant_msg: dict[str, Any] = {
                     "role": "assistant",
                     "content": msg.content or "",
                     "tool_calls": [
@@ -147,7 +150,12 @@ class KimiClient:
                         }
                         for tc in msg.tool_calls
                     ],
-                })
+                }
+                # Preserve reasoning_content for thinking-enabled models
+                reasoning = getattr(msg, "reasoning_content", None)
+                if reasoning:
+                    assistant_msg["reasoning_content"] = reasoning
+                msgs.append(assistant_msg)
 
                 # Execute each tool call and append results
                 for tc in msg.tool_calls:
