@@ -31,12 +31,13 @@ def test_tool_pool_types():
 
 
 def test_tool_pool_domains():
-    """Tool pool should cover all 5 domains."""
+    """Tool pool should cover all 7 domains."""
     tools = build_tool_pool()
     domains = {t.domain for t in tools}
-    expected = {ToolDomain.ADM, ToolDomain.ARCHIMATE, ToolDomain.REPOSITORY, ToolDomain.GOVERNANCE, ToolDomain.GENERAL}
+    expected = {ToolDomain.ADM, ToolDomain.ARCHIMATE, ToolDomain.REPOSITORY, ToolDomain.GOVERNANCE,
+                ToolDomain.GENERAL, ToolDomain.ANALYSIS, ToolDomain.TECHNOLOGY_RADAR}
     assert domains == expected, f"Missing domains: {expected - domains}"
-    print(f"  PASS: All 5 domains covered: {[d.value for d in sorted(domains, key=lambda x: x.value)]}")
+    print(f"  PASS: All {len(expected)} domains covered: {[d.value for d in sorted(domains, key=lambda x: x.value)]}")
 
 
 def test_tool_pool_unique_ids():

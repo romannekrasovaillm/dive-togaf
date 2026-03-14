@@ -786,6 +786,520 @@ def _stakeholder_seeds() -> list[SeedConcept]:
 
 
 # =====================================================================
+# BIAN Service Landscape — banking industry reference architecture
+# Based on BIAN Service Landscape v12
+# =====================================================================
+
+def _bian_service_domain_seeds() -> list[SeedConcept]:
+    """BIAN service domains — banking industry reference architecture."""
+    # Representative set from BIAN Service Landscape v12 across all business areas
+    domains = [
+        # Customer Management
+        ("party_reference_data", "Party Reference Data Directory", "customer_management",
+         "Maintain a directory of party reference information (individuals, organizations) used across services"),
+        ("customer_relationship", "Customer Relationship Management", "customer_management",
+         "Manage the relationship with customers including lifecycle, preferences, and engagement history"),
+        ("customer_offer", "Customer Offer", "customer_management",
+         "Manage the presentation and negotiation of product/service offers to customers"),
+        ("customer_onboarding", "Customer Onboarding", "customer_management",
+         "Orchestrate the activities involved in enrolling a new customer"),
+        ("customer_profile", "Customer Profile", "customer_management",
+         "Maintain consolidated customer profile data aggregating behavior and preferences"),
+        ("customer_access_entitlement", "Customer Access Entitlement", "customer_management",
+         "Manage customer authentication and access entitlements across channels"),
+        ("customer_agreement", "Customer Agreement", "customer_management",
+         "Maintain customer agreements covering products, terms, and conditions"),
+        ("customer_case_management", "Customer Case Management", "customer_management",
+         "Track and resolve customer cases, complaints, and service requests"),
+        ("customer_campaign_mgmt", "Customer Campaign Management", "customer_management",
+         "Design, execute, and track marketing campaigns targeting customer segments"),
+        ("customer_behavioral_insights", "Customer Behavioral Insights", "customer_management",
+         "Develop behavioral analysis and insights from customer activity patterns"),
+
+        # Sales & Service
+        ("sales_product_agreement", "Sales Product Agreement", "sales_service",
+         "Manage product agreements as part of the sales process"),
+        ("servicing_mandate", "Servicing Mandate", "sales_service",
+         "Maintain servicing mandates defining the scope and constraints of customer servicing"),
+        ("customer_servicing", "Customer Servicing", "sales_service",
+         "Orchestrate customer service delivery across products and channels"),
+        ("contact_center_mgmt", "Contact Center Management", "sales_service",
+         "Manage contact center operations including routing, queuing, and workforce scheduling"),
+        ("branch_network_mgmt", "Branch/Location Management", "sales_service",
+         "Manage physical branch network operations and logistics"),
+
+        # Products — Deposits & Lending
+        ("current_account", "Current Account", "products",
+         "Fulfill current/checking account facilities covering payments, balances, and statements"),
+        ("savings_account", "Savings Account", "products",
+         "Fulfill savings account facilities including interest calculations and withdrawal rules"),
+        ("deposit_account", "Deposit Account", "products",
+         "Fulfill term deposit and fixed deposit facilities"),
+        ("loan", "Loan", "products",
+         "Fulfill loan product facilities including disbursement, repayment, and interest management"),
+        ("mortgage", "Mortgage", "products",
+         "Fulfill mortgage product facilities covering property-secured lending"),
+        ("credit_facility", "Credit Facility", "products",
+         "Manage credit facility offerings including revolving credit and overdraft"),
+        ("credit_card", "Credit Card", "products",
+         "Fulfill credit card facilities including transactions, billing, and rewards"),
+        ("leasing", "Leasing", "products",
+         "Fulfill leasing arrangements for assets (vehicles, equipment)"),
+
+        # Products — Investment & Treasury
+        ("investment_portfolio", "Investment Portfolio Management", "products",
+         "Manage investment portfolios including asset allocation and rebalancing"),
+        ("securities_trading", "Securities Trading", "products",
+         "Execute securities trading across equities, bonds, and derivatives"),
+        ("market_making", "Market Making", "products",
+         "Provide market making services maintaining bid/ask quotes"),
+        ("treasury", "Treasury Management", "products",
+         "Manage treasury operations including liquidity, funding, and ALM"),
+        ("custody_services", "Custody Services", "products",
+         "Provide custody and safekeeping of securities and assets"),
+        ("wealth_management", "Wealth Management", "products",
+         "Deliver wealth management advisory and portfolio services"),
+        ("fund_management", "Fund Management", "products",
+         "Manage investment fund operations including NAV calculation and distribution"),
+
+        # Payments
+        ("payment_initiation", "Payment Initiation", "payments",
+         "Initiate payment transactions across domestic and international schemes"),
+        ("payment_execution", "Payment Execution", "payments",
+         "Execute and settle payment transactions through clearing networks"),
+        ("payment_order", "Payment Order", "payments",
+         "Process payment orders including validation, routing, and confirmation"),
+        ("card_transaction_switch", "Card Transaction Switch", "payments",
+         "Route and switch card transactions between acquirers and issuers"),
+        ("correspondent_banking", "Correspondent Banking", "payments",
+         "Manage correspondent banking relationships and nostro/vostro accounts"),
+        ("direct_debit", "Direct Debit", "payments",
+         "Process direct debit mandates and collections"),
+
+        # Risk & Compliance
+        ("credit_risk_assessment", "Credit Risk Assessment", "risk_compliance",
+         "Assess credit risk for counterparties and exposures"),
+        ("market_risk", "Market Risk", "risk_compliance",
+         "Measure and monitor market risk (VaR, stress testing, sensitivity)"),
+        ("operational_risk", "Operational Risk", "risk_compliance",
+         "Identify, assess, and monitor operational risk events and controls"),
+        ("fraud_detection", "Fraud Detection", "risk_compliance",
+         "Detect and investigate fraudulent activities using pattern analysis"),
+        ("aml_kyc", "AML/KYC", "risk_compliance",
+         "Perform anti-money-laundering checks and know-your-customer due diligence"),
+        ("regulatory_compliance", "Regulatory Compliance", "risk_compliance",
+         "Monitor and ensure compliance with regulatory requirements"),
+        ("regulatory_reporting", "Regulatory Reporting", "risk_compliance",
+         "Generate and submit regulatory reports (Basel, IFRS, local regulations)"),
+        ("counterparty_risk", "Counterparty Risk", "risk_compliance",
+         "Assess and monitor counterparty credit and settlement risk"),
+
+        # Operations & Technology
+        ("transaction_engine", "Transaction Engine", "operations",
+         "Core transaction processing engine for booking and posting"),
+        ("general_ledger", "General Ledger", "operations",
+         "Maintain the general ledger and chart of accounts"),
+        ("financial_accounting", "Financial Accounting", "operations",
+         "Manage financial accounting, reporting, and reconciliation"),
+        ("reconciliation", "Reconciliation", "operations",
+         "Perform automated reconciliation of transactions across systems"),
+        ("document_management", "Document Management", "operations",
+         "Manage documents, content, and digital records across the enterprise"),
+        ("data_management", "Enterprise Data Management", "operations",
+         "Govern enterprise data quality, lineage, and master data"),
+        ("it_operations", "IT Operations Administration", "operations",
+         "Manage IT infrastructure operations, monitoring, and incident response"),
+        ("system_administration", "System Administration", "operations",
+         "Administer core banking systems and middleware"),
+        ("business_continuity", "Business Continuity Management", "operations",
+         "Plan and manage business continuity and disaster recovery"),
+
+        # Corporate Services
+        ("trade_finance", "Trade Finance", "corporate",
+         "Fulfill trade finance instruments (letters of credit, guarantees, documentary collections)"),
+        ("corporate_lending", "Corporate Lending", "corporate",
+         "Manage corporate and syndicated lending facilities"),
+        ("cash_management", "Cash Management", "corporate",
+         "Provide corporate cash management including pooling and sweeping"),
+        ("supply_chain_finance", "Supply Chain Finance", "corporate",
+         "Facilitate supply chain financing (factoring, reverse factoring)"),
+    ]
+
+    seeds = []
+    for key, name, area, desc in domains:
+        seeds.append(SeedConcept(
+            id=f"bian_{key}", name=f"BIAN: {name}",
+            category=SeedCategory.BIAN_SERVICE_DOMAIN,
+            description=desc, domain="banking",
+            tags=["bian", "banking", area, "service_domain"],
+            metadata={"bian_business_area": area, "reference": "BIAN Service Landscape v12"},
+        ))
+    return seeds
+
+
+# =====================================================================
+# TMForum Open Digital Architecture — telco/digital industry
+# Based on TMForum ODA Functional Architecture v5
+# =====================================================================
+
+def _tmforum_oda_seeds() -> list[SeedConcept]:
+    """TMForum Open Digital Architecture functional blocks."""
+    blocks = [
+        # Core Commerce Management
+        ("party_mgmt", "Party Management", "core_commerce",
+         "Manage parties (individuals, organizations) and their roles across the enterprise"),
+        ("product_catalog", "Product Catalog Management", "core_commerce",
+         "Design, manage, and publish product and service catalogs"),
+        ("product_ordering", "Product Ordering", "core_commerce",
+         "Capture, validate, and orchestrate product orders through fulfillment"),
+        ("product_inventory", "Product Inventory", "core_commerce",
+         "Track and manage the inventory of active product instances"),
+        ("customer_mgmt", "Customer Management", "core_commerce",
+         "Manage customer lifecycle, profiles, and interaction history"),
+        ("customer_bill_mgmt", "Customer Bill Management", "core_commerce",
+         "Generate, present, and manage customer billing and invoicing"),
+        ("revenue_mgmt", "Revenue Management", "core_commerce",
+         "Rate usage, apply charges, manage revenue assurance and settlements"),
+        ("loyalty_mgmt", "Loyalty Management", "core_commerce",
+         "Manage loyalty programs, points, tiers, and rewards"),
+        ("partner_mgmt", "Partner Management", "core_commerce",
+         "Manage partner relationships, agreements, and settlement"),
+        ("sales_mgmt", "Sales Management", "core_commerce",
+         "Manage sales pipeline, opportunities, and quoting processes"),
+        ("agreement_mgmt", "Agreement Management", "core_commerce",
+         "Manage commercial agreements, SLAs, and contractual terms"),
+        ("payment_mgmt", "Payment Management", "core_commerce",
+         "Process payments, refunds, and manage payment methods"),
+
+        # Production
+        ("service_catalog", "Service Catalog Management", "production",
+         "Design and manage the service catalog including technical service specifications"),
+        ("service_ordering", "Service Ordering", "production",
+         "Decompose and orchestrate service orders into resource actions"),
+        ("service_inventory", "Service Inventory", "production",
+         "Maintain inventory of active service instances and configurations"),
+        ("service_activation", "Service Activation & Configuration", "production",
+         "Activate, configure, and modify services on the network"),
+        ("service_quality", "Service Quality Management", "production",
+         "Monitor and manage service quality and performance levels"),
+        ("service_test", "Service Test Management", "production",
+         "Plan and execute service tests to validate quality and functionality"),
+        ("resource_catalog", "Resource Catalog", "production",
+         "Manage the catalog of physical and logical resources"),
+        ("resource_ordering", "Resource Ordering", "production",
+         "Orchestrate resource provisioning and configuration orders"),
+        ("resource_inventory", "Resource Inventory", "production",
+         "Maintain inventory of physical and logical network resources"),
+        ("resource_activation", "Resource Activation", "production",
+         "Activate and configure network resources"),
+        ("network_planning", "Network Planning & Design", "production",
+         "Plan, design, and optimize network topology and capacity"),
+
+        # Engagement Management
+        ("digital_experience", "Digital Experience Management", "engagement",
+         "Manage digital customer journeys across web, mobile, and IoT channels"),
+        ("contact_mgmt", "Contact Management", "engagement",
+         "Manage customer contacts and interactions across all touchpoints"),
+        ("trouble_ticket", "Trouble Ticket Management", "engagement",
+         "Create, track, and resolve trouble tickets and service problems"),
+        ("sla_mgmt", "SLA Management", "engagement",
+         "Define, monitor, and report on service level agreements"),
+
+        # Intelligence Management
+        ("analytics", "Analytics", "intelligence",
+         "Provide advanced analytics, predictive models, and AI/ML capabilities"),
+        ("data_governance", "Data Governance", "intelligence",
+         "Govern data quality, metadata, lineage, and data catalogs"),
+        ("reporting", "Reporting & Dashboards", "intelligence",
+         "Generate operational and business intelligence reports and dashboards"),
+
+        # Security & Governance
+        ("identity_access", "Identity & Access Management", "security",
+         "Manage identities, authentication, authorization, and access policies"),
+        ("fraud_mgmt", "Fraud Management", "security",
+         "Detect, investigate, and prevent fraud across services"),
+        ("privacy_mgmt", "Privacy Management", "security",
+         "Manage data privacy policies, consent, and regulatory compliance"),
+        ("policy_mgmt", "Policy Management", "security",
+         "Define and enforce business and technical policies"),
+
+        # Decoupling & Integration
+        ("event_mgmt", "Event Management", "integration",
+         "Manage business events, notifications, and event-driven architectures"),
+        ("api_mgmt", "API Management", "integration",
+         "Manage API lifecycle, gateway, and developer portal"),
+        ("integration_fabric", "Integration Fabric", "integration",
+         "Provide enterprise integration middleware and message routing"),
+
+        # Enterprise Management
+        ("strategic_planning", "Strategic Planning", "enterprise",
+         "Support strategic planning, business modeling, and portfolio management"),
+        ("program_project_mgmt", "Program & Project Management", "enterprise",
+         "Manage programs, projects, and transformation initiatives"),
+        ("enterprise_risk", "Enterprise Risk Management", "enterprise",
+         "Identify, assess, and manage enterprise-wide risks"),
+        ("regulatory_mgmt", "Regulatory Management", "enterprise",
+         "Track regulatory requirements and ensure compliance"),
+        ("workforce_mgmt", "Workforce Management", "enterprise",
+         "Manage workforce planning, scheduling, and skills"),
+        ("financial_mgmt", "Financial Management", "enterprise",
+         "Manage financial planning, budgeting, and accounting"),
+        ("procurement_mgmt", "Procurement & Supply Chain", "enterprise",
+         "Manage procurement, vendors, and supply chain"),
+    ]
+
+    seeds = []
+    for key, name, area, desc in blocks:
+        seeds.append(SeedConcept(
+            id=f"tmf_{key}", name=f"TMForum ODA: {name}",
+            category=SeedCategory.TMFORUM_FUNCTIONAL_BLOCK,
+            description=desc, domain="telecom",
+            tags=["tmforum", "oda", "telecom", area, "functional_block"],
+            metadata={"oda_area": area, "reference": "TMForum ODA Functional Architecture v5"},
+        ))
+    return seeds
+
+
+# =====================================================================
+# Technology Building Blocks — real platform/infrastructure components
+# =====================================================================
+
+def _technology_building_block_seeds() -> list[SeedConcept]:
+    """Concrete technology stacks as architectural building blocks."""
+    tech_blocks = [
+        # Container & Orchestration
+        ("k8s_cluster", "Kubernetes Cluster", "container_orchestration",
+         "Container orchestration platform for automated deployment, scaling, and management of containerized workloads",
+         {"vendor": "CNCF", "category": "orchestration"}),
+        ("k8s_namespace", "Kubernetes Namespace", "container_orchestration",
+         "Logical isolation boundary within a Kubernetes cluster for multi-tenancy and resource quotas",
+         {"vendor": "CNCF", "category": "orchestration"}),
+        ("k8s_ingress", "Kubernetes Ingress Controller", "container_orchestration",
+         "API gateway and L7 load balancer for routing external traffic to cluster services",
+         {"vendor": "CNCF", "category": "networking"}),
+        ("k8s_service_mesh", "Service Mesh (Istio/Linkerd)", "container_orchestration",
+         "Infrastructure layer for service-to-service communication with mTLS, observability, and traffic management",
+         {"vendor": "CNCF", "category": "networking"}),
+        ("helm_charts", "Helm Charts", "container_orchestration",
+         "Package manager for Kubernetes enabling templated, versioned application deployments",
+         {"vendor": "CNCF", "category": "packaging"}),
+        ("docker_registry", "Container Registry", "container_orchestration",
+         "OCI-compliant container image registry for storing and distributing container images",
+         {"vendor": "various", "category": "registry"}),
+
+        # Messaging & Streaming
+        ("kafka_cluster", "Apache Kafka Cluster", "messaging",
+         "Distributed event streaming platform for high-throughput, fault-tolerant publish-subscribe messaging",
+         {"vendor": "Apache", "category": "streaming"}),
+        ("kafka_connect", "Kafka Connect", "messaging",
+         "Framework for connecting Kafka with external systems via source and sink connectors",
+         {"vendor": "Apache", "category": "integration"}),
+        ("kafka_schema_registry", "Schema Registry", "messaging",
+         "Centralized schema management for Kafka topics enabling schema evolution and compatibility",
+         {"vendor": "Confluent", "category": "governance"}),
+        ("rabbitmq", "RabbitMQ", "messaging",
+         "Message broker implementing AMQP for reliable message queuing with routing and delivery guarantees",
+         {"vendor": "VMware", "category": "messaging"}),
+        ("pulsar", "Apache Pulsar", "messaging",
+         "Cloud-native distributed messaging and streaming platform with multi-tenancy and geo-replication",
+         {"vendor": "Apache", "category": "streaming"}),
+
+        # Databases & Storage
+        ("postgresql", "PostgreSQL", "data_storage",
+         "Advanced open-source relational database with extensibility, JSONB support, and ACID compliance",
+         {"vendor": "PostgreSQL Global Development Group", "category": "rdbms"}),
+        ("mongodb", "MongoDB", "data_storage",
+         "Document-oriented NoSQL database for flexible schema storage with horizontal scaling",
+         {"vendor": "MongoDB Inc.", "category": "document_db"}),
+        ("redis", "Redis", "data_storage",
+         "In-memory data structure store used as cache, message broker, and real-time data platform",
+         {"vendor": "Redis Ltd.", "category": "cache"}),
+        ("elasticsearch", "Elasticsearch", "data_storage",
+         "Distributed search and analytics engine for log analytics, full-text search, and observability",
+         {"vendor": "Elastic", "category": "search"}),
+        ("cassandra", "Apache Cassandra", "data_storage",
+         "Wide-column distributed database for high-availability, high-write-throughput workloads",
+         {"vendor": "Apache", "category": "wide_column"}),
+        ("snowflake", "Snowflake", "data_storage",
+         "Cloud data warehouse with separation of storage and compute, supporting structured and semi-structured data",
+         {"vendor": "Snowflake", "category": "data_warehouse"}),
+        ("s3_object_store", "Object Storage (S3-compatible)", "data_storage",
+         "Scalable object storage for unstructured data with lifecycle policies and versioning",
+         {"vendor": "AWS/MinIO", "category": "object_storage"}),
+
+        # ERP & Business Platforms
+        ("sap_s4hana", "SAP S/4HANA", "erp",
+         "In-memory ERP suite covering finance, supply chain, manufacturing, and asset management on HANA database",
+         {"vendor": "SAP", "category": "erp"}),
+        ("sap_btp", "SAP Business Technology Platform", "erp",
+         "PaaS for extending SAP with integration, analytics, AI, and custom development",
+         {"vendor": "SAP", "category": "platform"}),
+        ("sap_integration_suite", "SAP Integration Suite", "erp",
+         "iPaaS for integrating SAP and non-SAP systems via APIs, events, and process orchestration",
+         {"vendor": "SAP", "category": "integration"}),
+        ("salesforce_core", "Salesforce CRM Platform", "crm",
+         "Cloud CRM platform covering sales, service, and marketing automation with extensible data model",
+         {"vendor": "Salesforce", "category": "crm"}),
+        ("salesforce_mulesoft", "MuleSoft Anypoint Platform", "crm",
+         "API-led connectivity platform for integrating SaaS, on-prem, and legacy systems",
+         {"vendor": "Salesforce/MuleSoft", "category": "integration"}),
+        ("salesforce_tableau", "Tableau", "crm",
+         "Visual analytics platform for self-service BI, data exploration, and dashboard publishing",
+         {"vendor": "Salesforce/Tableau", "category": "analytics"}),
+        ("servicenow", "ServiceNow", "itsm",
+         "Cloud platform for IT service management, IT operations, and enterprise workflow automation",
+         {"vendor": "ServiceNow", "category": "itsm"}),
+
+        # Observability & DevOps
+        ("prometheus", "Prometheus", "observability",
+         "Time-series monitoring system with PromQL query language and alerting for cloud-native workloads",
+         {"vendor": "CNCF", "category": "monitoring"}),
+        ("grafana", "Grafana", "observability",
+         "Observability platform for metrics visualization, log exploration, and distributed tracing dashboards",
+         {"vendor": "Grafana Labs", "category": "visualization"}),
+        ("opentelemetry", "OpenTelemetry", "observability",
+         "Vendor-neutral observability framework for collecting traces, metrics, and logs",
+         {"vendor": "CNCF", "category": "instrumentation"}),
+        ("argocd", "ArgoCD", "devops",
+         "GitOps continuous delivery tool for Kubernetes, declaratively managing application deployments",
+         {"vendor": "CNCF", "category": "gitops"}),
+        ("terraform", "Terraform", "devops",
+         "Infrastructure as Code tool for provisioning and managing cloud resources declaratively",
+         {"vendor": "HashiCorp", "category": "iac"}),
+        ("vault", "HashiCorp Vault", "devops",
+         "Secrets management and encryption service for dynamic secrets, PKI, and data encryption",
+         {"vendor": "HashiCorp", "category": "security"}),
+        ("github_actions", "GitHub Actions", "devops",
+         "CI/CD automation platform integrated with GitHub for building, testing, and deploying code",
+         {"vendor": "GitHub", "category": "ci_cd"}),
+
+        # Cloud Infrastructure
+        ("aws_vpc", "AWS VPC / Azure VNet", "cloud",
+         "Virtual private network isolation boundary in public cloud with subnets, routing, and security groups",
+         {"vendor": "AWS/Azure", "category": "networking"}),
+        ("aws_lambda", "Serverless Functions (Lambda/Azure Functions)", "cloud",
+         "Event-driven serverless compute for running code without provisioning servers",
+         {"vendor": "AWS/Azure", "category": "compute"}),
+        ("cdn", "CDN (CloudFront/Akamai)", "cloud",
+         "Content delivery network for low-latency global distribution of static and dynamic content",
+         {"vendor": "various", "category": "edge"}),
+        ("api_gateway", "API Gateway (Kong/AWS API GW)", "cloud",
+         "Managed API gateway for rate limiting, authentication, and request routing",
+         {"vendor": "various", "category": "api_management"}),
+
+        # Data & AI
+        ("spark", "Apache Spark", "data_ai",
+         "Unified analytics engine for large-scale data processing, batch and streaming, with ML support",
+         {"vendor": "Apache", "category": "processing"}),
+        ("airflow", "Apache Airflow", "data_ai",
+         "Workflow orchestration platform for authoring, scheduling, and monitoring data pipelines",
+         {"vendor": "Apache", "category": "orchestration"}),
+        ("mlflow", "MLflow", "data_ai",
+         "ML lifecycle management platform for experiment tracking, model registry, and deployment",
+         {"vendor": "Databricks", "category": "mlops"}),
+        ("feature_store", "Feature Store (Feast/Tecton)", "data_ai",
+         "Centralized feature management for ML pipelines supporting online and offline serving",
+         {"vendor": "various", "category": "ml_infra"}),
+    ]
+
+    seeds = []
+    for key, name, area, desc, meta in tech_blocks:
+        meta["technology_area"] = area
+        seeds.append(SeedConcept(
+            id=f"tech_{key}", name=name,
+            category=SeedCategory.TECHNOLOGY_BUILDING_BLOCK,
+            description=desc, domain="technology",
+            tags=["technology", area, meta.get("category", ""), "building_block"],
+            metadata=meta,
+        ))
+    return seeds
+
+
+# =====================================================================
+# Team Topologies — organizational patterns
+# Based on Team Topologies by Skelton & Pais
+# =====================================================================
+
+def _team_topology_seeds() -> list[SeedConcept]:
+    """Team Topologies organizational patterns."""
+    topologies = [
+        # Four fundamental team types
+        ("stream_aligned", "Stream-Aligned Team", "team_type",
+         "Team aligned to a single flow of work from a segment of the business domain, "
+         "empowered to build and deliver customer value as quickly and independently as possible",
+         {"interaction_modes": ["collaboration", "x-as-a-service", "facilitating"],
+          "characteristics": ["cross-functional", "long-lived", "owns end-to-end delivery"],
+          "cognitive_load": "bounded by domain complexity"}),
+        ("enabling", "Enabling Team", "team_type",
+         "Team that assists stream-aligned teams in overcoming obstacles by detecting missing capabilities "
+         "and helping to close skill gaps, typically around specific technical or product management areas",
+         {"interaction_modes": ["facilitating"],
+          "characteristics": ["specialists", "temporary engagement", "knowledge transfer focus"],
+          "cognitive_load": "focused on capability uplift"}),
+        ("complicated_subsystem", "Complicated-Subsystem Team", "team_type",
+         "Team responsible for building and maintaining a subsystem that requires specialist knowledge "
+         "beyond that of most stream-aligned teams (e.g., mathematical models, real-time processing)",
+         {"interaction_modes": ["x-as-a-service"],
+          "characteristics": ["deep specialists", "reduces cognitive load on consumers"],
+          "cognitive_load": "high intrinsic complexity, shielded from others"}),
+        ("platform", "Platform Team", "team_type",
+         "Team that provides internal services to reduce cognitive load on stream-aligned teams, "
+         "offering self-service APIs, tools, and reliable infrastructure as a product",
+         {"interaction_modes": ["x-as-a-service"],
+          "characteristics": ["treats platform as product", "self-service", "reduces stream team burden"],
+          "cognitive_load": "abstracts infrastructure complexity"}),
+
+        # Three interaction modes
+        ("mode_collaboration", "Collaboration Interaction Mode", "interaction_mode",
+         "Two teams work closely together for a defined period to discover new patterns, approaches, or practices. "
+         "High-bandwidth but high-cost; should be time-boxed",
+         {"suitable_for": ["new technology adoption", "exploring new domain boundaries"],
+          "anti_pattern": "permanent collaboration indicates poor boundaries"}),
+        ("mode_x_as_a_service", "X-as-a-Service Interaction Mode", "interaction_mode",
+         "One team provides something (API, tool, platform) as a service with clear interface and SLA. "
+         "Minimal collaboration needed; consumer team has autonomy",
+         {"suitable_for": ["well-defined interfaces", "platform consumption", "stable subsystems"],
+          "anti_pattern": "forcing x-as-a-service on immature boundaries"}),
+        ("mode_facilitating", "Facilitating Interaction Mode", "interaction_mode",
+         "One team helps another team learn or adopt new skills/approaches. "
+         "The enabling team does not build the thing; it coaches the stream-aligned team",
+         {"suitable_for": ["capability gaps", "new practice adoption", "tooling migration"],
+          "anti_pattern": "enabling team permanently doing work for the other team"}),
+
+        # Organizational sensing patterns
+        ("conways_law", "Conway's Law", "organizational_pattern",
+         "Organizations produce designs which are copies of their communication structures. "
+         "Inverse Conway Maneuver: deliberately shape team structures to encourage desired architecture",
+         {"principle": "architecture follows communication pathways",
+          "application": "use to align team boundaries with architectural boundaries"}),
+        ("cognitive_load", "Cognitive Load Management", "organizational_pattern",
+         "Limit the cognitive load on teams to what they can effectively handle. "
+         "Three types: intrinsic (domain), extraneous (environment), germane (learning)",
+         {"types": ["intrinsic", "extraneous", "germane"],
+          "principle": "minimize extraneous load, manage intrinsic load, maximize germane load"}),
+        ("fracture_planes", "Fracture Planes", "organizational_pattern",
+         "Natural lines along which to split software and teams: business domain, regulatory compliance, "
+         "change cadence, team location, technology, user personas, risk",
+         {"planes": ["business_domain", "regulatory", "change_cadence", "location",
+                     "technology", "user_persona", "risk", "performance_isolation"],
+          "principle": "split where natural seams exist to reduce coupling"}),
+    ]
+
+    seeds = []
+    for key, name, pattern_type, desc, meta in topologies:
+        meta["pattern_type"] = pattern_type
+        meta["reference"] = "Team Topologies (Skelton & Pais, 2019)"
+        seeds.append(SeedConcept(
+            id=f"topo_{key}", name=name,
+            category=SeedCategory.TEAM_TOPOLOGY,
+            description=desc, domain="organizational",
+            tags=["team_topologies", pattern_type, "organizational"],
+            metadata=meta,
+        ))
+    return seeds
+
+
+# =====================================================================
 # Build complete pool
 # =====================================================================
 
@@ -806,6 +1320,11 @@ def build_seed_pool() -> list[SeedConcept]:
     seeds.extend(_capability_seeds())
     seeds.extend(_building_block_seeds())
     seeds.extend(_stakeholder_seeds())
+    # Cross-domain reference architectures
+    seeds.extend(_bian_service_domain_seeds())
+    seeds.extend(_tmforum_oda_seeds())
+    seeds.extend(_technology_building_block_seeds())
+    seeds.extend(_team_topology_seeds())
     return seeds
 
 

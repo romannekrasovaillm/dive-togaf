@@ -1151,6 +1151,272 @@ def _complex_multi_step_exemplars() -> list[Exemplar]:
 
 
 # =====================================================================
+# Family 12: Architecture Decision Records (ADR)
+# Pattern: context → alternatives → trade-offs → decision → consequences
+# Inspired by public ADR repositories and Michael Nygard's ADR format
+# =====================================================================
+
+def _architecture_decision_exemplars() -> list[Exemplar]:
+    """ADR-style exemplars: given context X, chose Y because Z, rejected W."""
+    templates = [
+        # Infrastructure decisions
+        ("adr_01",
+         "Draft an ADR for selecting {Container_Orchestration_Platform}: document the context (microservices deployment needs), "
+         "evaluate Kubernetes vs ECS vs Nomad, analyze trade-offs (operational complexity vs ecosystem breadth vs vendor lock-in), "
+         "and justify the decision based on team skills and scale requirements.",
+         ["retrieval", "retrieval", "processing", "processing"], 3, 4,
+         "ADR: container orchestration platform selection"),
+        ("adr_02",
+         "Draft an ADR for choosing between synchronous REST APIs and asynchronous event-driven messaging "
+         "for {Inter_Service_Communication}. Evaluate latency, coupling, reliability, and debugging complexity. "
+         "Recommend a hybrid approach where applicable and document the decision boundary.",
+         ["retrieval", "processing", "processing"], 3, 3,
+         "ADR: sync vs async inter-service communication"),
+        ("adr_03",
+         "Draft an ADR for {Database_Selection}: compare relational (PostgreSQL) vs document (MongoDB) vs wide-column (Cassandra) "
+         "for the given workload profile. Evaluate consistency model, query patterns, operational cost, and team expertise. "
+         "Document rejected alternatives with specific reasons.",
+         ["retrieval", "retrieval", "processing", "processing"], 3, 4,
+         "ADR: database technology selection"),
+        ("adr_04",
+         "Draft an ADR for adopting {Service_Mesh} (Istio vs Linkerd vs no mesh). Analyze mTLS requirements, "
+         "observability gains, latency overhead, memory footprint, and operational complexity. "
+         "Consider the team size and maturity constraints.",
+         ["retrieval", "processing", "processing"], 3, 3,
+         "ADR: service mesh adoption decision"),
+        ("adr_05",
+         "Draft an ADR for {Authentication_Strategy}: evaluate OAuth2/OIDC vs SAML vs API keys vs mutual TLS. "
+         "Consider user-facing vs service-to-service scenarios, token lifecycle management, "
+         "and compliance requirements (SOC2, GDPR). Document the chosen hybrid approach.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "ADR: authentication and authorization strategy"),
+
+        # Data architecture decisions
+        ("adr_06",
+         "Draft an ADR for {Event_Sourcing_vs_CRUD}: analyze the trade-offs of event sourcing vs traditional CRUD "
+         "for the domain. Evaluate audit requirements, temporal query needs, read/write ratio, "
+         "eventual consistency tolerance, and development complexity.",
+         ["retrieval", "processing", "processing"], 3, 3,
+         "ADR: event sourcing vs CRUD data pattern"),
+        ("adr_07",
+         "Draft an ADR for {Data_Partitioning_Strategy}: evaluate horizontal sharding vs vertical partitioning "
+         "vs federation for scaling the data tier. Analyze query routing complexity, cross-partition joins, "
+         "rebalancing cost, and consistency implications.",
+         ["retrieval", "processing", "processing"], 4, 3,
+         "ADR: data partitioning and sharding strategy"),
+        ("adr_08",
+         "Draft an ADR for {CQRS_Adoption}: analyze whether to separate read and write models. "
+         "Evaluate query complexity, write throughput requirements, consistency requirements, "
+         "and the cost of maintaining dual models. Document the bounded contexts where CQRS applies.",
+         ["retrieval", "processing", "processing"], 3, 3,
+         "ADR: CQRS pattern adoption"),
+
+        # Integration decisions
+        ("adr_09",
+         "Draft an ADR for {API_Gateway_Strategy}: evaluate centralized gateway vs BFF (Backend for Frontend) "
+         "vs direct service calls. Analyze routing flexibility, team autonomy, single point of failure risk, "
+         "and cross-cutting concern management (auth, rate limiting, observability).",
+         ["retrieval", "retrieval", "processing", "processing"], 3, 4,
+         "ADR: API gateway strategy"),
+        ("adr_10",
+         "Draft an ADR for {Message_Broker_Selection}: compare Kafka vs RabbitMQ vs Pulsar for the given workload. "
+         "Evaluate throughput requirements, ordering guarantees, consumer group semantics, "
+         "operational complexity, and exactly-once delivery needs.",
+         ["retrieval", "retrieval", "processing", "processing"], 3, 4,
+         "ADR: message broker selection"),
+
+        # Organizational architecture decisions
+        ("adr_11",
+         "Draft an ADR for {Monolith_vs_Microservices}: analyze whether to decompose the monolith. "
+         "Evaluate team size and structure, deployment frequency needs, domain boundary clarity, "
+         "data coupling, and operational readiness. Apply the Inverse Conway Maneuver.",
+         ["retrieval", "processing", "processing", "processing"], 4, 4,
+         "ADR: monolith decomposition decision"),
+        ("adr_12",
+         "Draft an ADR for {Multi_Tenancy_Strategy}: evaluate siloed (per-tenant infra) vs pooled (shared infra) "
+         "vs hybrid multi-tenancy. Analyze isolation requirements, cost per tenant, noisy neighbor risk, "
+         "compliance constraints, and operational complexity scaling.",
+         ["retrieval", "processing", "processing"], 4, 3,
+         "ADR: multi-tenancy architecture strategy"),
+        ("adr_13",
+         "Draft an ADR for {Observability_Strategy}: decide between unified observability platform "
+         "(Grafana stack) vs best-of-breed (Datadog/New Relic) vs build-on-OSS (OpenTelemetry + backends). "
+         "Evaluate cost at scale, vendor lock-in, correlation capabilities, and team adoption curve.",
+         ["retrieval", "retrieval", "processing", "processing"], 3, 4,
+         "ADR: observability platform strategy"),
+        ("adr_14",
+         "Draft an ADR for {CI_CD_Pipeline_Architecture}: evaluate GitHub Actions vs Jenkins vs GitLab CI "
+         "vs ArgoCD+Tekton. Analyze GitOps compatibility, pipeline-as-code maturity, self-hosted vs SaaS, "
+         "secrets management, and deployment strategy (blue-green, canary, rolling).",
+         ["retrieval", "retrieval", "processing", "processing"], 3, 4,
+         "ADR: CI/CD pipeline architecture"),
+        ("adr_15",
+         "Draft an ADR for {Frontend_Architecture}: evaluate micro-frontends vs monolithic SPA vs server-side "
+         "rendering. Analyze team autonomy, shared component strategy, performance budget, "
+         "deployment independence, and user experience consistency.",
+         ["retrieval", "processing", "processing"], 3, 3,
+         "ADR: frontend architecture pattern"),
+
+        # Cloud architecture decisions
+        ("adr_16",
+         "Draft an ADR for {Cloud_Provider_Strategy}: evaluate single-cloud vs multi-cloud vs hybrid-cloud. "
+         "Analyze vendor lock-in risk, portability cost, operational complexity, "
+         "regulatory requirements, and total cost of ownership.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "ADR: cloud provider strategy"),
+        ("adr_17",
+         "Draft an ADR for {Serverless_vs_Containers}: evaluate when to use serverless functions "
+         "vs containerized services. Define the decision boundary based on execution duration, "
+         "cold start tolerance, state requirements, and cost at different traffic patterns.",
+         ["retrieval", "processing", "processing"], 3, 3,
+         "ADR: serverless vs container workload placement"),
+        ("adr_18",
+         "Draft an ADR for {Data_Lake_Architecture}: evaluate medallion architecture (bronze/silver/gold) "
+         "vs data mesh vs traditional data warehouse. Analyze data ownership, governance model, "
+         "query latency requirements, and organizational data literacy.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "ADR: data lake/mesh architecture"),
+
+        # Security decisions
+        ("adr_19",
+         "Draft an ADR for {Secrets_Management}: evaluate HashiCorp Vault vs AWS Secrets Manager vs "
+         "sealed secrets in Git. Analyze rotation policies, access audit requirements, "
+         "cross-environment consistency, and disaster recovery of secrets.",
+         ["retrieval", "retrieval", "processing", "processing"], 3, 4,
+         "ADR: secrets management strategy"),
+        ("adr_20",
+         "Draft an ADR for {Zero_Trust_Architecture}: decide the scope and phasing of zero-trust adoption. "
+         "Evaluate identity-aware proxy vs service mesh mTLS vs network segmentation. "
+         "Analyze impact on developer experience, performance overhead, and compliance mapping.",
+         ["retrieval", "processing", "processing", "processing"], 4, 4,
+         "ADR: zero-trust network architecture"),
+    ]
+    return [
+        Exemplar(id=t[0], family=ExemplarFamily.ARCHITECTURE_DECISION,
+                 template=t[1], implied_pattern=t[2], complexity=t[3],
+                 required_tool_types=["retrieval", "processing"],
+                 description=t[5], sub_questions=t[4],
+                 tags=["adr", "decision_record", "cross_domain"])
+        for t in templates
+    ]
+
+
+# =====================================================================
+# Family 13: Architecture Kata
+# Pattern: requirements → constraints → quality attributes → design → trade-offs
+# Inspired by O'Reilly Architecture Katas and Neal Ford's exercises
+# =====================================================================
+
+def _architecture_kata_exemplars() -> list[Exemplar]:
+    """Architecture kata exemplars: design exercises with constraints."""
+    templates = [
+        # Classic kata patterns
+        ("kata_01",
+         "Design an architecture for a {Real_Time_Bidding_Platform}: 50ms latency SLA, 1M requests/sec peak, "
+         "geographic distribution across 3 regions. Define component topology, data flow, "
+         "and the trade-off between consistency and latency. Apply ArchiMate Technology Layer modeling.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "Kata: real-time bidding platform with strict latency SLA"),
+        ("kata_02",
+         "Design an architecture for a {Healthcare_Records_System}: HIPAA compliance, audit trail for all access, "
+         "integration with HL7/FHIR, multi-tenant for hospital groups. Map to TOGAF Business and Application layers, "
+         "identify key architecture decisions and document as ADRs.",
+         ["retrieval", "retrieval", "processing", "processing", "processing"], 5, 5,
+         "Kata: healthcare records system with compliance constraints"),
+        ("kata_03",
+         "Design an architecture for a {Global_E-Commerce_Platform}: handle flash sales (100x traffic spikes), "
+         "eventual consistency for inventory, strong consistency for payments, multi-currency support. "
+         "Apply TOGAF Phase B-D deliverables and compute cost-scalability trade-offs.",
+         ["retrieval", "processing", "processing", "processing"], 4, 4,
+         "Kata: e-commerce platform handling flash sale traffic spikes"),
+        ("kata_04",
+         "Design an architecture for a {Ride_Sharing_Platform}: real-time matching, location streaming, "
+         "surge pricing computation, driver/rider rating system. Focus on event streaming architecture, "
+         "geospatial data handling, and Team Topologies for the engineering org.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "Kata: ride-sharing platform with real-time matching"),
+        ("kata_05",
+         "Design an architecture for a {Banking_Core_Modernization}: migrate from mainframe COBOL to cloud-native. "
+         "Apply Strangler Fig pattern, define transition architectures (TOGAF Phase F), "
+         "map to BIAN service domains, and compute migration risk per service.",
+         ["retrieval", "retrieval", "processing", "processing", "processing"], 5, 5,
+         "Kata: core banking modernization from mainframe to cloud"),
+
+        # Constraint-focused katas
+        ("kata_06",
+         "Design a {Disaster_Recovery_Architecture} with RPO < 15min and RTO < 1hr across two regions. "
+         "Evaluate active-active vs active-passive vs pilot light strategies. "
+         "Map infrastructure components in ArchiMate Technology Layer and compute cost per 9 of availability.",
+         ["retrieval", "processing", "processing"], 3, 3,
+         "Kata: disaster recovery architecture with RPO/RTO constraints"),
+        ("kata_07",
+         "Design a {Multi_Region_Data_Architecture} satisfying GDPR data residency requirements. "
+         "Evaluate data replication strategies, define data classification tiers, "
+         "and design the consent management architecture. Map to TOGAF Information Architecture.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "Kata: multi-region data architecture with GDPR compliance"),
+        ("kata_08",
+         "Design an architecture for an {IoT_Fleet_Management} system: 100K connected devices, "
+         "telemetry ingestion at 10K events/sec, edge computing for anomaly detection, "
+         "cloud aggregation for analytics. Apply ArchiMate Physical and Technology layers.",
+         ["retrieval", "processing", "processing", "processing"], 4, 4,
+         "Kata: IoT fleet management with edge computing"),
+        ("kata_09",
+         "Design a {Regulatory_Reporting_Platform} for a bank: aggregate data from 20+ source systems, "
+         "apply Basel III/IV calculations, generate reports in XBRL format, ensure data lineage. "
+         "Map to BIAN service domains and TOGAF Data Architecture.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "Kata: regulatory reporting platform with data lineage"),
+        ("kata_10",
+         "Design a {Machine_Learning_Platform}: support experiment tracking, feature store, model registry, "
+         "A/B testing infrastructure, and model monitoring. Define team topologies (platform team + ML stream teams), "
+         "and evaluate build vs buy for each component.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "Kata: ML platform with build-vs-buy decisions"),
+
+        # Migration & evolution katas
+        ("kata_11",
+         "Design a migration path for {Monolith_to_Event_Driven}: decompose a monolithic order management system "
+         "into event-driven microservices. Identify bounded contexts via domain events, "
+         "design the event schema evolution strategy, and plan the strangler fig migration phases.",
+         ["retrieval", "processing", "processing", "processing"], 4, 4,
+         "Kata: monolith to event-driven decomposition"),
+        ("kata_12",
+         "Design a {Platform_Engineering} initiative: build an internal developer platform "
+         "providing golden paths for deployment, observability, and security. "
+         "Apply platform team topology, define the self-service API catalog, and compute ROI.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "Kata: internal developer platform engineering"),
+        ("kata_13",
+         "Design a {Telco_BSS_Modernization}: migrate BSS stack to TMForum ODA-compliant architecture. "
+         "Map existing capabilities to ODA functional blocks, define API-first integration, "
+         "plan the transition architecture, and assess vendor ecosystem.",
+         ["retrieval", "retrieval", "processing", "processing", "processing"], 5, 5,
+         "Kata: telco BSS modernization to TMForum ODA"),
+        ("kata_14",
+         "Design a {Supply_Chain_Digital_Twin}: real-time visibility across suppliers, warehouses, and logistics. "
+         "Define the event streaming backbone, digital twin data model, simulation engine, "
+         "and integration with SAP S/4HANA. Apply TOGAF Application Architecture.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "Kata: supply chain digital twin architecture"),
+        ("kata_15",
+         "Design a {Zero_Downtime_Database_Migration}: migrate from Oracle to PostgreSQL "
+         "while maintaining 99.99% availability. Define the dual-write strategy, data validation pipeline, "
+         "cutover plan, and rollback procedure. Compute risk per migration phase.",
+         ["retrieval", "processing", "processing", "processing"], 4, 4,
+         "Kata: zero-downtime database migration strategy"),
+    ]
+    return [
+        Exemplar(id=t[0], family=ExemplarFamily.ARCHITECTURE_KATA,
+                 template=t[1], implied_pattern=t[2], complexity=t[3],
+                 required_tool_types=["retrieval", "processing"],
+                 description=t[5], sub_questions=t[4],
+                 tags=["kata", "design_exercise", "cross_domain"])
+        for t in templates
+    ]
+
+
+# =====================================================================
 # Build all
 # =====================================================================
 
@@ -1168,6 +1434,9 @@ def build_exemplar_pool() -> list[Exemplar]:
     exemplars.extend(_stakeholder_analysis_exemplars())
     exemplars.extend(_cost_benefit_exemplars())
     exemplars.extend(_complex_multi_step_exemplars())
+    # Cross-domain exemplar families
+    exemplars.extend(_architecture_decision_exemplars())
+    exemplars.extend(_architecture_kata_exemplars())
     return exemplars
 
 

@@ -1022,6 +1022,408 @@ def _processing_tools() -> list[ToolDefinition]:
     return tools
 
 
+# =====================================================================
+# Analysis Tools — architecture metrics, DSM, gap analysis, tech radar
+# =====================================================================
+
+def _analysis_tools() -> list[ToolDefinition]:
+    """Architecture analysis and comparison tools."""
+    tools = []
+
+    # --- Martin Metrics (coupling/cohesion/instability/abstractness) ---
+    tools.append(ToolDefinition(
+        id="compute_coupling_metrics",
+        name="compute_coupling_metrics",
+        description="Computes afferent coupling (Ca) and efferent coupling (Ce) for architecture components. "
+                    "Ca = number of components that depend on this component. Ce = number of components this component depends on.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.ANALYSIS,
+        parameters=[
+            ToolParameter("components", "array", "List of component objects with their dependency relationships"),
+            ToolParameter("scope", "string", "Analysis scope", required=False,
+                         enum=["component", "layer", "domain"], default="component"),
+        ],
+        return_schema={"type": "object", "properties": {
+            "metrics": {"type": "array", "items": {"type": "object", "properties": {
+                "component": {"type": "string"}, "Ca": {"type": "integer"}, "Ce": {"type": "integer"}}}},
+            "summary": {"type": "object", "properties": {
+                "avg_Ca": {"type": "number"}, "avg_Ce": {"type": "number"}, "max_Ca_component": {"type": "string"}}}}},
+        examples=[{"call": {"components": [{"id": "OrderService", "depends_on": ["PaymentService", "InventoryService"]}], "scope": "component"},
+                   "response": {"metrics": [{"component": "OrderService", "Ca": 0, "Ce": 2}]}}],
+        tags=["analysis", "metrics", "coupling", "martin"],
+    ))
+
+    tools.append(ToolDefinition(
+        id="compute_instability_abstractness",
+        name="compute_instability_abstractness",
+        description="Computes Robert C. Martin's Instability (I = Ce/(Ca+Ce)) and Abstractness (A = abstract_types/total_types) "
+                    "for each component. Plots position on the Main Sequence (D = |A + I - 1|). "
+                    "Zone of Pain: high stability + low abstraction. Zone of Uselessness: high instability + high abstraction.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.ANALYSIS,
+        parameters=[
+            ToolParameter("components", "array", "Components with Ca, Ce, abstract_count, total_count"),
+            ToolParameter("threshold_d", "number", "Distance-from-main-sequence threshold for flagging", required=False, default=0.3),
+        ],
+        return_schema={"type": "object", "properties": {
+            "metrics": {"type": "array", "items": {"type": "object", "properties": {
+                "component": {"type": "string"}, "I": {"type": "number"}, "A": {"type": "number"},
+                "D": {"type": "number"}, "zone": {"type": "string"}}}},
+            "flagged": {"type": "array"}, "main_sequence_chart": {"type": "string"}}},
+        examples=[],
+        tags=["analysis", "metrics", "instability", "abstractness", "martin"],
+    ))
+
+    tools.append(ToolDefinition(
+        id="compute_cohesion_metrics",
+        name="compute_cohesion_metrics",
+        description="Computes Lack of Cohesion (LCOM) metrics for architecture components. "
+                    "Measures how well the internal elements of a component belong together. "
+                    "High LCOM suggests the component should be split.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.ANALYSIS,
+        parameters=[
+            ToolParameter("components", "array", "Components with internal elements and their interactions"),
+            ToolParameter("method", "string", "Cohesion measurement method", required=False,
+                         enum=["lcom1", "lcom4", "connectivity"], default="lcom4"),
+        ],
+        return_schema={"type": "object", "properties": {
+            "metrics": {"type": "array", "items": {"type": "object", "properties": {
+                "component": {"type": "string"}, "lcom": {"type": "number"}, "connected_components": {"type": "integer"},
+                "should_split": {"type": "boolean"}}}},
+            "split_recommendations": {"type": "array"}}},
+        examples=[],
+        tags=["analysis", "metrics", "cohesion", "lcom"],
+    ))
+
+    # --- Dependency Structure Matrix (DSM) ---
+    tools.append(ToolDefinition(
+        id="build_dependency_structure_matrix",
+        name="build_dependency_structure_matrix",
+        description="Builds a Dependency Structure Matrix (DSM) from architecture components and their relationships. "
+                    "Rows and columns are components; cells indicate dependency type and strength. "
+                    "Supports reordering algorithms (partitioning, clustering) to reveal architectural layers and cycles.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.ANALYSIS,
+        parameters=[
+            ToolParameter("elements", "array", "Architecture elements (components, services, modules)"),
+            ToolParameter("relationships", "array", "Relationships between elements with type and direction"),
+            ToolParameter("ordering", "string", "Matrix ordering algorithm", required=False,
+                         enum=["original", "partition", "cluster", "band_optimize"], default="partition"),
+            ToolParameter("relationship_filter", "array", "Relationship types to include", required=False),
+        ],
+        return_schema={"type": "object", "properties": {
+            "matrix": {"type": "array", "items": {"type": "array"}},
+            "element_order": {"type": "array"},
+            "cycles": {"type": "array", "items": {"type": "array"}},
+            "layers": {"type": "array", "items": {"type": "object", "properties": {
+                "layer": {"type": "integer"}, "elements": {"type": "array"}}}},
+            "density": {"type": "number"},
+            "propagation_cost": {"type": "number"}}},
+        examples=[],
+        tags=["analysis", "dsm", "dependency", "matrix", "visualization"],
+    ))
+
+    tools.append(ToolDefinition(
+        id="detect_architecture_cycles",
+        name="detect_architecture_cycles",
+        description="Detects dependency cycles in the architecture graph using Tarjan's algorithm. "
+                    "Cycles indicate architectural debt and potential deployment issues.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.ANALYSIS,
+        parameters=[
+            ToolParameter("elements", "array", "Architecture elements"),
+            ToolParameter("relationships", "array", "Directed relationships between elements"),
+            ToolParameter("max_cycle_length", "integer", "Maximum cycle length to report", required=False, default=10),
+        ],
+        return_schema={"type": "object", "properties": {
+            "cycles": {"type": "array", "items": {"type": "array", "items": {"type": "string"}}},
+            "strongly_connected_components": {"type": "array"},
+            "cycle_count": {"type": "integer"},
+            "acyclic": {"type": "boolean"}}},
+        examples=[],
+        tags=["analysis", "cycles", "dependency", "tarjan"],
+    ))
+
+    # --- Architecture Gap Analysis ---
+    tools.append(ToolDefinition(
+        id="gap_analysis_asis_tobe",
+        name="gap_analysis_asis_tobe",
+        description="Performs structured gap analysis between as-is and to-be architecture states. "
+                    "Identifies elements that are: (1) unchanged, (2) modified, (3) removed in to-be, (4) new in to-be. "
+                    "Maps each gap to required transition activities.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.ANALYSIS,
+        parameters=[
+            ToolParameter("as_is", "object", "As-is architecture state with elements and relationships"),
+            ToolParameter("to_be", "object", "To-be architecture state with elements and relationships"),
+            ToolParameter("comparison_keys", "array", "Attributes to compare for change detection", required=False),
+            ToolParameter("include_transition", "boolean", "Generate transition architecture recommendations", required=False, default=True),
+        ],
+        return_schema={"type": "object", "properties": {
+            "unchanged": {"type": "array"}, "modified": {"type": "array"},
+            "removed": {"type": "array"}, "new": {"type": "array"},
+            "gap_count": {"type": "integer"},
+            "transition_activities": {"type": "array", "items": {"type": "object", "properties": {
+                "gap": {"type": "string"}, "activity": {"type": "string"},
+                "effort": {"type": "string"}, "risk": {"type": "string"}}}},
+            "impact_matrix": {"type": "object"}}},
+        examples=[],
+        tags=["analysis", "gap_analysis", "as_is", "to_be", "transition"],
+    ))
+
+    tools.append(ToolDefinition(
+        id="capability_gap_heatmap",
+        name="capability_gap_heatmap",
+        description="Generates a capability-based gap heatmap. Scores current capabilities against target maturity, "
+                    "producing a visual heatmap showing investment priorities. Uses TOGAF capability-based planning.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.ANALYSIS,
+        parameters=[
+            ToolParameter("capabilities", "array", "Capabilities with current and target maturity scores (1-5)"),
+            ToolParameter("dimensions", "array", "Assessment dimensions", required=False,
+                         enum=["process", "people", "technology", "information"], default=None),
+            ToolParameter("weighting", "string", "Capability weighting scheme", required=False,
+                         enum=["equal", "strategic_value", "risk"], default="strategic_value"),
+        ],
+        return_schema={"type": "object", "properties": {
+            "heatmap": {"type": "array", "items": {"type": "object", "properties": {
+                "capability": {"type": "string"}, "current": {"type": "number"},
+                "target": {"type": "number"}, "gap": {"type": "number"}, "priority": {"type": "string"}}}},
+            "investment_priorities": {"type": "array"},
+            "total_gap_score": {"type": "number"}}},
+        examples=[],
+        tags=["analysis", "capability", "gap", "heatmap", "maturity"],
+    ))
+
+    # --- Architecture Health & Complexity ---
+    tools.append(ToolDefinition(
+        id="compute_architecture_complexity",
+        name="compute_architecture_complexity",
+        description="Computes architecture complexity metrics: total elements, total relationships, "
+                    "connectivity ratio, depth of inheritance, fan-in/fan-out distribution, "
+                    "and overall complexity score using graph-theoretic measures.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.ANALYSIS,
+        parameters=[
+            ToolParameter("elements", "array", "All architecture elements"),
+            ToolParameter("relationships", "array", "All relationships between elements"),
+            ToolParameter("include_distribution", "boolean", "Include statistical distributions", required=False, default=True),
+        ],
+        return_schema={"type": "object", "properties": {
+            "element_count": {"type": "integer"}, "relationship_count": {"type": "integer"},
+            "connectivity_ratio": {"type": "number"}, "avg_fan_in": {"type": "number"},
+            "avg_fan_out": {"type": "number"}, "max_fan_in": {"type": "object"},
+            "max_fan_out": {"type": "object"}, "depth_distribution": {"type": "array"},
+            "complexity_score": {"type": "number"}, "complexity_rating": {"type": "string"}}},
+        examples=[],
+        tags=["analysis", "complexity", "health", "graph"],
+    ))
+
+    tools.append(ToolDefinition(
+        id="detect_architecture_smells",
+        name="detect_architecture_smells",
+        description="Detects common architecture smells: god components (too many responsibilities), "
+                    "hub-and-spoke (single point of failure), cyclic dependencies, dead components, "
+                    "ambiguous interfaces, and scattered functionality.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.ANALYSIS,
+        parameters=[
+            ToolParameter("elements", "array", "Architecture elements with types and properties"),
+            ToolParameter("relationships", "array", "Relationships between elements"),
+            ToolParameter("thresholds", "object", "Custom thresholds for smell detection", required=False),
+        ],
+        return_schema={"type": "object", "properties": {
+            "smells": {"type": "array", "items": {"type": "object", "properties": {
+                "type": {"type": "string"}, "severity": {"type": "string"},
+                "elements": {"type": "array"}, "description": {"type": "string"},
+                "recommendation": {"type": "string"}}}},
+            "smell_count": {"type": "integer"}, "health_score": {"type": "number"}}},
+        examples=[],
+        tags=["analysis", "smells", "health", "quality"],
+    ))
+
+    tools.append(ToolDefinition(
+        id="compute_modularity_score",
+        name="compute_modularity_score",
+        description="Computes the modularity score (Q) of an architecture using Newman's modularity metric. "
+                    "Q measures how well the architecture decomposes into loosely coupled, highly cohesive modules. "
+                    "Scores range from -0.5 to 1.0; values above 0.3 indicate meaningful modular structure.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.ANALYSIS,
+        parameters=[
+            ToolParameter("elements", "array", "Architecture elements with module/domain assignments"),
+            ToolParameter("relationships", "array", "Relationships between elements"),
+            ToolParameter("module_field", "string", "Field name identifying module membership", required=False, default="domain"),
+        ],
+        return_schema={"type": "object", "properties": {
+            "Q": {"type": "number"}, "modules": {"type": "array", "items": {"type": "object", "properties": {
+                "module": {"type": "string"}, "internal_edges": {"type": "integer"},
+                "external_edges": {"type": "integer"}, "cohesion": {"type": "number"}}}},
+            "inter_module_coupling": {"type": "array"}}},
+        examples=[],
+        tags=["analysis", "modularity", "newman", "graph"],
+    ))
+
+    # --- Technology Radar ---
+    tools.append(ToolDefinition(
+        id="get_technology_radar",
+        name="get_technology_radar",
+        description="Retrieves technology radar data with ring classifications (Adopt, Trial, Assess, Hold) "
+                    "for technologies across quadrants (Techniques, Platforms, Tools, Languages & Frameworks). "
+                    "Based on ThoughtWorks Technology Radar methodology.",
+        tool_type=ToolType.RETRIEVAL,
+        domain=ToolDomain.TECHNOLOGY_RADAR,
+        parameters=[
+            ToolParameter("quadrant", "string", "Radar quadrant to query", required=False,
+                         enum=["techniques", "platforms", "tools", "languages_frameworks"]),
+            ToolParameter("ring", "string", "Radar ring to filter", required=False,
+                         enum=["adopt", "trial", "assess", "hold"]),
+            ToolParameter("tags", "array", "Technology tags to filter by", required=False),
+        ],
+        return_schema={"type": "object", "properties": {
+            "entries": {"type": "array", "items": {"type": "object", "properties": {
+                "name": {"type": "string"}, "quadrant": {"type": "string"}, "ring": {"type": "string"},
+                "description": {"type": "string"}, "moved": {"type": "string"}}}},
+            "total": {"type": "integer"}}},
+        examples=[{"call": {"quadrant": "platforms", "ring": "adopt"},
+                   "response": {"entries": [{"name": "Kubernetes", "quadrant": "platforms", "ring": "adopt",
+                                            "description": "Container orchestration standard", "moved": "stable"}]}}],
+        tags=["radar", "technology", "assessment"],
+    ))
+
+    tools.append(ToolDefinition(
+        id="assess_technology_fitness",
+        name="assess_technology_fitness",
+        description="Assesses the fitness of a technology choice against architectural quality attributes "
+                    "(scalability, reliability, security, operability, cost). Cross-references technology radar position "
+                    "and community momentum to produce an adoption recommendation.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.TECHNOLOGY_RADAR,
+        parameters=[
+            ToolParameter("technology", "string", "Technology name to assess"),
+            ToolParameter("quality_attributes", "array", "Required quality attributes with priorities"),
+            ToolParameter("context", "object", "Deployment context (scale, team_size, budget, timeline)", required=False),
+        ],
+        return_schema={"type": "object", "properties": {
+            "technology": {"type": "string"}, "radar_position": {"type": "string"},
+            "fitness_scores": {"type": "object"}, "overall_fitness": {"type": "number"},
+            "recommendation": {"type": "string"}, "risks": {"type": "array"},
+            "alternatives": {"type": "array"}}},
+        examples=[],
+        tags=["radar", "technology", "fitness", "assessment"],
+    ))
+
+    tools.append(ToolDefinition(
+        id="compare_technology_stacks",
+        name="compare_technology_stacks",
+        description="Compares two or more technology stack alternatives across dimensions: "
+                    "maturity, community size, learning curve, operational complexity, licensing cost, "
+                    "ecosystem breadth, and alignment with architecture principles.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.TECHNOLOGY_RADAR,
+        parameters=[
+            ToolParameter("stacks", "array", "Technology stack alternatives to compare"),
+            ToolParameter("criteria", "array", "Comparison criteria with weights", required=False),
+            ToolParameter("context", "object", "Organizational context for evaluation", required=False),
+        ],
+        return_schema={"type": "object", "properties": {
+            "comparison_matrix": {"type": "array"}, "winner": {"type": "string"},
+            "trade_offs": {"type": "array"}, "migration_complexity": {"type": "object"}}},
+        examples=[],
+        tags=["radar", "technology", "comparison", "stack"],
+    ))
+
+    # --- Cross-domain reference architecture retrieval ---
+    tools.append(ToolDefinition(
+        id="get_bian_service_domain",
+        name="get_bian_service_domain",
+        description="Retrieves BIAN Service Landscape service domain details including business area, "
+                    "service operations, asset types, and behavioral qualifiers.",
+        tool_type=ToolType.RETRIEVAL,
+        domain=ToolDomain.GENERAL,
+        parameters=[
+            ToolParameter("domain_name", "string", "BIAN service domain name or partial match"),
+            ToolParameter("business_area", "string", "Filter by business area", required=False),
+        ],
+        return_schema={"type": "object", "properties": {
+            "domain": {"type": "string"}, "business_area": {"type": "string"},
+            "description": {"type": "string"}, "service_operations": {"type": "array"},
+            "asset_type": {"type": "string"}, "behavioral_qualifiers": {"type": "array"}}},
+        examples=[],
+        tags=["bian", "banking", "reference_architecture"],
+    ))
+
+    tools.append(ToolDefinition(
+        id="get_tmforum_functional_block",
+        name="get_tmforum_functional_block",
+        description="Retrieves TMForum ODA functional block details including capabilities, "
+                    "exposed APIs (Open APIs), and integration points.",
+        tool_type=ToolType.RETRIEVAL,
+        domain=ToolDomain.GENERAL,
+        parameters=[
+            ToolParameter("block_name", "string", "ODA functional block name or partial match"),
+            ToolParameter("area", "string", "Filter by ODA area", required=False,
+                         enum=["core_commerce", "production", "engagement", "intelligence", "security", "integration", "enterprise"]),
+        ],
+        return_schema={"type": "object", "properties": {
+            "block": {"type": "string"}, "area": {"type": "string"},
+            "description": {"type": "string"}, "capabilities": {"type": "array"},
+            "open_apis": {"type": "array"}, "integration_points": {"type": "array"}}},
+        examples=[],
+        tags=["tmforum", "oda", "telecom", "reference_architecture"],
+    ))
+
+    tools.append(ToolDefinition(
+        id="map_team_topology",
+        name="map_team_topology",
+        description="Maps architecture components to Team Topologies patterns. Analyzes component boundaries, "
+                    "interaction patterns, and cognitive load to recommend team structures "
+                    "(stream-aligned, platform, enabling, complicated-subsystem) and interaction modes.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.ANALYSIS,
+        parameters=[
+            ToolParameter("components", "array", "Architecture components with domain and dependency info"),
+            ToolParameter("current_teams", "array", "Current team structures", required=False),
+            ToolParameter("max_cognitive_load", "integer", "Max services per team before splitting", required=False, default=8),
+        ],
+        return_schema={"type": "object", "properties": {
+            "recommended_teams": {"type": "array", "items": {"type": "object", "properties": {
+                "name": {"type": "string"}, "type": {"type": "string"},
+                "components": {"type": "array"}, "interaction_mode": {"type": "string"}}}},
+            "cognitive_load_analysis": {"type": "object"},
+            "fracture_planes": {"type": "array"}}},
+        examples=[],
+        tags=["analysis", "team_topologies", "organizational"],
+    ))
+
+    # --- Architecture Fitness Functions ---
+    tools.append(ToolDefinition(
+        id="evaluate_fitness_functions",
+        name="evaluate_fitness_functions",
+        description="Evaluates architecture fitness functions — automated tests for architecture characteristics. "
+                    "Checks quantifiable quality attributes against defined thresholds: "
+                    "response time, availability, deployment frequency, coupling metrics, security posture.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.ANALYSIS,
+        parameters=[
+            ToolParameter("fitness_functions", "array", "Fitness function definitions with thresholds"),
+            ToolParameter("measurements", "object", "Current measurement values"),
+            ToolParameter("trend_window", "integer", "Number of historical data points for trend analysis", required=False, default=10),
+        ],
+        return_schema={"type": "object", "properties": {
+            "results": {"type": "array", "items": {"type": "object", "properties": {
+                "function": {"type": "string"}, "passed": {"type": "boolean"},
+                "current": {"type": "number"}, "threshold": {"type": "number"},
+                "trend": {"type": "string"}}}},
+            "overall_fitness": {"type": "number"}, "failing_count": {"type": "integer"}}},
+        examples=[],
+        tags=["analysis", "fitness_functions", "evolutionary", "quality"],
+    ))
+
+    return tools
+
+
 def build_tool_pool() -> list[ToolDefinition]:
     """Builds the complete tool pool."""
     tools = []
@@ -1031,6 +1433,7 @@ def build_tool_pool() -> list[ToolDefinition]:
     tools.extend(_retrieval_tools_governance())
     tools.extend(_retrieval_tools_general())
     tools.extend(_processing_tools())
+    tools.extend(_analysis_tools())
     return tools
 
 

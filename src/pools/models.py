@@ -20,6 +20,8 @@ class ToolDomain(str, Enum):
     REPOSITORY = "repository"
     GOVERNANCE = "governance"
     GENERAL = "general"
+    ANALYSIS = "analysis"
+    TECHNOLOGY_RADAR = "technology_radar"
 
 
 class SeedCategory(str, Enum):
@@ -40,6 +42,11 @@ class SeedCategory(str, Enum):
     CAPABILITY = "capability"
     BUILDING_BLOCK = "building_block"
     STAKEHOLDER = "stakeholder"
+    # Cross-domain reference architectures
+    BIAN_SERVICE_DOMAIN = "bian_service_domain"
+    TMFORUM_FUNCTIONAL_BLOCK = "tmforum_functional_block"
+    TECHNOLOGY_BUILDING_BLOCK = "technology_building_block"
+    TEAM_TOPOLOGY = "team_topology"
 
 
 class ExemplarFamily(str, Enum):
@@ -53,6 +60,8 @@ class ExemplarFamily(str, Enum):
     ROADMAP_PLANNING = "roadmap_planning"
     STAKEHOLDER_ANALYSIS = "stakeholder_analysis"
     COST_BENEFIT = "cost_benefit"
+    ARCHITECTURE_DECISION = "architecture_decision"
+    ARCHITECTURE_KATA = "architecture_kata"
 
 
 @dataclass

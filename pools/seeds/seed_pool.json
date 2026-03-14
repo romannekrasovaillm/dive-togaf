@@ -5174,5 +5174,2870 @@
       "external"
     ],
     "metadata": {}
+  },
+  {
+    "id": "bian_party_reference_data",
+    "name": "BIAN: Party Reference Data Directory",
+    "category": "bian_service_domain",
+    "description": "Maintain a directory of party reference information (individuals, organizations) used across services",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "customer_management",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "customer_management",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_customer_relationship",
+    "name": "BIAN: Customer Relationship Management",
+    "category": "bian_service_domain",
+    "description": "Manage the relationship with customers including lifecycle, preferences, and engagement history",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "customer_management",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "customer_management",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_customer_offer",
+    "name": "BIAN: Customer Offer",
+    "category": "bian_service_domain",
+    "description": "Manage the presentation and negotiation of product/service offers to customers",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "customer_management",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "customer_management",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_customer_onboarding",
+    "name": "BIAN: Customer Onboarding",
+    "category": "bian_service_domain",
+    "description": "Orchestrate the activities involved in enrolling a new customer",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "customer_management",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "customer_management",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_customer_profile",
+    "name": "BIAN: Customer Profile",
+    "category": "bian_service_domain",
+    "description": "Maintain consolidated customer profile data aggregating behavior and preferences",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "customer_management",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "customer_management",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_customer_access_entitlement",
+    "name": "BIAN: Customer Access Entitlement",
+    "category": "bian_service_domain",
+    "description": "Manage customer authentication and access entitlements across channels",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "customer_management",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "customer_management",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_customer_agreement",
+    "name": "BIAN: Customer Agreement",
+    "category": "bian_service_domain",
+    "description": "Maintain customer agreements covering products, terms, and conditions",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "customer_management",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "customer_management",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_customer_case_management",
+    "name": "BIAN: Customer Case Management",
+    "category": "bian_service_domain",
+    "description": "Track and resolve customer cases, complaints, and service requests",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "customer_management",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "customer_management",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_customer_campaign_mgmt",
+    "name": "BIAN: Customer Campaign Management",
+    "category": "bian_service_domain",
+    "description": "Design, execute, and track marketing campaigns targeting customer segments",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "customer_management",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "customer_management",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_customer_behavioral_insights",
+    "name": "BIAN: Customer Behavioral Insights",
+    "category": "bian_service_domain",
+    "description": "Develop behavioral analysis and insights from customer activity patterns",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "customer_management",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "customer_management",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_sales_product_agreement",
+    "name": "BIAN: Sales Product Agreement",
+    "category": "bian_service_domain",
+    "description": "Manage product agreements as part of the sales process",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "sales_service",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "sales_service",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_servicing_mandate",
+    "name": "BIAN: Servicing Mandate",
+    "category": "bian_service_domain",
+    "description": "Maintain servicing mandates defining the scope and constraints of customer servicing",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "sales_service",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "sales_service",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_customer_servicing",
+    "name": "BIAN: Customer Servicing",
+    "category": "bian_service_domain",
+    "description": "Orchestrate customer service delivery across products and channels",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "sales_service",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "sales_service",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_contact_center_mgmt",
+    "name": "BIAN: Contact Center Management",
+    "category": "bian_service_domain",
+    "description": "Manage contact center operations including routing, queuing, and workforce scheduling",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "sales_service",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "sales_service",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_branch_network_mgmt",
+    "name": "BIAN: Branch/Location Management",
+    "category": "bian_service_domain",
+    "description": "Manage physical branch network operations and logistics",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "sales_service",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "sales_service",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_current_account",
+    "name": "BIAN: Current Account",
+    "category": "bian_service_domain",
+    "description": "Fulfill current/checking account facilities covering payments, balances, and statements",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "products",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "products",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_savings_account",
+    "name": "BIAN: Savings Account",
+    "category": "bian_service_domain",
+    "description": "Fulfill savings account facilities including interest calculations and withdrawal rules",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "products",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "products",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_deposit_account",
+    "name": "BIAN: Deposit Account",
+    "category": "bian_service_domain",
+    "description": "Fulfill term deposit and fixed deposit facilities",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "products",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "products",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_loan",
+    "name": "BIAN: Loan",
+    "category": "bian_service_domain",
+    "description": "Fulfill loan product facilities including disbursement, repayment, and interest management",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "products",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "products",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_mortgage",
+    "name": "BIAN: Mortgage",
+    "category": "bian_service_domain",
+    "description": "Fulfill mortgage product facilities covering property-secured lending",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "products",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "products",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_credit_facility",
+    "name": "BIAN: Credit Facility",
+    "category": "bian_service_domain",
+    "description": "Manage credit facility offerings including revolving credit and overdraft",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "products",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "products",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_credit_card",
+    "name": "BIAN: Credit Card",
+    "category": "bian_service_domain",
+    "description": "Fulfill credit card facilities including transactions, billing, and rewards",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "products",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "products",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_leasing",
+    "name": "BIAN: Leasing",
+    "category": "bian_service_domain",
+    "description": "Fulfill leasing arrangements for assets (vehicles, equipment)",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "products",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "products",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_investment_portfolio",
+    "name": "BIAN: Investment Portfolio Management",
+    "category": "bian_service_domain",
+    "description": "Manage investment portfolios including asset allocation and rebalancing",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "products",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "products",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_securities_trading",
+    "name": "BIAN: Securities Trading",
+    "category": "bian_service_domain",
+    "description": "Execute securities trading across equities, bonds, and derivatives",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "products",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "products",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_market_making",
+    "name": "BIAN: Market Making",
+    "category": "bian_service_domain",
+    "description": "Provide market making services maintaining bid/ask quotes",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "products",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "products",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_treasury",
+    "name": "BIAN: Treasury Management",
+    "category": "bian_service_domain",
+    "description": "Manage treasury operations including liquidity, funding, and ALM",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "products",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "products",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_custody_services",
+    "name": "BIAN: Custody Services",
+    "category": "bian_service_domain",
+    "description": "Provide custody and safekeeping of securities and assets",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "products",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "products",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_wealth_management",
+    "name": "BIAN: Wealth Management",
+    "category": "bian_service_domain",
+    "description": "Deliver wealth management advisory and portfolio services",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "products",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "products",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_fund_management",
+    "name": "BIAN: Fund Management",
+    "category": "bian_service_domain",
+    "description": "Manage investment fund operations including NAV calculation and distribution",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "products",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "products",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_payment_initiation",
+    "name": "BIAN: Payment Initiation",
+    "category": "bian_service_domain",
+    "description": "Initiate payment transactions across domestic and international schemes",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "payments",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "payments",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_payment_execution",
+    "name": "BIAN: Payment Execution",
+    "category": "bian_service_domain",
+    "description": "Execute and settle payment transactions through clearing networks",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "payments",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "payments",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_payment_order",
+    "name": "BIAN: Payment Order",
+    "category": "bian_service_domain",
+    "description": "Process payment orders including validation, routing, and confirmation",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "payments",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "payments",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_card_transaction_switch",
+    "name": "BIAN: Card Transaction Switch",
+    "category": "bian_service_domain",
+    "description": "Route and switch card transactions between acquirers and issuers",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "payments",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "payments",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_correspondent_banking",
+    "name": "BIAN: Correspondent Banking",
+    "category": "bian_service_domain",
+    "description": "Manage correspondent banking relationships and nostro/vostro accounts",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "payments",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "payments",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_direct_debit",
+    "name": "BIAN: Direct Debit",
+    "category": "bian_service_domain",
+    "description": "Process direct debit mandates and collections",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "payments",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "payments",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_credit_risk_assessment",
+    "name": "BIAN: Credit Risk Assessment",
+    "category": "bian_service_domain",
+    "description": "Assess credit risk for counterparties and exposures",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "risk_compliance",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "risk_compliance",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_market_risk",
+    "name": "BIAN: Market Risk",
+    "category": "bian_service_domain",
+    "description": "Measure and monitor market risk (VaR, stress testing, sensitivity)",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "risk_compliance",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "risk_compliance",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_operational_risk",
+    "name": "BIAN: Operational Risk",
+    "category": "bian_service_domain",
+    "description": "Identify, assess, and monitor operational risk events and controls",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "risk_compliance",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "risk_compliance",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_fraud_detection",
+    "name": "BIAN: Fraud Detection",
+    "category": "bian_service_domain",
+    "description": "Detect and investigate fraudulent activities using pattern analysis",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "risk_compliance",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "risk_compliance",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_aml_kyc",
+    "name": "BIAN: AML/KYC",
+    "category": "bian_service_domain",
+    "description": "Perform anti-money-laundering checks and know-your-customer due diligence",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "risk_compliance",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "risk_compliance",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_regulatory_compliance",
+    "name": "BIAN: Regulatory Compliance",
+    "category": "bian_service_domain",
+    "description": "Monitor and ensure compliance with regulatory requirements",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "risk_compliance",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "risk_compliance",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_regulatory_reporting",
+    "name": "BIAN: Regulatory Reporting",
+    "category": "bian_service_domain",
+    "description": "Generate and submit regulatory reports (Basel, IFRS, local regulations)",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "risk_compliance",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "risk_compliance",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_counterparty_risk",
+    "name": "BIAN: Counterparty Risk",
+    "category": "bian_service_domain",
+    "description": "Assess and monitor counterparty credit and settlement risk",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "risk_compliance",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "risk_compliance",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_transaction_engine",
+    "name": "BIAN: Transaction Engine",
+    "category": "bian_service_domain",
+    "description": "Core transaction processing engine for booking and posting",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "operations",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "operations",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_general_ledger",
+    "name": "BIAN: General Ledger",
+    "category": "bian_service_domain",
+    "description": "Maintain the general ledger and chart of accounts",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "operations",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "operations",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_financial_accounting",
+    "name": "BIAN: Financial Accounting",
+    "category": "bian_service_domain",
+    "description": "Manage financial accounting, reporting, and reconciliation",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "operations",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "operations",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_reconciliation",
+    "name": "BIAN: Reconciliation",
+    "category": "bian_service_domain",
+    "description": "Perform automated reconciliation of transactions across systems",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "operations",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "operations",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_document_management",
+    "name": "BIAN: Document Management",
+    "category": "bian_service_domain",
+    "description": "Manage documents, content, and digital records across the enterprise",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "operations",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "operations",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_data_management",
+    "name": "BIAN: Enterprise Data Management",
+    "category": "bian_service_domain",
+    "description": "Govern enterprise data quality, lineage, and master data",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "operations",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "operations",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_it_operations",
+    "name": "BIAN: IT Operations Administration",
+    "category": "bian_service_domain",
+    "description": "Manage IT infrastructure operations, monitoring, and incident response",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "operations",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "operations",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_system_administration",
+    "name": "BIAN: System Administration",
+    "category": "bian_service_domain",
+    "description": "Administer core banking systems and middleware",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "operations",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "operations",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_business_continuity",
+    "name": "BIAN: Business Continuity Management",
+    "category": "bian_service_domain",
+    "description": "Plan and manage business continuity and disaster recovery",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "operations",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "operations",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_trade_finance",
+    "name": "BIAN: Trade Finance",
+    "category": "bian_service_domain",
+    "description": "Fulfill trade finance instruments (letters of credit, guarantees, documentary collections)",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "corporate",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "corporate",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_corporate_lending",
+    "name": "BIAN: Corporate Lending",
+    "category": "bian_service_domain",
+    "description": "Manage corporate and syndicated lending facilities",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "corporate",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "corporate",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_cash_management",
+    "name": "BIAN: Cash Management",
+    "category": "bian_service_domain",
+    "description": "Provide corporate cash management including pooling and sweeping",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "corporate",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "corporate",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "bian_supply_chain_finance",
+    "name": "BIAN: Supply Chain Finance",
+    "category": "bian_service_domain",
+    "description": "Facilitate supply chain financing (factoring, reverse factoring)",
+    "domain": "banking",
+    "related_tools": [],
+    "tags": [
+      "bian",
+      "banking",
+      "corporate",
+      "service_domain"
+    ],
+    "metadata": {
+      "bian_business_area": "corporate",
+      "reference": "BIAN Service Landscape v12"
+    }
+  },
+  {
+    "id": "tmf_party_mgmt",
+    "name": "TMForum ODA: Party Management",
+    "category": "tmforum_functional_block",
+    "description": "Manage parties (individuals, organizations) and their roles across the enterprise",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "core_commerce",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "core_commerce",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_product_catalog",
+    "name": "TMForum ODA: Product Catalog Management",
+    "category": "tmforum_functional_block",
+    "description": "Design, manage, and publish product and service catalogs",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "core_commerce",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "core_commerce",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_product_ordering",
+    "name": "TMForum ODA: Product Ordering",
+    "category": "tmforum_functional_block",
+    "description": "Capture, validate, and orchestrate product orders through fulfillment",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "core_commerce",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "core_commerce",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_product_inventory",
+    "name": "TMForum ODA: Product Inventory",
+    "category": "tmforum_functional_block",
+    "description": "Track and manage the inventory of active product instances",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "core_commerce",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "core_commerce",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_customer_mgmt",
+    "name": "TMForum ODA: Customer Management",
+    "category": "tmforum_functional_block",
+    "description": "Manage customer lifecycle, profiles, and interaction history",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "core_commerce",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "core_commerce",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_customer_bill_mgmt",
+    "name": "TMForum ODA: Customer Bill Management",
+    "category": "tmforum_functional_block",
+    "description": "Generate, present, and manage customer billing and invoicing",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "core_commerce",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "core_commerce",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_revenue_mgmt",
+    "name": "TMForum ODA: Revenue Management",
+    "category": "tmforum_functional_block",
+    "description": "Rate usage, apply charges, manage revenue assurance and settlements",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "core_commerce",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "core_commerce",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_loyalty_mgmt",
+    "name": "TMForum ODA: Loyalty Management",
+    "category": "tmforum_functional_block",
+    "description": "Manage loyalty programs, points, tiers, and rewards",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "core_commerce",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "core_commerce",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_partner_mgmt",
+    "name": "TMForum ODA: Partner Management",
+    "category": "tmforum_functional_block",
+    "description": "Manage partner relationships, agreements, and settlement",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "core_commerce",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "core_commerce",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_sales_mgmt",
+    "name": "TMForum ODA: Sales Management",
+    "category": "tmforum_functional_block",
+    "description": "Manage sales pipeline, opportunities, and quoting processes",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "core_commerce",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "core_commerce",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_agreement_mgmt",
+    "name": "TMForum ODA: Agreement Management",
+    "category": "tmforum_functional_block",
+    "description": "Manage commercial agreements, SLAs, and contractual terms",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "core_commerce",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "core_commerce",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_payment_mgmt",
+    "name": "TMForum ODA: Payment Management",
+    "category": "tmforum_functional_block",
+    "description": "Process payments, refunds, and manage payment methods",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "core_commerce",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "core_commerce",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_service_catalog",
+    "name": "TMForum ODA: Service Catalog Management",
+    "category": "tmforum_functional_block",
+    "description": "Design and manage the service catalog including technical service specifications",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "production",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "production",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_service_ordering",
+    "name": "TMForum ODA: Service Ordering",
+    "category": "tmforum_functional_block",
+    "description": "Decompose and orchestrate service orders into resource actions",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "production",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "production",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_service_inventory",
+    "name": "TMForum ODA: Service Inventory",
+    "category": "tmforum_functional_block",
+    "description": "Maintain inventory of active service instances and configurations",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "production",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "production",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_service_activation",
+    "name": "TMForum ODA: Service Activation & Configuration",
+    "category": "tmforum_functional_block",
+    "description": "Activate, configure, and modify services on the network",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "production",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "production",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_service_quality",
+    "name": "TMForum ODA: Service Quality Management",
+    "category": "tmforum_functional_block",
+    "description": "Monitor and manage service quality and performance levels",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "production",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "production",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_service_test",
+    "name": "TMForum ODA: Service Test Management",
+    "category": "tmforum_functional_block",
+    "description": "Plan and execute service tests to validate quality and functionality",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "production",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "production",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_resource_catalog",
+    "name": "TMForum ODA: Resource Catalog",
+    "category": "tmforum_functional_block",
+    "description": "Manage the catalog of physical and logical resources",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "production",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "production",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_resource_ordering",
+    "name": "TMForum ODA: Resource Ordering",
+    "category": "tmforum_functional_block",
+    "description": "Orchestrate resource provisioning and configuration orders",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "production",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "production",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_resource_inventory",
+    "name": "TMForum ODA: Resource Inventory",
+    "category": "tmforum_functional_block",
+    "description": "Maintain inventory of physical and logical network resources",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "production",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "production",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_resource_activation",
+    "name": "TMForum ODA: Resource Activation",
+    "category": "tmforum_functional_block",
+    "description": "Activate and configure network resources",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "production",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "production",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_network_planning",
+    "name": "TMForum ODA: Network Planning & Design",
+    "category": "tmforum_functional_block",
+    "description": "Plan, design, and optimize network topology and capacity",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "production",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "production",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_digital_experience",
+    "name": "TMForum ODA: Digital Experience Management",
+    "category": "tmforum_functional_block",
+    "description": "Manage digital customer journeys across web, mobile, and IoT channels",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "engagement",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "engagement",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_contact_mgmt",
+    "name": "TMForum ODA: Contact Management",
+    "category": "tmforum_functional_block",
+    "description": "Manage customer contacts and interactions across all touchpoints",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "engagement",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "engagement",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_trouble_ticket",
+    "name": "TMForum ODA: Trouble Ticket Management",
+    "category": "tmforum_functional_block",
+    "description": "Create, track, and resolve trouble tickets and service problems",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "engagement",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "engagement",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_sla_mgmt",
+    "name": "TMForum ODA: SLA Management",
+    "category": "tmforum_functional_block",
+    "description": "Define, monitor, and report on service level agreements",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "engagement",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "engagement",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_analytics",
+    "name": "TMForum ODA: Analytics",
+    "category": "tmforum_functional_block",
+    "description": "Provide advanced analytics, predictive models, and AI/ML capabilities",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "intelligence",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "intelligence",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_data_governance",
+    "name": "TMForum ODA: Data Governance",
+    "category": "tmforum_functional_block",
+    "description": "Govern data quality, metadata, lineage, and data catalogs",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "intelligence",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "intelligence",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_reporting",
+    "name": "TMForum ODA: Reporting & Dashboards",
+    "category": "tmforum_functional_block",
+    "description": "Generate operational and business intelligence reports and dashboards",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "intelligence",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "intelligence",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_identity_access",
+    "name": "TMForum ODA: Identity & Access Management",
+    "category": "tmforum_functional_block",
+    "description": "Manage identities, authentication, authorization, and access policies",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "security",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "security",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_fraud_mgmt",
+    "name": "TMForum ODA: Fraud Management",
+    "category": "tmforum_functional_block",
+    "description": "Detect, investigate, and prevent fraud across services",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "security",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "security",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_privacy_mgmt",
+    "name": "TMForum ODA: Privacy Management",
+    "category": "tmforum_functional_block",
+    "description": "Manage data privacy policies, consent, and regulatory compliance",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "security",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "security",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_policy_mgmt",
+    "name": "TMForum ODA: Policy Management",
+    "category": "tmforum_functional_block",
+    "description": "Define and enforce business and technical policies",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "security",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "security",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_event_mgmt",
+    "name": "TMForum ODA: Event Management",
+    "category": "tmforum_functional_block",
+    "description": "Manage business events, notifications, and event-driven architectures",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "integration",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "integration",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_api_mgmt",
+    "name": "TMForum ODA: API Management",
+    "category": "tmforum_functional_block",
+    "description": "Manage API lifecycle, gateway, and developer portal",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "integration",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "integration",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_integration_fabric",
+    "name": "TMForum ODA: Integration Fabric",
+    "category": "tmforum_functional_block",
+    "description": "Provide enterprise integration middleware and message routing",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "integration",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "integration",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_strategic_planning",
+    "name": "TMForum ODA: Strategic Planning",
+    "category": "tmforum_functional_block",
+    "description": "Support strategic planning, business modeling, and portfolio management",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "enterprise",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "enterprise",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_program_project_mgmt",
+    "name": "TMForum ODA: Program & Project Management",
+    "category": "tmforum_functional_block",
+    "description": "Manage programs, projects, and transformation initiatives",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "enterprise",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "enterprise",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_enterprise_risk",
+    "name": "TMForum ODA: Enterprise Risk Management",
+    "category": "tmforum_functional_block",
+    "description": "Identify, assess, and manage enterprise-wide risks",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "enterprise",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "enterprise",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_regulatory_mgmt",
+    "name": "TMForum ODA: Regulatory Management",
+    "category": "tmforum_functional_block",
+    "description": "Track regulatory requirements and ensure compliance",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "enterprise",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "enterprise",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_workforce_mgmt",
+    "name": "TMForum ODA: Workforce Management",
+    "category": "tmforum_functional_block",
+    "description": "Manage workforce planning, scheduling, and skills",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "enterprise",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "enterprise",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_financial_mgmt",
+    "name": "TMForum ODA: Financial Management",
+    "category": "tmforum_functional_block",
+    "description": "Manage financial planning, budgeting, and accounting",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "enterprise",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "enterprise",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tmf_procurement_mgmt",
+    "name": "TMForum ODA: Procurement & Supply Chain",
+    "category": "tmforum_functional_block",
+    "description": "Manage procurement, vendors, and supply chain",
+    "domain": "telecom",
+    "related_tools": [],
+    "tags": [
+      "tmforum",
+      "oda",
+      "telecom",
+      "enterprise",
+      "functional_block"
+    ],
+    "metadata": {
+      "oda_area": "enterprise",
+      "reference": "TMForum ODA Functional Architecture v5"
+    }
+  },
+  {
+    "id": "tech_k8s_cluster",
+    "name": "Kubernetes Cluster",
+    "category": "technology_building_block",
+    "description": "Container orchestration platform for automated deployment, scaling, and management of containerized workloads",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "container_orchestration",
+      "orchestration",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "CNCF",
+      "category": "orchestration",
+      "technology_area": "container_orchestration"
+    }
+  },
+  {
+    "id": "tech_k8s_namespace",
+    "name": "Kubernetes Namespace",
+    "category": "technology_building_block",
+    "description": "Logical isolation boundary within a Kubernetes cluster for multi-tenancy and resource quotas",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "container_orchestration",
+      "orchestration",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "CNCF",
+      "category": "orchestration",
+      "technology_area": "container_orchestration"
+    }
+  },
+  {
+    "id": "tech_k8s_ingress",
+    "name": "Kubernetes Ingress Controller",
+    "category": "technology_building_block",
+    "description": "API gateway and L7 load balancer for routing external traffic to cluster services",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "container_orchestration",
+      "networking",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "CNCF",
+      "category": "networking",
+      "technology_area": "container_orchestration"
+    }
+  },
+  {
+    "id": "tech_k8s_service_mesh",
+    "name": "Service Mesh (Istio/Linkerd)",
+    "category": "technology_building_block",
+    "description": "Infrastructure layer for service-to-service communication with mTLS, observability, and traffic management",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "container_orchestration",
+      "networking",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "CNCF",
+      "category": "networking",
+      "technology_area": "container_orchestration"
+    }
+  },
+  {
+    "id": "tech_helm_charts",
+    "name": "Helm Charts",
+    "category": "technology_building_block",
+    "description": "Package manager for Kubernetes enabling templated, versioned application deployments",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "container_orchestration",
+      "packaging",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "CNCF",
+      "category": "packaging",
+      "technology_area": "container_orchestration"
+    }
+  },
+  {
+    "id": "tech_docker_registry",
+    "name": "Container Registry",
+    "category": "technology_building_block",
+    "description": "OCI-compliant container image registry for storing and distributing container images",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "container_orchestration",
+      "registry",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "various",
+      "category": "registry",
+      "technology_area": "container_orchestration"
+    }
+  },
+  {
+    "id": "tech_kafka_cluster",
+    "name": "Apache Kafka Cluster",
+    "category": "technology_building_block",
+    "description": "Distributed event streaming platform for high-throughput, fault-tolerant publish-subscribe messaging",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "messaging",
+      "streaming",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "Apache",
+      "category": "streaming",
+      "technology_area": "messaging"
+    }
+  },
+  {
+    "id": "tech_kafka_connect",
+    "name": "Kafka Connect",
+    "category": "technology_building_block",
+    "description": "Framework for connecting Kafka with external systems via source and sink connectors",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "messaging",
+      "integration",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "Apache",
+      "category": "integration",
+      "technology_area": "messaging"
+    }
+  },
+  {
+    "id": "tech_kafka_schema_registry",
+    "name": "Schema Registry",
+    "category": "technology_building_block",
+    "description": "Centralized schema management for Kafka topics enabling schema evolution and compatibility",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "messaging",
+      "governance",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "Confluent",
+      "category": "governance",
+      "technology_area": "messaging"
+    }
+  },
+  {
+    "id": "tech_rabbitmq",
+    "name": "RabbitMQ",
+    "category": "technology_building_block",
+    "description": "Message broker implementing AMQP for reliable message queuing with routing and delivery guarantees",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "messaging",
+      "messaging",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "VMware",
+      "category": "messaging",
+      "technology_area": "messaging"
+    }
+  },
+  {
+    "id": "tech_pulsar",
+    "name": "Apache Pulsar",
+    "category": "technology_building_block",
+    "description": "Cloud-native distributed messaging and streaming platform with multi-tenancy and geo-replication",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "messaging",
+      "streaming",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "Apache",
+      "category": "streaming",
+      "technology_area": "messaging"
+    }
+  },
+  {
+    "id": "tech_postgresql",
+    "name": "PostgreSQL",
+    "category": "technology_building_block",
+    "description": "Advanced open-source relational database with extensibility, JSONB support, and ACID compliance",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "data_storage",
+      "rdbms",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "PostgreSQL Global Development Group",
+      "category": "rdbms",
+      "technology_area": "data_storage"
+    }
+  },
+  {
+    "id": "tech_mongodb",
+    "name": "MongoDB",
+    "category": "technology_building_block",
+    "description": "Document-oriented NoSQL database for flexible schema storage with horizontal scaling",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "data_storage",
+      "document_db",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "MongoDB Inc.",
+      "category": "document_db",
+      "technology_area": "data_storage"
+    }
+  },
+  {
+    "id": "tech_redis",
+    "name": "Redis",
+    "category": "technology_building_block",
+    "description": "In-memory data structure store used as cache, message broker, and real-time data platform",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "data_storage",
+      "cache",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "Redis Ltd.",
+      "category": "cache",
+      "technology_area": "data_storage"
+    }
+  },
+  {
+    "id": "tech_elasticsearch",
+    "name": "Elasticsearch",
+    "category": "technology_building_block",
+    "description": "Distributed search and analytics engine for log analytics, full-text search, and observability",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "data_storage",
+      "search",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "Elastic",
+      "category": "search",
+      "technology_area": "data_storage"
+    }
+  },
+  {
+    "id": "tech_cassandra",
+    "name": "Apache Cassandra",
+    "category": "technology_building_block",
+    "description": "Wide-column distributed database for high-availability, high-write-throughput workloads",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "data_storage",
+      "wide_column",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "Apache",
+      "category": "wide_column",
+      "technology_area": "data_storage"
+    }
+  },
+  {
+    "id": "tech_snowflake",
+    "name": "Snowflake",
+    "category": "technology_building_block",
+    "description": "Cloud data warehouse with separation of storage and compute, supporting structured and semi-structured data",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "data_storage",
+      "data_warehouse",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "Snowflake",
+      "category": "data_warehouse",
+      "technology_area": "data_storage"
+    }
+  },
+  {
+    "id": "tech_s3_object_store",
+    "name": "Object Storage (S3-compatible)",
+    "category": "technology_building_block",
+    "description": "Scalable object storage for unstructured data with lifecycle policies and versioning",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "data_storage",
+      "object_storage",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "AWS/MinIO",
+      "category": "object_storage",
+      "technology_area": "data_storage"
+    }
+  },
+  {
+    "id": "tech_sap_s4hana",
+    "name": "SAP S/4HANA",
+    "category": "technology_building_block",
+    "description": "In-memory ERP suite covering finance, supply chain, manufacturing, and asset management on HANA database",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "erp",
+      "erp",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "SAP",
+      "category": "erp",
+      "technology_area": "erp"
+    }
+  },
+  {
+    "id": "tech_sap_btp",
+    "name": "SAP Business Technology Platform",
+    "category": "technology_building_block",
+    "description": "PaaS for extending SAP with integration, analytics, AI, and custom development",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "erp",
+      "platform",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "SAP",
+      "category": "platform",
+      "technology_area": "erp"
+    }
+  },
+  {
+    "id": "tech_sap_integration_suite",
+    "name": "SAP Integration Suite",
+    "category": "technology_building_block",
+    "description": "iPaaS for integrating SAP and non-SAP systems via APIs, events, and process orchestration",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "erp",
+      "integration",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "SAP",
+      "category": "integration",
+      "technology_area": "erp"
+    }
+  },
+  {
+    "id": "tech_salesforce_core",
+    "name": "Salesforce CRM Platform",
+    "category": "technology_building_block",
+    "description": "Cloud CRM platform covering sales, service, and marketing automation with extensible data model",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "crm",
+      "crm",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "Salesforce",
+      "category": "crm",
+      "technology_area": "crm"
+    }
+  },
+  {
+    "id": "tech_salesforce_mulesoft",
+    "name": "MuleSoft Anypoint Platform",
+    "category": "technology_building_block",
+    "description": "API-led connectivity platform for integrating SaaS, on-prem, and legacy systems",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "crm",
+      "integration",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "Salesforce/MuleSoft",
+      "category": "integration",
+      "technology_area": "crm"
+    }
+  },
+  {
+    "id": "tech_salesforce_tableau",
+    "name": "Tableau",
+    "category": "technology_building_block",
+    "description": "Visual analytics platform for self-service BI, data exploration, and dashboard publishing",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "crm",
+      "analytics",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "Salesforce/Tableau",
+      "category": "analytics",
+      "technology_area": "crm"
+    }
+  },
+  {
+    "id": "tech_servicenow",
+    "name": "ServiceNow",
+    "category": "technology_building_block",
+    "description": "Cloud platform for IT service management, IT operations, and enterprise workflow automation",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "itsm",
+      "itsm",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "ServiceNow",
+      "category": "itsm",
+      "technology_area": "itsm"
+    }
+  },
+  {
+    "id": "tech_prometheus",
+    "name": "Prometheus",
+    "category": "technology_building_block",
+    "description": "Time-series monitoring system with PromQL query language and alerting for cloud-native workloads",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "observability",
+      "monitoring",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "CNCF",
+      "category": "monitoring",
+      "technology_area": "observability"
+    }
+  },
+  {
+    "id": "tech_grafana",
+    "name": "Grafana",
+    "category": "technology_building_block",
+    "description": "Observability platform for metrics visualization, log exploration, and distributed tracing dashboards",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "observability",
+      "visualization",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "Grafana Labs",
+      "category": "visualization",
+      "technology_area": "observability"
+    }
+  },
+  {
+    "id": "tech_opentelemetry",
+    "name": "OpenTelemetry",
+    "category": "technology_building_block",
+    "description": "Vendor-neutral observability framework for collecting traces, metrics, and logs",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "observability",
+      "instrumentation",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "CNCF",
+      "category": "instrumentation",
+      "technology_area": "observability"
+    }
+  },
+  {
+    "id": "tech_argocd",
+    "name": "ArgoCD",
+    "category": "technology_building_block",
+    "description": "GitOps continuous delivery tool for Kubernetes, declaratively managing application deployments",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "devops",
+      "gitops",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "CNCF",
+      "category": "gitops",
+      "technology_area": "devops"
+    }
+  },
+  {
+    "id": "tech_terraform",
+    "name": "Terraform",
+    "category": "technology_building_block",
+    "description": "Infrastructure as Code tool for provisioning and managing cloud resources declaratively",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "devops",
+      "iac",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "HashiCorp",
+      "category": "iac",
+      "technology_area": "devops"
+    }
+  },
+  {
+    "id": "tech_vault",
+    "name": "HashiCorp Vault",
+    "category": "technology_building_block",
+    "description": "Secrets management and encryption service for dynamic secrets, PKI, and data encryption",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "devops",
+      "security",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "HashiCorp",
+      "category": "security",
+      "technology_area": "devops"
+    }
+  },
+  {
+    "id": "tech_github_actions",
+    "name": "GitHub Actions",
+    "category": "technology_building_block",
+    "description": "CI/CD automation platform integrated with GitHub for building, testing, and deploying code",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "devops",
+      "ci_cd",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "GitHub",
+      "category": "ci_cd",
+      "technology_area": "devops"
+    }
+  },
+  {
+    "id": "tech_aws_vpc",
+    "name": "AWS VPC / Azure VNet",
+    "category": "technology_building_block",
+    "description": "Virtual private network isolation boundary in public cloud with subnets, routing, and security groups",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "cloud",
+      "networking",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "AWS/Azure",
+      "category": "networking",
+      "technology_area": "cloud"
+    }
+  },
+  {
+    "id": "tech_aws_lambda",
+    "name": "Serverless Functions (Lambda/Azure Functions)",
+    "category": "technology_building_block",
+    "description": "Event-driven serverless compute for running code without provisioning servers",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "cloud",
+      "compute",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "AWS/Azure",
+      "category": "compute",
+      "technology_area": "cloud"
+    }
+  },
+  {
+    "id": "tech_cdn",
+    "name": "CDN (CloudFront/Akamai)",
+    "category": "technology_building_block",
+    "description": "Content delivery network for low-latency global distribution of static and dynamic content",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "cloud",
+      "edge",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "various",
+      "category": "edge",
+      "technology_area": "cloud"
+    }
+  },
+  {
+    "id": "tech_api_gateway",
+    "name": "API Gateway (Kong/AWS API GW)",
+    "category": "technology_building_block",
+    "description": "Managed API gateway for rate limiting, authentication, and request routing",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "cloud",
+      "api_management",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "various",
+      "category": "api_management",
+      "technology_area": "cloud"
+    }
+  },
+  {
+    "id": "tech_spark",
+    "name": "Apache Spark",
+    "category": "technology_building_block",
+    "description": "Unified analytics engine for large-scale data processing, batch and streaming, with ML support",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "data_ai",
+      "processing",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "Apache",
+      "category": "processing",
+      "technology_area": "data_ai"
+    }
+  },
+  {
+    "id": "tech_airflow",
+    "name": "Apache Airflow",
+    "category": "technology_building_block",
+    "description": "Workflow orchestration platform for authoring, scheduling, and monitoring data pipelines",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "data_ai",
+      "orchestration",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "Apache",
+      "category": "orchestration",
+      "technology_area": "data_ai"
+    }
+  },
+  {
+    "id": "tech_mlflow",
+    "name": "MLflow",
+    "category": "technology_building_block",
+    "description": "ML lifecycle management platform for experiment tracking, model registry, and deployment",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "data_ai",
+      "mlops",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "Databricks",
+      "category": "mlops",
+      "technology_area": "data_ai"
+    }
+  },
+  {
+    "id": "tech_feature_store",
+    "name": "Feature Store (Feast/Tecton)",
+    "category": "technology_building_block",
+    "description": "Centralized feature management for ML pipelines supporting online and offline serving",
+    "domain": "technology",
+    "related_tools": [],
+    "tags": [
+      "technology",
+      "data_ai",
+      "ml_infra",
+      "building_block"
+    ],
+    "metadata": {
+      "vendor": "various",
+      "category": "ml_infra",
+      "technology_area": "data_ai"
+    }
+  },
+  {
+    "id": "topo_stream_aligned",
+    "name": "Stream-Aligned Team",
+    "category": "team_topology",
+    "description": "Team aligned to a single flow of work from a segment of the business domain, empowered to build and deliver customer value as quickly and independently as possible",
+    "domain": "organizational",
+    "related_tools": [],
+    "tags": [
+      "team_topologies",
+      "team_type",
+      "organizational"
+    ],
+    "metadata": {
+      "interaction_modes": [
+        "collaboration",
+        "x-as-a-service",
+        "facilitating"
+      ],
+      "characteristics": [
+        "cross-functional",
+        "long-lived",
+        "owns end-to-end delivery"
+      ],
+      "cognitive_load": "bounded by domain complexity",
+      "pattern_type": "team_type",
+      "reference": "Team Topologies (Skelton & Pais, 2019)"
+    }
+  },
+  {
+    "id": "topo_enabling",
+    "name": "Enabling Team",
+    "category": "team_topology",
+    "description": "Team that assists stream-aligned teams in overcoming obstacles by detecting missing capabilities and helping to close skill gaps, typically around specific technical or product management areas",
+    "domain": "organizational",
+    "related_tools": [],
+    "tags": [
+      "team_topologies",
+      "team_type",
+      "organizational"
+    ],
+    "metadata": {
+      "interaction_modes": [
+        "facilitating"
+      ],
+      "characteristics": [
+        "specialists",
+        "temporary engagement",
+        "knowledge transfer focus"
+      ],
+      "cognitive_load": "focused on capability uplift",
+      "pattern_type": "team_type",
+      "reference": "Team Topologies (Skelton & Pais, 2019)"
+    }
+  },
+  {
+    "id": "topo_complicated_subsystem",
+    "name": "Complicated-Subsystem Team",
+    "category": "team_topology",
+    "description": "Team responsible for building and maintaining a subsystem that requires specialist knowledge beyond that of most stream-aligned teams (e.g., mathematical models, real-time processing)",
+    "domain": "organizational",
+    "related_tools": [],
+    "tags": [
+      "team_topologies",
+      "team_type",
+      "organizational"
+    ],
+    "metadata": {
+      "interaction_modes": [
+        "x-as-a-service"
+      ],
+      "characteristics": [
+        "deep specialists",
+        "reduces cognitive load on consumers"
+      ],
+      "cognitive_load": "high intrinsic complexity, shielded from others",
+      "pattern_type": "team_type",
+      "reference": "Team Topologies (Skelton & Pais, 2019)"
+    }
+  },
+  {
+    "id": "topo_platform",
+    "name": "Platform Team",
+    "category": "team_topology",
+    "description": "Team that provides internal services to reduce cognitive load on stream-aligned teams, offering self-service APIs, tools, and reliable infrastructure as a product",
+    "domain": "organizational",
+    "related_tools": [],
+    "tags": [
+      "team_topologies",
+      "team_type",
+      "organizational"
+    ],
+    "metadata": {
+      "interaction_modes": [
+        "x-as-a-service"
+      ],
+      "characteristics": [
+        "treats platform as product",
+        "self-service",
+        "reduces stream team burden"
+      ],
+      "cognitive_load": "abstracts infrastructure complexity",
+      "pattern_type": "team_type",
+      "reference": "Team Topologies (Skelton & Pais, 2019)"
+    }
+  },
+  {
+    "id": "topo_mode_collaboration",
+    "name": "Collaboration Interaction Mode",
+    "category": "team_topology",
+    "description": "Two teams work closely together for a defined period to discover new patterns, approaches, or practices. High-bandwidth but high-cost; should be time-boxed",
+    "domain": "organizational",
+    "related_tools": [],
+    "tags": [
+      "team_topologies",
+      "interaction_mode",
+      "organizational"
+    ],
+    "metadata": {
+      "suitable_for": [
+        "new technology adoption",
+        "exploring new domain boundaries"
+      ],
+      "anti_pattern": "permanent collaboration indicates poor boundaries",
+      "pattern_type": "interaction_mode",
+      "reference": "Team Topologies (Skelton & Pais, 2019)"
+    }
+  },
+  {
+    "id": "topo_mode_x_as_a_service",
+    "name": "X-as-a-Service Interaction Mode",
+    "category": "team_topology",
+    "description": "One team provides something (API, tool, platform) as a service with clear interface and SLA. Minimal collaboration needed; consumer team has autonomy",
+    "domain": "organizational",
+    "related_tools": [],
+    "tags": [
+      "team_topologies",
+      "interaction_mode",
+      "organizational"
+    ],
+    "metadata": {
+      "suitable_for": [
+        "well-defined interfaces",
+        "platform consumption",
+        "stable subsystems"
+      ],
+      "anti_pattern": "forcing x-as-a-service on immature boundaries",
+      "pattern_type": "interaction_mode",
+      "reference": "Team Topologies (Skelton & Pais, 2019)"
+    }
+  },
+  {
+    "id": "topo_mode_facilitating",
+    "name": "Facilitating Interaction Mode",
+    "category": "team_topology",
+    "description": "One team helps another team learn or adopt new skills/approaches. The enabling team does not build the thing; it coaches the stream-aligned team",
+    "domain": "organizational",
+    "related_tools": [],
+    "tags": [
+      "team_topologies",
+      "interaction_mode",
+      "organizational"
+    ],
+    "metadata": {
+      "suitable_for": [
+        "capability gaps",
+        "new practice adoption",
+        "tooling migration"
+      ],
+      "anti_pattern": "enabling team permanently doing work for the other team",
+      "pattern_type": "interaction_mode",
+      "reference": "Team Topologies (Skelton & Pais, 2019)"
+    }
+  },
+  {
+    "id": "topo_conways_law",
+    "name": "Conway's Law",
+    "category": "team_topology",
+    "description": "Organizations produce designs which are copies of their communication structures. Inverse Conway Maneuver: deliberately shape team structures to encourage desired architecture",
+    "domain": "organizational",
+    "related_tools": [],
+    "tags": [
+      "team_topologies",
+      "organizational_pattern",
+      "organizational"
+    ],
+    "metadata": {
+      "principle": "architecture follows communication pathways",
+      "application": "use to align team boundaries with architectural boundaries",
+      "pattern_type": "organizational_pattern",
+      "reference": "Team Topologies (Skelton & Pais, 2019)"
+    }
+  },
+  {
+    "id": "topo_cognitive_load",
+    "name": "Cognitive Load Management",
+    "category": "team_topology",
+    "description": "Limit the cognitive load on teams to what they can effectively handle. Three types: intrinsic (domain), extraneous (environment), germane (learning)",
+    "domain": "organizational",
+    "related_tools": [],
+    "tags": [
+      "team_topologies",
+      "organizational_pattern",
+      "organizational"
+    ],
+    "metadata": {
+      "types": [
+        "intrinsic",
+        "extraneous",
+        "germane"
+      ],
+      "principle": "minimize extraneous load, manage intrinsic load, maximize germane load",
+      "pattern_type": "organizational_pattern",
+      "reference": "Team Topologies (Skelton & Pais, 2019)"
+    }
+  },
+  {
+    "id": "topo_fracture_planes",
+    "name": "Fracture Planes",
+    "category": "team_topology",
+    "description": "Natural lines along which to split software and teams: business domain, regulatory compliance, change cadence, team location, technology, user personas, risk",
+    "domain": "organizational",
+    "related_tools": [],
+    "tags": [
+      "team_topologies",
+      "organizational_pattern",
+      "organizational"
+    ],
+    "metadata": {
+      "planes": [
+        "business_domain",
+        "regulatory",
+        "change_cadence",
+        "location",
+        "technology",
+        "user_persona",
+        "risk",
+        "performance_isolation"
+      ],
+      "principle": "split where natural seams exist to reduce coupling",
+      "pattern_type": "organizational_pattern",
+      "reference": "Team Topologies (Skelton & Pais, 2019)"
+    }
   }
 ]

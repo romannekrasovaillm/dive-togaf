@@ -4726,5 +4726,804 @@
       "complex_multi_step",
       "cross_domain"
     ]
+  },
+  {
+    "id": "adr_01",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for selecting {Container_Orchestration_Platform}: document the context (microservices deployment needs), evaluate Kubernetes vs ECS vs Nomad, analyze trade-offs (operational complexity vs ecosystem breadth vs vendor lock-in), and justify the decision based on team skills and scale requirements.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: container orchestration platform selection",
+    "sub_questions": 4,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_02",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for choosing between synchronous REST APIs and asynchronous event-driven messaging for {Inter_Service_Communication}. Evaluate latency, coupling, reliability, and debugging complexity. Recommend a hybrid approach where applicable and document the decision boundary.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: sync vs async inter-service communication",
+    "sub_questions": 3,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_03",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for {Database_Selection}: compare relational (PostgreSQL) vs document (MongoDB) vs wide-column (Cassandra) for the given workload profile. Evaluate consistency model, query patterns, operational cost, and team expertise. Document rejected alternatives with specific reasons.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: database technology selection",
+    "sub_questions": 4,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_04",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for adopting {Service_Mesh} (Istio vs Linkerd vs no mesh). Analyze mTLS requirements, observability gains, latency overhead, memory footprint, and operational complexity. Consider the team size and maturity constraints.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: service mesh adoption decision",
+    "sub_questions": 3,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_05",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for {Authentication_Strategy}: evaluate OAuth2/OIDC vs SAML vs API keys vs mutual TLS. Consider user-facing vs service-to-service scenarios, token lifecycle management, and compliance requirements (SOC2, GDPR). Document the chosen hybrid approach.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: authentication and authorization strategy",
+    "sub_questions": 4,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_06",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for {Event_Sourcing_vs_CRUD}: analyze the trade-offs of event sourcing vs traditional CRUD for the domain. Evaluate audit requirements, temporal query needs, read/write ratio, eventual consistency tolerance, and development complexity.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: event sourcing vs CRUD data pattern",
+    "sub_questions": 3,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_07",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for {Data_Partitioning_Strategy}: evaluate horizontal sharding vs vertical partitioning vs federation for scaling the data tier. Analyze query routing complexity, cross-partition joins, rebalancing cost, and consistency implications.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: data partitioning and sharding strategy",
+    "sub_questions": 3,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_08",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for {CQRS_Adoption}: analyze whether to separate read and write models. Evaluate query complexity, write throughput requirements, consistency requirements, and the cost of maintaining dual models. Document the bounded contexts where CQRS applies.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: CQRS pattern adoption",
+    "sub_questions": 3,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_09",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for {API_Gateway_Strategy}: evaluate centralized gateway vs BFF (Backend for Frontend) vs direct service calls. Analyze routing flexibility, team autonomy, single point of failure risk, and cross-cutting concern management (auth, rate limiting, observability).",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: API gateway strategy",
+    "sub_questions": 4,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_10",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for {Message_Broker_Selection}: compare Kafka vs RabbitMQ vs Pulsar for the given workload. Evaluate throughput requirements, ordering guarantees, consumer group semantics, operational complexity, and exactly-once delivery needs.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: message broker selection",
+    "sub_questions": 4,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_11",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for {Monolith_vs_Microservices}: analyze whether to decompose the monolith. Evaluate team size and structure, deployment frequency needs, domain boundary clarity, data coupling, and operational readiness. Apply the Inverse Conway Maneuver.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: monolith decomposition decision",
+    "sub_questions": 4,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_12",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for {Multi_Tenancy_Strategy}: evaluate siloed (per-tenant infra) vs pooled (shared infra) vs hybrid multi-tenancy. Analyze isolation requirements, cost per tenant, noisy neighbor risk, compliance constraints, and operational complexity scaling.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: multi-tenancy architecture strategy",
+    "sub_questions": 3,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_13",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for {Observability_Strategy}: decide between unified observability platform (Grafana stack) vs best-of-breed (Datadog/New Relic) vs build-on-OSS (OpenTelemetry + backends). Evaluate cost at scale, vendor lock-in, correlation capabilities, and team adoption curve.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: observability platform strategy",
+    "sub_questions": 4,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_14",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for {CI_CD_Pipeline_Architecture}: evaluate GitHub Actions vs Jenkins vs GitLab CI vs ArgoCD+Tekton. Analyze GitOps compatibility, pipeline-as-code maturity, self-hosted vs SaaS, secrets management, and deployment strategy (blue-green, canary, rolling).",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: CI/CD pipeline architecture",
+    "sub_questions": 4,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_15",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for {Frontend_Architecture}: evaluate micro-frontends vs monolithic SPA vs server-side rendering. Analyze team autonomy, shared component strategy, performance budget, deployment independence, and user experience consistency.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: frontend architecture pattern",
+    "sub_questions": 3,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_16",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for {Cloud_Provider_Strategy}: evaluate single-cloud vs multi-cloud vs hybrid-cloud. Analyze vendor lock-in risk, portability cost, operational complexity, regulatory requirements, and total cost of ownership.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: cloud provider strategy",
+    "sub_questions": 4,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_17",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for {Serverless_vs_Containers}: evaluate when to use serverless functions vs containerized services. Define the decision boundary based on execution duration, cold start tolerance, state requirements, and cost at different traffic patterns.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: serverless vs container workload placement",
+    "sub_questions": 3,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_18",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for {Data_Lake_Architecture}: evaluate medallion architecture (bronze/silver/gold) vs data mesh vs traditional data warehouse. Analyze data ownership, governance model, query latency requirements, and organizational data literacy.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: data lake/mesh architecture",
+    "sub_questions": 4,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_19",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for {Secrets_Management}: evaluate HashiCorp Vault vs AWS Secrets Manager vs sealed secrets in Git. Analyze rotation policies, access audit requirements, cross-environment consistency, and disaster recovery of secrets.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: secrets management strategy",
+    "sub_questions": 4,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "adr_20",
+    "family": "architecture_decision",
+    "template": "Draft an ADR for {Zero_Trust_Architecture}: decide the scope and phasing of zero-trust adoption. Evaluate identity-aware proxy vs service mesh mTLS vs network segmentation. Analyze impact on developer experience, performance overhead, and compliance mapping.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADR: zero-trust network architecture",
+    "sub_questions": 4,
+    "tags": [
+      "adr",
+      "decision_record",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "kata_01",
+    "family": "architecture_kata",
+    "template": "Design an architecture for a {Real_Time_Bidding_Platform}: 50ms latency SLA, 1M requests/sec peak, geographic distribution across 3 regions. Define component topology, data flow, and the trade-off between consistency and latency. Apply ArchiMate Technology Layer modeling.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Kata: real-time bidding platform with strict latency SLA",
+    "sub_questions": 4,
+    "tags": [
+      "kata",
+      "design_exercise",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "kata_02",
+    "family": "architecture_kata",
+    "template": "Design an architecture for a {Healthcare_Records_System}: HIPAA compliance, audit trail for all access, integration with HL7/FHIR, multi-tenant for hospital groups. Map to TOGAF Business and Application layers, identify key architecture decisions and document as ADRs.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Kata: healthcare records system with compliance constraints",
+    "sub_questions": 5,
+    "tags": [
+      "kata",
+      "design_exercise",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "kata_03",
+    "family": "architecture_kata",
+    "template": "Design an architecture for a {Global_E-Commerce_Platform}: handle flash sales (100x traffic spikes), eventual consistency for inventory, strong consistency for payments, multi-currency support. Apply TOGAF Phase B-D deliverables and compute cost-scalability trade-offs.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Kata: e-commerce platform handling flash sale traffic spikes",
+    "sub_questions": 4,
+    "tags": [
+      "kata",
+      "design_exercise",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "kata_04",
+    "family": "architecture_kata",
+    "template": "Design an architecture for a {Ride_Sharing_Platform}: real-time matching, location streaming, surge pricing computation, driver/rider rating system. Focus on event streaming architecture, geospatial data handling, and Team Topologies for the engineering org.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Kata: ride-sharing platform with real-time matching",
+    "sub_questions": 4,
+    "tags": [
+      "kata",
+      "design_exercise",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "kata_05",
+    "family": "architecture_kata",
+    "template": "Design an architecture for a {Banking_Core_Modernization}: migrate from mainframe COBOL to cloud-native. Apply Strangler Fig pattern, define transition architectures (TOGAF Phase F), map to BIAN service domains, and compute migration risk per service.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Kata: core banking modernization from mainframe to cloud",
+    "sub_questions": 5,
+    "tags": [
+      "kata",
+      "design_exercise",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "kata_06",
+    "family": "architecture_kata",
+    "template": "Design a {Disaster_Recovery_Architecture} with RPO < 15min and RTO < 1hr across two regions. Evaluate active-active vs active-passive vs pilot light strategies. Map infrastructure components in ArchiMate Technology Layer and compute cost per 9 of availability.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Kata: disaster recovery architecture with RPO/RTO constraints",
+    "sub_questions": 3,
+    "tags": [
+      "kata",
+      "design_exercise",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "kata_07",
+    "family": "architecture_kata",
+    "template": "Design a {Multi_Region_Data_Architecture} satisfying GDPR data residency requirements. Evaluate data replication strategies, define data classification tiers, and design the consent management architecture. Map to TOGAF Information Architecture.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Kata: multi-region data architecture with GDPR compliance",
+    "sub_questions": 4,
+    "tags": [
+      "kata",
+      "design_exercise",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "kata_08",
+    "family": "architecture_kata",
+    "template": "Design an architecture for an {IoT_Fleet_Management} system: 100K connected devices, telemetry ingestion at 10K events/sec, edge computing for anomaly detection, cloud aggregation for analytics. Apply ArchiMate Physical and Technology layers.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Kata: IoT fleet management with edge computing",
+    "sub_questions": 4,
+    "tags": [
+      "kata",
+      "design_exercise",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "kata_09",
+    "family": "architecture_kata",
+    "template": "Design a {Regulatory_Reporting_Platform} for a bank: aggregate data from 20+ source systems, apply Basel III/IV calculations, generate reports in XBRL format, ensure data lineage. Map to BIAN service domains and TOGAF Data Architecture.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Kata: regulatory reporting platform with data lineage",
+    "sub_questions": 4,
+    "tags": [
+      "kata",
+      "design_exercise",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "kata_10",
+    "family": "architecture_kata",
+    "template": "Design a {Machine_Learning_Platform}: support experiment tracking, feature store, model registry, A/B testing infrastructure, and model monitoring. Define team topologies (platform team + ML stream teams), and evaluate build vs buy for each component.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Kata: ML platform with build-vs-buy decisions",
+    "sub_questions": 4,
+    "tags": [
+      "kata",
+      "design_exercise",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "kata_11",
+    "family": "architecture_kata",
+    "template": "Design a migration path for {Monolith_to_Event_Driven}: decompose a monolithic order management system into event-driven microservices. Identify bounded contexts via domain events, design the event schema evolution strategy, and plan the strangler fig migration phases.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Kata: monolith to event-driven decomposition",
+    "sub_questions": 4,
+    "tags": [
+      "kata",
+      "design_exercise",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "kata_12",
+    "family": "architecture_kata",
+    "template": "Design a {Platform_Engineering} initiative: build an internal developer platform providing golden paths for deployment, observability, and security. Apply platform team topology, define the self-service API catalog, and compute ROI.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Kata: internal developer platform engineering",
+    "sub_questions": 4,
+    "tags": [
+      "kata",
+      "design_exercise",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "kata_13",
+    "family": "architecture_kata",
+    "template": "Design a {Telco_BSS_Modernization}: migrate BSS stack to TMForum ODA-compliant architecture. Map existing capabilities to ODA functional blocks, define API-first integration, plan the transition architecture, and assess vendor ecosystem.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Kata: telco BSS modernization to TMForum ODA",
+    "sub_questions": 5,
+    "tags": [
+      "kata",
+      "design_exercise",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "kata_14",
+    "family": "architecture_kata",
+    "template": "Design a {Supply_Chain_Digital_Twin}: real-time visibility across suppliers, warehouses, and logistics. Define the event streaming backbone, digital twin data model, simulation engine, and integration with SAP S/4HANA. Apply TOGAF Application Architecture.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Kata: supply chain digital twin architecture",
+    "sub_questions": 4,
+    "tags": [
+      "kata",
+      "design_exercise",
+      "cross_domain"
+    ]
+  },
+  {
+    "id": "kata_15",
+    "family": "architecture_kata",
+    "template": "Design a {Zero_Downtime_Database_Migration}: migrate from Oracle to PostgreSQL while maintaining 99.99% availability. Define the dual-write strategy, data validation pipeline, cutover plan, and rollback procedure. Compute risk per migration phase.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Kata: zero-downtime database migration strategy",
+    "sub_questions": 4,
+    "tags": [
+      "kata",
+      "design_exercise",
+      "cross_domain"
+    ]
   }
 ]
