@@ -148,6 +148,10 @@ class SynthesisOrchestrator:
                 k, len(evidence), task.complexity, task.grounding_score, task.question[:100],
             )
 
+            # Rate limit pacing between iterations
+            if k < self._k:
+                time.sleep(3)
+
         elapsed = time.time() - start
 
         logger.info(

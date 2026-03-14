@@ -319,6 +319,9 @@ class KimiClient:
                     "Round %d/%d: %d tool calls, message count: %d",
                     round_num + 1, max_rounds, len(msg.tool_calls), len(msgs),
                 )
+
+                # Rate limit pacing — avoid hitting RPM/TPM limits
+                time.sleep(2)
             else:
                 # Model finished — return final text
                 return msg.content or "", tool_call_log
