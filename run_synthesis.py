@@ -107,23 +107,25 @@ def main() -> None:
         max_tool_rounds_per_iter=args.max_tool_rounds,
     )
 
-    # Run synthesis batch
-    print("Starting synthesis...")
+    # Prepare writer for incremental saves
+    writer = DatasetWriter(output_dir=Path(args.output_dir))
+    dataset_path = Path(args.output_dir) / "dataset.jsonl"
+    full_path = Path(args.output_dir) / "full_results.jsonl"
+
+    # Run synthesis batch — results saved to disk after each cycle
+    print("Starting synthesis (results saved incrementally)...")
     results = orchestrator.run_batch(
         batch_size=args.batch_size,
         seed=args.random_seed,
         seed_category=args.seed_category,
+        writer=writer,
     )
 
     if not results:
         print("ERROR: No synthesis results produced.")
         sys.exit(1)
 
-    # Write outputs
-    writer = DatasetWriter(output_dir=Path(args.output_dir))
-
-    dataset_path = writer.write_results(results, "dataset.jsonl")
-    full_path = writer.write_full_results(results, "full_results.jsonl")
+    # Write final summary (uses all accumulated results)
     summary_path = writer.write_summary(results, "summary.json")
 
     # Print summary
