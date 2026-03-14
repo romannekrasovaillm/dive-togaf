@@ -234,11 +234,19 @@ class DatasetWriter:
     intermediate results are persisted as each cycle completes.
     """
 
-    def __init__(self, output_dir: Path):
+    def __init__(self, output_dir: Path, resume: bool = False):
         self.output_dir = output_dir
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self._dataset_count = 0
         self._full_count = 0
+
+        # Clear previous run's files unless resuming
+        if not resume:
+            for fname in ("dataset.jsonl", "full_results.jsonl"):
+                path = self.output_dir / fname
+                if path.exists():
+                    logger.info("New run: clearing previous %s", path)
+                    path.unlink()
 
     # ------ incremental (append) methods ------
 

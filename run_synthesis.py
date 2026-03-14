@@ -53,6 +53,8 @@ def parse_args() -> argparse.Namespace:
                         help="Kimi model name (default: kimi-k2.5)")
     parser.add_argument("--temperature", type=float, default=0.6,
                         help="LLM temperature (default: 0.6)")
+    parser.add_argument("--resume", action="store_true",
+                        help="Resume: append to existing dataset files instead of clearing them")
     parser.add_argument("--verbose", action="store_true",
                         help="Enable debug logging")
     return parser.parse_args()
@@ -109,7 +111,7 @@ def main() -> None:
     )
 
     # Prepare writer for incremental saves
-    writer = DatasetWriter(output_dir=Path(args.output_dir))
+    writer = DatasetWriter(output_dir=Path(args.output_dir), resume=args.resume)
     dataset_path = Path(args.output_dir) / "dataset.jsonl"
     full_path = Path(args.output_dir) / "full_results.jsonl"
 
