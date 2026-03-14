@@ -300,7 +300,7 @@ class TaskGenerator:
             response = self._kimi.chat_text(
                 messages=messages,
                 temperature=0.5,
-                max_tokens=4096,
+                max_tokens=32768,
             )
 
             task_data = self._parse_response(response)

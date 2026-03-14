@@ -24,7 +24,10 @@ DEFAULT_MODEL = "kimi-k2.5"
 # Models where temperature/top_p/n/presence_penalty/frequency_penalty cannot be modified
 _FIXED_TEMP_MODELS = {"kimi-k2.5"}
 
-# Limits to prevent context explosion in multi-round tool-calling loops
+# Thinking models require max_tokens >= 16000 (reasoning_content + content)
+_THINKING_MIN_TOKENS = 32768
+
+
 def _get_api_key() -> str:
     key = os.environ.get("KIMI_API_KEY") or os.environ.get("MOONSHOT_API_KEY")
     if not key:
@@ -62,13 +65,17 @@ class KimiClient:
         tools: list[dict[str, Any]] | None = None,
         tool_choice: str | None = None,
         temperature: float | None = None,
-        max_tokens: int = 4096,
+        max_tokens: int = 32768,
         stream: bool = False,
     ) -> ChatCompletion:
         """Send a chat completion request, with optional tool definitions.
 
         Returns the raw ChatCompletion object.
         """
+        # Thinking models need >= 16000 tokens for reasoning_content + content
+        if self.model in _FIXED_TEMP_MODELS or "thinking" in self.model:
+            max_tokens = max(max_tokens, _THINKING_MIN_TOKENS)
+
         kwargs: dict[str, Any] = {
             "model": self.model,
             "messages": messages,
@@ -203,7 +210,7 @@ class KimiClient:
         self,
         messages: list[dict[str, Any]],
         temperature: float | None = None,
-        max_tokens: int = 4096,
+        max_tokens: int = 32768,
     ) -> str:
         """Simple text-only chat completion. Returns assistant content string."""
         resp = self.chat(messages, temperature=temperature, max_tokens=max_tokens)
@@ -216,13 +223,15 @@ class KimiClient:
         tool_executor: Any,
         max_rounds: int = 10,
         temperature: float | None = None,
-        max_tokens: int = 4096,
+        max_tokens: int = 32768,
     ) -> tuple[str, list[dict[str, Any]]]:
         """Run a tool-calling loop until the model finishes or max_rounds reached.
 
         Uses streaming to avoid connection timeouts on long-running thinking
-        responses. Truncates tool results and reasoning_content to keep the
-        context within manageable bounds.
+        responses. Per Moonshot docs for thinking models:
+        - Append the assistant message object directly (preserves reasoning_content)
+        - max_tokens >= 16000 for reasoning_content + content
+        - stream = true to avoid timeouts
 
         Args:
             messages: Conversation history.
@@ -250,30 +259,10 @@ class KimiClient:
 
             # If model returned tool calls
             if msg.tool_calls:
-                # Build assistant message echoed back to the API.
-                # kimi-k2.5 thinking mode requires reasoning_content field.
-                # IMPORTANT: truncate reasoning_content to prevent context
-                # explosion — each round adds thousands of thinking tokens.
-                assistant_msg: dict[str, Any] = {
-                    "role": "assistant",
-                    "content": msg.content or "",
-                    "tool_calls": [
-                        {
-                            "id": tc.id,
-                            "type": "function",
-                            "function": {
-                                "name": tc.function.name,
-                                "arguments": tc.function.arguments,
-                            },
-                        }
-                        for tc in msg.tool_calls
-                    ],
-                }
-                # Preserve full reasoning_content for thinking-enabled models
-                reasoning = getattr(msg, "reasoning_content", None)
-                if reasoning:
-                    assistant_msg["reasoning_content"] = reasoning
-                msgs.append(assistant_msg)
+                # Append the assistant message directly (per Moonshot docs).
+                # This preserves reasoning_content intact — "the model will
+                # decide which parts are necessary and forward them."
+                msgs.append(msg)
 
                 # Execute each tool call and append results
                 for tc in msg.tool_calls:
@@ -293,7 +282,6 @@ class KimiClient:
                         "result": result,
                     })
 
-                    # Full tool results — evidence must be complete
                     msgs.append({
                         "role": "tool",
                         "tool_call_id": tc.id,
@@ -310,4 +298,6 @@ class KimiClient:
 
         # Max rounds reached — return whatever we have
         logger.warning("Max tool-call rounds (%d) reached", max_rounds)
-        return msgs[-1].get("content", "") if isinstance(msgs[-1], dict) else "", tool_call_log
+        last = msgs[-1]
+        final = last.get("content", "") if isinstance(last, dict) else getattr(last, "content", "") or ""
+        return final, tool_call_log
