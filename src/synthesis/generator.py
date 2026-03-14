@@ -206,6 +206,23 @@ def _validate_grounding(
             f"Complexity {complexity} but only {len(answer_cited)} evidence items cited in answer"
         )
 
+    # Check 5: count simulated and parse-failed evidence items
+    simulated_cited = set()
+    parse_failed_cited = set()
+    for eid in all_cited:
+        if 0 <= eid <= max_eid:
+            item = evidence.items[eid]
+            result = item.result
+            if isinstance(result, dict):
+                if result.get("_simulated"):
+                    simulated_cited.add(eid)
+                if result.get("_parse_failed"):
+                    parse_failed_cited.add(eid)
+    if parse_failed_cited:
+        violations.append(
+            f"Evidence items with parse failures cited: {parse_failed_cited}"
+        )
+
     # Compute grounding score
     if not answer_cited:
         score = 0.0
@@ -216,6 +233,14 @@ def _validate_grounding(
         # Bonus for matching declared vs actual
         if declared_ids and declared_ids == all_cited:
             score = min(1.0, score + 0.1)
+        # Penalty for simulated evidence (reduce by 0.05 per simulated item)
+        if simulated_cited:
+            penalty = len(simulated_cited) * 0.05
+            score = max(0.1, score - penalty)
+        # Heavier penalty for parse-failed evidence (reduce by 0.15 per item)
+        if parse_failed_cited:
+            penalty = len(parse_failed_cited) * 0.15
+            score = max(0.05, score - penalty)
 
     return round(score, 2), violations
 

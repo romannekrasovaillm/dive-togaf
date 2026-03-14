@@ -35,8 +35,10 @@ class SynthesisResult:
     evidence: list[dict[str, Any]]
     tasks: list[dict[str, Any]]
     tool_call_count: int
-    iterations: int
-    elapsed_seconds: float
+    live_tool_count: int = 0
+    simulated_tool_count: int = 0
+    iterations: int = 0
+    elapsed_seconds: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -45,6 +47,8 @@ class SynthesisResult:
             "evidence_count": len(self.evidence),
             "task_count": len(self.tasks),
             "tool_call_count": self.tool_call_count,
+            "live_tool_count": self.live_tool_count,
+            "simulated_tool_count": self.simulated_tool_count,
             "iterations": self.iterations,
             "elapsed_seconds": self.elapsed_seconds,
             "evidence": self.evidence,
@@ -140,11 +144,16 @@ class SynthesisOrchestrator:
             prev_query = task.question
 
             logger.info(
-                "K=%d: evidence=%d items, task complexity=%d, Q='%s'",
-                k, len(evidence), task.complexity, task.question[:100],
+                "K=%d: evidence=%d items, task complexity=%d, grounding=%.2f, Q='%s'",
+                k, len(evidence), task.complexity, task.grounding_score, task.question[:100],
             )
 
         elapsed = time.time() - start
+
+        logger.info(
+            "Cycle done: %d tool calls (%d live, %d simulated) in %.1fs",
+            executor.call_count, executor.live_count, executor.simulated_count, elapsed,
+        )
 
         return SynthesisResult(
             config_id=config.config_id,
@@ -152,6 +161,8 @@ class SynthesisOrchestrator:
             evidence=evidence.to_list(),
             tasks=[t.to_dict() for t in tasks],
             tool_call_count=executor.call_count,
+            live_tool_count=executor.live_count,
+            simulated_tool_count=executor.simulated_count,
             iterations=self._k,
             elapsed_seconds=round(elapsed, 2),
         )
@@ -270,6 +281,8 @@ class DatasetWriter:
         total_tasks = sum(len(r.tasks) for r in results)
         total_evidence = sum(len(r.evidence) for r in results)
         total_tool_calls = sum(r.tool_call_count for r in results)
+        total_live = sum(r.live_tool_count for r in results)
+        total_simulated = sum(r.simulated_tool_count for r in results)
         total_time = sum(r.elapsed_seconds for r in results)
 
         categories = {}
@@ -294,6 +307,9 @@ class DatasetWriter:
             "total_tasks": total_tasks,
             "total_evidence_items": total_evidence,
             "total_tool_calls": total_tool_calls,
+            "total_live_tool_calls": total_live,
+            "total_simulated_tool_calls": total_simulated,
+            "live_tool_rate": round(total_live / max(total_tool_calls, 1), 3),
             "total_elapsed_seconds": round(total_time, 2),
             "avg_seconds_per_cycle": round(total_time / max(len(results), 1), 2),
             "grounding": {
