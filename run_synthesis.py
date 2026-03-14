@@ -53,6 +53,10 @@ def parse_args() -> argparse.Namespace:
                         help="Kimi model name (default: kimi-k2.5)")
     parser.add_argument("--temperature", type=float, default=0.6,
                         help="LLM temperature (default: 0.6)")
+    parser.add_argument("--no-teacher", action="store_true",
+                        help="Disable teacher rollout (skip SFT trajectory generation)")
+    parser.add_argument("--teacher-max-rounds", type=int, default=6,
+                        help="Max tool-call rounds for teacher rollout (default: 6)")
     parser.add_argument("--verbose", action="store_true",
                         help="Enable debug logging")
     return parser.parse_args()
@@ -78,6 +82,7 @@ def main() -> None:
     print(f"  Max tool rounds: {args.max_tool_rounds} per iteration")
     print(f"  Seed category:   {args.seed_category or 'any'}")
     print(f"  Random seed:     {args.random_seed or 'none'}")
+    print(f"  Teacher rollout: {'enabled' if not args.no_teacher else 'disabled'}")
     print(f"  Output:          {args.output_dir}/")
     print("=" * 70)
 
@@ -106,6 +111,8 @@ def main() -> None:
         sampler=sampler,
         k_iterations=args.k_iterations,
         max_tool_rounds_per_iter=args.max_tool_rounds,
+        enable_teacher=not args.no_teacher,
+        teacher_max_rounds=args.teacher_max_rounds,
     )
 
     # Prepare writer for incremental saves

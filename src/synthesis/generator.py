@@ -36,9 +36,10 @@ class SynthesizedTask:
     family: str = ""
     reasoning_trace: str = ""
     grounding_score: float = 0.0
+    agent_trajectory: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        d = {
             "question": self.question,
             "answer": self.answer,
             "sub_questions": self.sub_questions,
@@ -50,6 +51,9 @@ class SynthesizedTask:
             "reasoning_trace": self.reasoning_trace,
             "grounding_score": self.grounding_score,
         }
+        if self.agent_trajectory is not None:
+            d["agent_trajectory"] = self.agent_trajectory
+        return d
 
 
 GENERATOR_SYSTEM_PROMPT = """You are a TOGAF/ArchiMate Task Generator for the DIVE synthesis pipeline.

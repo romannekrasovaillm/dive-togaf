@@ -22,6 +22,7 @@ from src.pools.sampler import PoolSampler, SynthesisConfig
 from .collector import CollectorAgent, EvidenceSet
 from .generator import TaskGenerator, SynthesizedTask
 from .kimi_client import KimiClient
+from .teacher import TeacherAgent
 from .tool_executor import ToolExecutor
 
 logger = logging.getLogger(__name__)
@@ -65,12 +66,18 @@ class SynthesisOrchestrator:
         sampler: PoolSampler,
         k_iterations: int = 3,
         max_tool_rounds_per_iter: int = 4,
+        enable_teacher: bool = True,
+        teacher_max_rounds: int = 6,
     ):
         self._kimi = kimi_client
         self._sampler = sampler
         self._k = k_iterations
         self._max_tool_rounds = max_tool_rounds_per_iter
         self._generator = TaskGenerator(kimi_client)
+        self._enable_teacher = enable_teacher
+        self._teacher = TeacherAgent(
+            kimi_client, max_rounds=teacher_max_rounds,
+        ) if enable_teacher else None
 
     def run_single(
         self,
@@ -140,6 +147,25 @@ class SynthesisOrchestrator:
                 exemplars=config.exemplars,
                 iteration=k,
             )
+
+            # Teacher rollout: solve the generated question to produce SFT trajectory
+            if self._teacher and task.question and task.grounding_score >= 0.5:
+                logger.info("K=%d: running teacher rollout for Q='%s'", k, task.question[:80])
+                try:
+                    trajectory = self._teacher.rollout(
+                        question=task.question,
+                        tool_schemas=tool_schemas,
+                        tool_executor=executor,
+                        reference_answer=task.answer,
+                    )
+                    task.agent_trajectory = trajectory.to_dict()
+                    logger.info(
+                        "K=%d: teacher rollout done: %d steps, verified=%s",
+                        k, len(trajectory.steps), trajectory.verified,
+                    )
+                except Exception as e:
+                    logger.warning("K=%d: teacher rollout failed: %s", k, e)
+
             tasks.append(task)
             prev_query = task.question
 
@@ -276,7 +302,7 @@ class DatasetWriter:
 
     @staticmethod
     def _task_record(result: SynthesisResult, task: dict[str, Any]) -> dict[str, Any]:
-        return {
+        record = {
             "config_id": result.config_id,
             "seed_id": result.seed.get("id", ""),
             "seed_name": result.seed.get("name", ""),
@@ -294,6 +320,9 @@ class DatasetWriter:
             "evidence_count": len(result.evidence),
             "tool_call_count": result.tool_call_count,
         }
+        if task.get("agent_trajectory"):
+            record["agent_trajectory"] = task["agent_trajectory"]
+        return record
 
     # ------ batch (overwrite) methods — kept for compatibility ------
 
