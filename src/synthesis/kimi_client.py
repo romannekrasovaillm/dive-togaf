@@ -25,9 +25,6 @@ DEFAULT_MODEL = "kimi-k2.5"
 _FIXED_TEMP_MODELS = {"kimi-k2.5"}
 
 # Limits to prevent context explosion in multi-round tool-calling loops
-_MAX_REASONING_CHARS = 500         # truncate reasoning_content echo-back
-
-
 def _get_api_key() -> str:
     key = os.environ.get("KIMI_API_KEY") or os.environ.get("MOONSHOT_API_KEY")
     if not key:
@@ -36,13 +33,6 @@ def _get_api_key() -> str:
             "Get your key at https://platform.moonshot.ai/"
         )
     return key
-
-
-def _truncate(s: str, max_len: int) -> str:
-    """Truncate a string and add ellipsis if too long."""
-    if len(s) <= max_len:
-        return s
-    return s[:max_len] + "... [truncated]"
 
 
 class KimiClient:
@@ -279,12 +269,10 @@ class KimiClient:
                         for tc in msg.tool_calls
                     ],
                 }
-                # Preserve reasoning_content (truncated) for thinking-enabled models
+                # Preserve full reasoning_content for thinking-enabled models
                 reasoning = getattr(msg, "reasoning_content", None)
                 if reasoning:
-                    assistant_msg["reasoning_content"] = _truncate(
-                        reasoning, _MAX_REASONING_CHARS,
-                    )
+                    assistant_msg["reasoning_content"] = reasoning
                 msgs.append(assistant_msg)
 
                 # Execute each tool call and append results
