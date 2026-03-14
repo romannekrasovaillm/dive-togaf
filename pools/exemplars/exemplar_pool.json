@@ -1,0 +1,3681 @@
+[
+  {
+    "id": "rc_01",
+    "family": "retrieve_compute",
+    "template": "What is the maturity level of {capability} and which {deliverable} should be created first?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 1,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Query capability maturity then determine deliverable priority",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "rc_02",
+    "family": "retrieve_compute",
+    "template": "Retrieve the current state of {system} and compute the risk score based on its technology stack age and interface count.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Fetch system state then compute risk",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "rc_03",
+    "family": "retrieve_compute",
+    "template": "What is the cost-benefit ratio for migrating {system} to {target_platform}?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Gather costs and benefits then compute ratio",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_04",
+    "family": "retrieve_compute",
+    "template": "How many building blocks in {domain} are reused across more than one project?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve building blocks then compute reuse percentage",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_05",
+    "family": "retrieve_compute",
+    "template": "What is the compliance score of {system} against {standard} and what are the top violations?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Fetch system details and standard requirements then check compliance",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "rc_06",
+    "family": "retrieve_compute",
+    "template": "Calculate the migration complexity score for moving {source_system} to {target_system}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve both system states then compute complexity",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_07",
+    "family": "retrieve_compute",
+    "template": "What is the architecture quality score for the {domain} domain based on modularity and reusability?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve architecture and compute quality score",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_08",
+    "family": "retrieve_compute",
+    "template": "Determine the capacity planning horizon for {system} given current growth rate of {rate}%.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve utilization data then compute capacity projection",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_09",
+    "family": "retrieve_compute",
+    "template": "What is the technical debt principal for {system} and what is the estimated remediation cost?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve system state then compute debt assessment",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "rc_10",
+    "family": "retrieve_compute",
+    "template": "Compute the interoperability score between {system_a} and {system_b}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve both systems then compute interoperability matrix",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_11",
+    "family": "retrieve_compute",
+    "template": "Which ADM phase deliverable has the most dependencies and what is its completeness score?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve deliverables and dependencies then analyze",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "rc_12",
+    "family": "retrieve_compute",
+    "template": "What percentage of {domain} capabilities are below maturity level 3?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 1,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve capability assessments then compute percentage",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_13",
+    "family": "retrieve_compute",
+    "template": "Calculate the ROI for implementing {building_block} across {count} projects.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve block costs and project benefits then compute ROI",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_14",
+    "family": "retrieve_compute",
+    "template": "What is the average maturity score across all capabilities in {domain}?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 1,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve all maturity scores then compute average",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_15",
+    "family": "retrieve_compute",
+    "template": "Determine the SLA compliance margin for {system} against {requirements}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve system metrics and SLA requirements then validate",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_16",
+    "family": "retrieve_compute",
+    "template": "What is the transformation readiness score for {organization} given the proposed {changes}?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve organization profile then assess readiness",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_17",
+    "family": "retrieve_compute",
+    "template": "Calculate the weighted architecture decision score for {alternatives} given {criteria}.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve alternative details then compute weighted scores",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_18",
+    "family": "retrieve_compute",
+    "template": "What is the heat map classification for {capability}: invest, tolerate, migrate, or eliminate?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve capability metrics then compute heat map position",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_19",
+    "family": "retrieve_compute",
+    "template": "Compute the data flow throughput bottleneck between {system_a} and {system_b}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve integration details then analyze data flow",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_20",
+    "family": "retrieve_compute",
+    "template": "What is the estimated payback period for the {initiative} initiative?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve cost/benefit projections then compute payback",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_21",
+    "family": "retrieve_compute",
+    "template": "Score the dependency coupling between {system_a} and {system_b} in the {domain} domain.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve relationships then compute coupling metric",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_22",
+    "family": "retrieve_compute",
+    "template": "What is the gap severity distribution for the {domain} architecture domain?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve baseline and target states then analyze gap distribution",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_23",
+    "family": "retrieve_compute",
+    "template": "Calculate the portfolio health score for applications in the {domain} domain.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve application portfolio then compute health score",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_24",
+    "family": "retrieve_compute",
+    "template": "What is the standards compliance percentage for {domain} technology components?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve components and standards then check compliance",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rc_25",
+    "family": "retrieve_compute",
+    "template": "Determine the architecture fitness score for the proposed {solution} solution.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve architecture details then compute fitness score",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_01",
+    "family": "multi_hop_retrieval",
+    "template": "Among all building blocks that serve {service}, find which one has status 'approved' and supports {standard}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Multi-hop search through BBs with service and standard filters",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_02",
+    "family": "multi_hop_retrieval",
+    "template": "Find all stakeholders whose concerns include {concern} and who are impacted by changes in Phase {phase}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Stakeholder search with concern and phase cross-reference",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_03",
+    "family": "multi_hop_retrieval",
+    "template": "Which ArchiMate elements in the {layer} layer have relationships to elements being eliminated in the gap analysis?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Cross-reference ArchiMate elements with gap analysis results",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_04",
+    "family": "multi_hop_retrieval",
+    "template": "Find all architecture decisions that reference {standard} and were approved in the last {period}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Governance log search with standard and time filters",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_05",
+    "family": "multi_hop_retrieval",
+    "template": "Which capabilities in {domain} are supported by building blocks with status 'proposed' but not yet 'approved'?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Capability to BB status chain query",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_06",
+    "family": "multi_hop_retrieval",
+    "template": "Find all systems that have interfaces with {system} AND are classified as 'migrate' in the application portfolio.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Integration + portfolio cross-reference",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_07",
+    "family": "multi_hop_retrieval",
+    "template": "Which data entities flowing between {system_a} and {system_b} have classification 'restricted'?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Data flow + classification cross-reference",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_08",
+    "family": "multi_hop_retrieval",
+    "template": "Find all technology standards in the {domain} domain that are both 'deprecated' and still used by active applications.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Standards + application portfolio cross-reference",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_09",
+    "family": "multi_hop_retrieval",
+    "template": "Which Phase {phase} deliverables reference principles from the {category} principle category?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Deliverable to principle cross-reference",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_10",
+    "family": "multi_hop_retrieval",
+    "template": "Find all dispensations granted for {project} that affect {standard} compliance.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Dispensation + compliance cross-reference",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_11",
+    "family": "multi_hop_retrieval",
+    "template": "Which ArchiMate viewpoints show elements from both the {layer_a} and {layer_b} layers?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Viewpoint to multi-layer element analysis",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_12",
+    "family": "multi_hop_retrieval",
+    "template": "Find the longest dependency chain starting from {system} through all serving relationships.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Recursive relationship traversal",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_13",
+    "family": "multi_hop_retrieval",
+    "template": "Which reference models define components that map to capabilities with maturity below {threshold}?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Reference model to capability maturity chain",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_14",
+    "family": "multi_hop_retrieval",
+    "template": "Find all work packages in the roadmap that depend on building blocks with unresolved compliance violations.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Roadmap to BB to compliance chain",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_15",
+    "family": "multi_hop_retrieval",
+    "template": "Which patterns from the pattern library are applicable to {system} based on its current architecture?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Pattern matching based on system architecture",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_16",
+    "family": "multi_hop_retrieval",
+    "template": "Find all services in the value stream that are realized by applications classified as 'eliminate'.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Value stream to application portfolio chain",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_17",
+    "family": "multi_hop_retrieval",
+    "template": "Which stakeholders have concerns that are not addressed by any deliverable in Phase {phase}?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Stakeholder concern to deliverable coverage gap",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_18",
+    "family": "multi_hop_retrieval",
+    "template": "Find all interfaces between systems where one is in the 'invest' and the other in 'migrate' TIME category.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Integration + TIME classification cross-reference",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_19",
+    "family": "multi_hop_retrieval",
+    "template": "Which ArchiMate elements are both a target of 'realization' from {element_a} and a source of 'serving' to {element_b}?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Bidirectional relationship chain query",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_20",
+    "family": "multi_hop_retrieval",
+    "template": "Find all transition architectures that include building blocks not yet approved by the architecture board.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Transition architecture to BB to board decision chain",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_21",
+    "family": "multi_hop_retrieval",
+    "template": "Which compliance requirements from {standard_a} overlap with requirements from {standard_b}?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Cross-standard requirement overlap analysis",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_22",
+    "family": "multi_hop_retrieval",
+    "template": "Find all contracts that reference systems with risk scores above {threshold}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Contract to system to risk chain",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_23",
+    "family": "multi_hop_retrieval",
+    "template": "Which capabilities in the business capability model have no supporting building blocks defined?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Capability to BB coverage gap",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_24",
+    "family": "multi_hop_retrieval",
+    "template": "Find all architecture board decisions that impact Phase {phase} deliverables and have status 'deferred'.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Board decision to phase impact chain",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "mh_25",
+    "family": "multi_hop_retrieval",
+    "template": "Which data entities are master data but have no defined data quality metrics?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval"
+    ],
+    "description": "Data catalog to quality metrics gap",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cd_01",
+    "family": "compare_decide",
+    "template": "Compare the {ref_model_a} and {ref_model_b} reference models and recommend which better fits {use_case}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve two reference models then compare and decide",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cd_02",
+    "family": "compare_decide",
+    "template": "Compare two architecture alternatives for {system}: {option_a} vs {option_b}. Which has better cost-benefit?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve alternatives then compare across dimensions",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cd_03",
+    "family": "compare_decide",
+    "template": "Should {system} be classified as Tolerate, Invest, Migrate, or Eliminate? Compare against criteria.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Retrieve system state and criteria then classify",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cd_04",
+    "family": "compare_decide",
+    "template": "Compare the compliance posture of {system_a} vs {system_b} against {standard}. Which needs more remediation?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Compare compliance of two systems",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cd_05",
+    "family": "compare_decide",
+    "template": "Evaluate whether {pattern_a} or {pattern_b} is more suitable for {use_case} based on quality attributes.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Compare patterns against quality attributes",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cd_06",
+    "family": "compare_decide",
+    "template": "Which migration strategy (big bang, phased, or parallel) is optimal for {system} given its dependencies?",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Evaluate migration strategies based on dependencies",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cd_07",
+    "family": "compare_decide",
+    "template": "Compare the maturity levels of {capability_a} and {capability_b} and recommend which to invest in first.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Compare capability maturities and prioritize",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cd_08",
+    "family": "compare_decide",
+    "template": "Should {building_block} be built in-house or procured? Compare based on cost, time, and strategic fit.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Build vs buy decision analysis",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cd_09",
+    "family": "compare_decide",
+    "template": "Compare the risk profiles of transition architecture {ta_a} and {ta_b}. Which is safer?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Compare risk profiles of transition architectures",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cd_10",
+    "family": "compare_decide",
+    "template": "Which viewpoint ({viewpoint_a} or {viewpoint_b}) better addresses the concerns of {stakeholder}?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Compare viewpoints against stakeholder concerns",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cd_11",
+    "family": "compare_decide",
+    "template": "Compare cloud deployment options ({option_a}, {option_b}, {option_c}) for {workload} based on SLA requirements.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Multi-option cloud deployment comparison",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cd_12",
+    "family": "compare_decide",
+    "template": "Which data architecture approach (centralized DW, data lake, or data mesh) best fits {organization}?",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Data architecture approach comparison",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cd_13",
+    "family": "compare_decide",
+    "template": "Compare the integration approaches (API, messaging, file) for connecting {system_a} to {system_b}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Integration approach comparison",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cd_14",
+    "family": "compare_decide",
+    "template": "Evaluate two roadmap alternatives for {program}: aggressive (2-wave) vs conservative (4-wave).",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Roadmap alternative evaluation",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cd_15",
+    "family": "compare_decide",
+    "template": "Which SBB implementation ({sbb_a} or {sbb_b}) better realizes the {abb} architecture building block?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "SBB to ABB realization comparison",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cd_16",
+    "family": "compare_decide",
+    "template": "Compare the transformation readiness of {org_unit_a} vs {org_unit_b} for the {initiative} initiative.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Transformation readiness comparison",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cd_17",
+    "family": "compare_decide",
+    "template": "Which Phase ({phase_a} or {phase_b}) should be prioritized based on current gap analysis results?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Phase prioritization based on gaps",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cd_18",
+    "family": "compare_decide",
+    "template": "Compare {framework_a} and {framework_b} standards for applicability to {domain}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Standards framework comparison",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cd_19",
+    "family": "compare_decide",
+    "template": "Evaluate whether to extend {existing_system} or replace with {new_system} based on TCO and risk.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Extend vs replace decision",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cd_20",
+    "family": "compare_decide",
+    "template": "Which technology radar ring (adopt, trial, assess, hold) should {technology} be placed in?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Technology radar classification decision",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ga_01",
+    "family": "gap_analysis",
+    "template": "Perform a full gap analysis for {domain} architecture, identifying all new, eliminated, and changed elements.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complete domain gap analysis",
+    "sub_questions": 3,
+    "tags": []
+  },
+  {
+    "id": "ga_02",
+    "family": "gap_analysis",
+    "template": "Which elements are being eliminated in {domain} and what are the downstream dependencies affected?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Elimination impact analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ga_03",
+    "family": "gap_analysis",
+    "template": "Identify all gaps in {domain} where stakeholder concerns from {stakeholder} are not addressed.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Stakeholder-concern gap analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ga_04",
+    "family": "gap_analysis",
+    "template": "What are the cross-domain gaps between {domain_a} and {domain_b} architecture layers?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Cross-domain gap analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ga_05",
+    "family": "gap_analysis",
+    "template": "Compute consolidated gaps across all architecture domains for {project} and prioritize by risk.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Consolidated multi-domain gap analysis",
+    "sub_questions": 3,
+    "tags": []
+  },
+  {
+    "id": "ga_06",
+    "family": "gap_analysis",
+    "template": "Which gaps in {domain} can be addressed by existing building blocks vs. requiring new development?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Gap to building block coverage analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ga_07",
+    "family": "gap_analysis",
+    "template": "Identify gaps between the current {capability} capability maturity and the target maturity level.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Capability maturity gap analysis",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ga_08",
+    "family": "gap_analysis",
+    "template": "What compliance gaps exist for {system} when transitioning from {standard_a} to {standard_b}?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Standards transition gap analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ga_09",
+    "family": "gap_analysis",
+    "template": "Perform gap analysis between {reference_model} reference model and the current {domain} architecture.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Reference model gap analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ga_10",
+    "family": "gap_analysis",
+    "template": "Identify security architecture gaps in the proposed {system} design against {security_standard}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Security gap analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ga_11",
+    "family": "gap_analysis",
+    "template": "What data architecture gaps exist between the current and target state for {domain}?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Data architecture gap analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ga_12",
+    "family": "gap_analysis",
+    "template": "Identify integration gaps when adding {new_system} to the existing {domain} ecosystem.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Integration gap analysis for new system",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ga_13",
+    "family": "gap_analysis",
+    "template": "Analyze gaps in the {phase} deliverables against TOGAF requirements.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADM deliverable completeness gap analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ga_14",
+    "family": "gap_analysis",
+    "template": "What organizational capability gaps exist to support the {initiative} transformation?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Organizational capability gap analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ga_15",
+    "family": "gap_analysis",
+    "template": "Identify gaps between current monitoring capabilities and the target observability architecture.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Observability gap analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ga_16",
+    "family": "gap_analysis",
+    "template": "Compute the gap analysis between existing APIs and the target API-first architecture for {domain}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "API architecture gap analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ga_17",
+    "family": "gap_analysis",
+    "template": "What gaps exist between the current disaster recovery capability and the target RTO/RPO objectives?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "DR capability gap analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ga_18",
+    "family": "gap_analysis",
+    "template": "Identify gaps in the value stream {value_stream} between current and target capability mapping.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Value stream capability gap analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ga_19",
+    "family": "gap_analysis",
+    "template": "Analyze the gap between current team topology and the target operating model for {domain}.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Team topology gap analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ga_20",
+    "family": "gap_analysis",
+    "template": "What vendor/technology gaps exist in the current {domain} platform against the target reference architecture?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Technology platform gap analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ag_01",
+    "family": "aggregate",
+    "template": "Calculate the percentage of building block reuse across the {domain_a}, {domain_b}, and {domain_c} domains.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Multi-domain building block reuse aggregation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_02",
+    "family": "aggregate",
+    "template": "What is the distribution of risk levels (high/medium/low) across all systems in {domain}?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Risk level distribution aggregation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_03",
+    "family": "aggregate",
+    "template": "Compute the average architecture quality score across all {layer} layer components.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Layer-wide quality score aggregation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_04",
+    "family": "aggregate",
+    "template": "What percentage of applications in the portfolio are classified as each TIME category?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Portfolio TIME classification distribution",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_05",
+    "family": "aggregate",
+    "template": "Summarize the total gap count by type (new, eliminated, changed) across all domains.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Cross-domain gap count aggregation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_06",
+    "family": "aggregate",
+    "template": "What is the compliance score distribution across all {count} systems against {standard}?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Compliance score distribution",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_07",
+    "family": "aggregate",
+    "template": "Calculate the total estimated migration cost for all systems in the {phase} wave.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Wave migration cost aggregation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_08",
+    "family": "aggregate",
+    "template": "Summarize the stakeholder concern coverage across all Phase {phase} deliverables.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Stakeholder concern coverage aggregation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_09",
+    "family": "aggregate",
+    "template": "What is the mean technical debt score across all {domain} applications?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Domain-wide technical debt aggregation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_10",
+    "family": "aggregate",
+    "template": "Aggregate the capacity utilization across all infrastructure components in {domain}.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Infrastructure utilization aggregation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_11",
+    "family": "aggregate",
+    "template": "Compute the total number of dispensations by standard across the enterprise.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Enterprise-wide dispensation aggregation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_12",
+    "family": "aggregate",
+    "template": "What is the distribution of architecture decisions by status across all projects?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Decision status distribution",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_13",
+    "family": "aggregate",
+    "template": "Calculate the weighted average maturity across all capabilities in the {value_stream} value stream.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Value stream maturity aggregation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_14",
+    "family": "aggregate",
+    "template": "Summarize the interface count and type distribution for all systems in {domain}.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Interface distribution analysis",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_15",
+    "family": "aggregate",
+    "template": "What is the age distribution of technology components across the enterprise?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Technology age distribution",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_16",
+    "family": "aggregate",
+    "template": "Aggregate the ROI projections across all active migration initiatives.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Portfolio ROI aggregation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_17",
+    "family": "aggregate",
+    "template": "Calculate the total work package count and resource allocation by roadmap wave.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Roadmap wave resource aggregation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_18",
+    "family": "aggregate",
+    "template": "What is the standard compliance coverage percentage by domain?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Domain compliance coverage aggregation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_19",
+    "family": "aggregate",
+    "template": "Summarize the viewpoint coverage — which ArchiMate viewpoints have been used vs. available?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Viewpoint usage coverage analysis",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ag_20",
+    "family": "aggregate",
+    "template": "Calculate the cross-system dependency density metric for the {domain} application landscape.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Dependency density aggregation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cc_01",
+    "family": "compliance_check",
+    "template": "Check {system} compliance against {standard_a} and {standard_b}. Report all critical and high violations.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Multi-standard compliance check",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cc_02",
+    "family": "compliance_check",
+    "template": "Verify that the proposed {building_block} design meets all {standard} requirements.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Building block compliance verification",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cc_03",
+    "family": "compliance_check",
+    "template": "Execute a compliance assessment for all systems in {domain} against {standard}. Which systems fail?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Domain-wide compliance sweep",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cc_04",
+    "family": "compliance_check",
+    "template": "Does the {transition_architecture} transition architecture introduce any new {standard} violations?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Transition architecture compliance check",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cc_05",
+    "family": "compliance_check",
+    "template": "Check if the dispensation for {system} regarding {standard} is still valid and what risks it introduces.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Dispensation validity and risk check",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cc_06",
+    "family": "compliance_check",
+    "template": "Verify the architecture contract for {project} against the actual implementation state.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Contract compliance verification",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cc_07",
+    "family": "compliance_check",
+    "template": "Execute a cross-standard compliance check: does {system} meet both {standard_a} and {standard_b}?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Cross-standard compliance analysis",
+    "sub_questions": 3,
+    "tags": []
+  },
+  {
+    "id": "cc_08",
+    "family": "compliance_check",
+    "template": "Check if the data architecture for {system} complies with {privacy_standard} data residency requirements.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Data residency compliance check",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cc_09",
+    "family": "compliance_check",
+    "template": "Verify that all {phase} deliverables meet TOGAF compliance requirements.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "ADM deliverable compliance check",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cc_10",
+    "family": "compliance_check",
+    "template": "Execute an architecture compliance review for {project} implementation against the approved architecture.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Implementation compliance review",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cc_11",
+    "family": "compliance_check",
+    "template": "Check if {system} meets the enterprise architecture principles for {category}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Principle compliance check",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cc_12",
+    "family": "compliance_check",
+    "template": "Verify that all APIs in {domain} conform to the API design standards.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "API standards compliance check",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cc_13",
+    "family": "compliance_check",
+    "template": "Execute a security compliance check for {system} against {security_standard} requirements.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Security compliance verification",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cc_14",
+    "family": "compliance_check",
+    "template": "Check compliance of {system} audit trail capabilities against {regulatory_standard}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Audit compliance check",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cc_15",
+    "family": "compliance_check",
+    "template": "Verify that the migration plan for {system} complies with change management governance.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Migration plan governance compliance",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ra_01",
+    "family": "risk_assessment",
+    "template": "Assess the risk of migrating {system} considering technology, data, integration, and organizational factors.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Comprehensive migration risk assessment",
+    "sub_questions": 3,
+    "tags": []
+  },
+  {
+    "id": "ra_02",
+    "family": "risk_assessment",
+    "template": "What is the combined risk score for the {transition_arch} transition architecture?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Transition architecture risk scoring",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ra_03",
+    "family": "risk_assessment",
+    "template": "Identify the top 5 risk factors for the {initiative} initiative and their mitigation strategies.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Initiative risk identification and mitigation",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ra_04",
+    "family": "risk_assessment",
+    "template": "Assess the risk of a compliance gap in {system} for {standard} and estimate remediation effort.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Compliance gap risk assessment",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ra_05",
+    "family": "risk_assessment",
+    "template": "What are the cascading risks if {system} migration fails during Wave {wave}?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Cascading failure risk analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ra_06",
+    "family": "risk_assessment",
+    "template": "Compute risk scores for all systems in the {phase} migration wave and identify the highest-risk one.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Wave risk ranking",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ra_07",
+    "family": "risk_assessment",
+    "template": "Assess the operational risk of running {system_a} and {system_b} in parallel during migration.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Parallel run risk assessment",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ra_08",
+    "family": "risk_assessment",
+    "template": "What is the vendor lock-in risk for choosing {sbb} as the implementation for {abb}?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Vendor lock-in risk analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ra_09",
+    "family": "risk_assessment",
+    "template": "Assess the risk impact on {stakeholder} if {system} migration is delayed by {period}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Delay impact risk assessment",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ra_10",
+    "family": "risk_assessment",
+    "template": "Compute the aggregate risk exposure for the {program} program across all work packages.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Program-wide risk aggregation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ra_11",
+    "family": "risk_assessment",
+    "template": "Assess the data loss risk during migration from {source} to {target} for {data_type} data.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Data migration risk assessment",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ra_12",
+    "family": "risk_assessment",
+    "template": "What is the risk of a single point of failure in the {domain} technology architecture?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "SPOF risk analysis",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ra_13",
+    "family": "risk_assessment",
+    "template": "Evaluate the security risk introduced by the new {interface} interface between {system_a} and {system_b}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Interface security risk evaluation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "ra_14",
+    "family": "risk_assessment",
+    "template": "Assess the organizational change management risk for the {transformation} transformation.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Change management risk assessment",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "ra_15",
+    "family": "risk_assessment",
+    "template": "What risks are introduced if the {dispensation} dispensation is extended beyond its expiry date?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Dispensation extension risk analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "rp_01",
+    "family": "roadmap_planning",
+    "template": "Generate a migration roadmap for {system} with 3 waves based on dependencies and business priority.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Multi-wave migration roadmap generation",
+    "sub_questions": 3,
+    "tags": []
+  },
+  {
+    "id": "rp_02",
+    "family": "roadmap_planning",
+    "template": "What is the optimal sequencing of work packages for the {initiative} initiative?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Work package sequencing optimization",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rp_03",
+    "family": "roadmap_planning",
+    "template": "In which roadmap wave should {building_block} be deployed given its dependencies?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Building block deployment sequencing",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rp_04",
+    "family": "roadmap_planning",
+    "template": "Generate a transition architecture sequence for moving from {current} to {target} with {count} plateaus.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Transition architecture sequencing",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "rp_05",
+    "family": "roadmap_planning",
+    "template": "Does the current roadmap for {program} fit within the {budget} budget and {timeline} timeline?",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Roadmap feasibility check",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "rp_06",
+    "family": "roadmap_planning",
+    "template": "What is the critical path in the {program} migration roadmap and what are the slack activities?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Critical path analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "rp_07",
+    "family": "roadmap_planning",
+    "template": "Resequence the {program} roadmap to prioritize {standard} compliance remediation in Wave 1.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Compliance-driven roadmap resequencing",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "rp_08",
+    "family": "roadmap_planning",
+    "template": "What dependencies need to be resolved before {work_package} can start?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Dependency resolution analysis",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rp_09",
+    "family": "roadmap_planning",
+    "template": "Generate a parallel execution plan for Waves {wave_a} and {wave_b} to compress the timeline.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Parallel wave execution planning",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "rp_10",
+    "family": "roadmap_planning",
+    "template": "What happens to the roadmap if {work_package} is delayed by {weeks} weeks?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Schedule impact analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "rp_11",
+    "family": "roadmap_planning",
+    "template": "Create a phased rollout plan for {system} across {region_count} regions.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Regional phased rollout planning",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "rp_12",
+    "family": "roadmap_planning",
+    "template": "What are the resource conflicts between Wave {wave_a} and Wave {wave_b} work packages?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Resource conflict analysis",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rp_13",
+    "family": "roadmap_planning",
+    "template": "Generate a rollback plan for Wave {wave} in case of critical issues during deployment.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Rollback plan generation",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "rp_14",
+    "family": "roadmap_planning",
+    "template": "Compute the value delivered at each transition architecture plateau for {program}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Incremental value delivery analysis",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "rp_15",
+    "family": "roadmap_planning",
+    "template": "What quick wins can be extracted from the {program} roadmap for early delivery?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Quick win identification",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "sa_01",
+    "family": "stakeholder_analysis",
+    "template": "Map all stakeholder concerns for {project} and identify which are not addressed by current deliverables.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Stakeholder concern coverage mapping",
+    "sub_questions": 3,
+    "tags": []
+  },
+  {
+    "id": "sa_02",
+    "family": "stakeholder_analysis",
+    "template": "Create a stakeholder power/interest grid for the {initiative} initiative.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Power/interest grid generation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "sa_03",
+    "family": "stakeholder_analysis",
+    "template": "Which stakeholders will be most impacted by the {change} architecture change?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Change impact stakeholder analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "sa_04",
+    "family": "stakeholder_analysis",
+    "template": "Generate a communication plan for the {program} program based on stakeholder concerns.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Stakeholder communication plan",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "sa_05",
+    "family": "stakeholder_analysis",
+    "template": "Identify conflicting concerns between {stakeholder_a} and {stakeholder_b} for {project}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Concern conflict identification",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "sa_06",
+    "family": "stakeholder_analysis",
+    "template": "Which viewpoints should be presented to {stakeholder} based on their concerns?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Viewpoint selection for stakeholder",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "sa_07",
+    "family": "stakeholder_analysis",
+    "template": "Map the {stakeholder} influence network and identify key alliance opportunities.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Stakeholder influence network analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "sa_08",
+    "family": "stakeholder_analysis",
+    "template": "What architecture artifacts should be reviewed by {stakeholder} in Phase {phase}?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Stakeholder artifact review mapping",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "sa_09",
+    "family": "stakeholder_analysis",
+    "template": "Assess the level of stakeholder buy-in for the {initiative} initiative across all impacted groups.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Stakeholder buy-in assessment",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "sa_10",
+    "family": "stakeholder_analysis",
+    "template": "Generate a RACI matrix for {project} architecture deliverables across stakeholder groups.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "RACI matrix generation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "sa_11",
+    "family": "stakeholder_analysis",
+    "template": "Which executive stakeholders have concerns that conflict with the proposed {change}?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Executive concern conflict analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "sa_12",
+    "family": "stakeholder_analysis",
+    "template": "Map stakeholder concerns to architecture principles and identify principle gaps.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Concern to principle coverage analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "sa_13",
+    "family": "stakeholder_analysis",
+    "template": "Create an engagement timeline for {stakeholder} across all ADM phases for {project}.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Stakeholder engagement timeline",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "sa_14",
+    "family": "stakeholder_analysis",
+    "template": "Identify all stakeholders who should be on the architecture board for {project}.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Board membership recommendation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "sa_15",
+    "family": "stakeholder_analysis",
+    "template": "Assess the impact of {decision} on each stakeholder group and recommend mitigation.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Decision impact assessment per stakeholder",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cb_01",
+    "family": "cost_benefit",
+    "template": "Compute the full cost-benefit analysis for the {initiative} initiative over a {years}-year horizon.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Multi-year cost-benefit analysis",
+    "sub_questions": 3,
+    "tags": []
+  },
+  {
+    "id": "cb_02",
+    "family": "cost_benefit",
+    "template": "What is the break-even point for migrating {system} to {target_platform}?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Migration break-even analysis",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cb_03",
+    "family": "cost_benefit",
+    "template": "Compare the TCO of {option_a} vs {option_b} for {use_case} over 5 years.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "TCO comparison analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cb_04",
+    "family": "cost_benefit",
+    "template": "What is the cost of NOT migrating {system} (maintaining status quo) vs migrating?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Status quo cost analysis",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cb_05",
+    "family": "cost_benefit",
+    "template": "Calculate the NPV and IRR for the {program} program given current cost projections.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "NPV and IRR computation",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cb_06",
+    "family": "cost_benefit",
+    "template": "What is the cost impact of adding {standard} compliance to the {system} migration scope?",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Compliance cost impact analysis",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cb_07",
+    "family": "cost_benefit",
+    "template": "Compute the opportunity cost of delaying {initiative} by {months} months.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Delay opportunity cost analysis",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cb_08",
+    "family": "cost_benefit",
+    "template": "What is the projected ROI at each roadmap wave completion for {program}?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Incremental ROI projection",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cb_09",
+    "family": "cost_benefit",
+    "template": "Calculate the cost avoidance from eliminating {count} legacy systems in Wave {wave}.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Legacy elimination cost avoidance",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cb_10",
+    "family": "cost_benefit",
+    "template": "What is the cost impact of choosing a phased vs big-bang migration for {system}?",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Migration strategy cost comparison",
+    "sub_questions": 2,
+    "tags": []
+  },
+  {
+    "id": "cb_11",
+    "family": "cost_benefit",
+    "template": "Compute the staffing cost for {program} assuming {fte} FTEs over {months} months.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Program staffing cost computation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cb_12",
+    "family": "cost_benefit",
+    "template": "What is the benefit realization timeline for the {initiative} initiative?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Benefit realization timeline",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cb_13",
+    "family": "cost_benefit",
+    "template": "Calculate the risk-adjusted ROI for {initiative} considering a {risk_factor}% risk factor.",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Risk-adjusted ROI computation",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cb_14",
+    "family": "cost_benefit",
+    "template": "What is the infrastructure cost saving from consolidating {count} platforms into {target}?",
+    "implied_pattern": [
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 2,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Platform consolidation savings",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cb_15",
+    "family": "cost_benefit",
+    "template": "Compute the total cost of compliance remediation for {standard} across all affected systems.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing"
+    ],
+    "complexity": 3,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Enterprise compliance remediation cost",
+    "sub_questions": 1,
+    "tags": []
+  },
+  {
+    "id": "cx_01",
+    "family": "roadmap_planning",
+    "template": "For {system}: (1) identify all SOX violations, (2) determine in which roadmap wave they get remediated, (3) check if the payback period fits within Waves 1+2, (4) identify which approved SBB addresses the gap.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "retrieval",
+      "processing",
+      "retrieval"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: compliance + roadmap + cost-benefit + building block cross-analysis",
+    "sub_questions": 4,
+    "tags": []
+  },
+  {
+    "id": "cx_02",
+    "family": "roadmap_planning",
+    "template": "For {domain} modernization: (1) compute gaps between current and target, (2) rank by risk score, (3) map to stakeholder concerns, (4) generate a prioritized roadmap.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: gap analysis + risk + stakeholder + roadmap",
+    "sub_questions": 4,
+    "tags": []
+  },
+  {
+    "id": "cx_03",
+    "family": "roadmap_planning",
+    "template": "Assess the {system} migration: (1) current state and dependencies, (2) compliance gaps against {standard_a} and {standard_b}, (3) cost-benefit with risk adjustment, (4) recommend migration wave placement.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: state assessment + compliance + cost-benefit + roadmap",
+    "sub_questions": 4,
+    "tags": []
+  },
+  {
+    "id": "cx_04",
+    "family": "roadmap_planning",
+    "template": "For the {initiative} initiative: (1) identify all affected stakeholders and their concerns, (2) map concerns to architecture gaps, (3) compute remediation costs, (4) generate communication plan.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: stakeholder + gap + cost + communication",
+    "sub_questions": 4,
+    "tags": []
+  },
+  {
+    "id": "cx_05",
+    "family": "roadmap_planning",
+    "template": "Evaluate {building_block}: (1) which capabilities it supports, (2) compliance status, (3) reuse potential across domains, (4) cost-benefit of standardizing it.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: capability + compliance + reuse + cost-benefit",
+    "sub_questions": 4,
+    "tags": []
+  },
+  {
+    "id": "cx_06",
+    "family": "roadmap_planning",
+    "template": "For {domain} platform: (1) assess current maturity across all capabilities, (2) identify capabilities below threshold, (3) compute gap analysis for each, (4) generate migration roadmap with cost estimates.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: maturity + gaps + roadmap + cost",
+    "sub_questions": 4,
+    "tags": []
+  },
+  {
+    "id": "cx_07",
+    "family": "roadmap_planning",
+    "template": "Architecture review for {project}: (1) verify deliverable completeness for Phase {phase}, (2) check compliance against architecture principles, (3) assess stakeholder concern coverage, (4) identify risks.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: deliverables + compliance + stakeholders + risk",
+    "sub_questions": 4,
+    "tags": []
+  },
+  {
+    "id": "cx_08",
+    "family": "roadmap_planning",
+    "template": "Technology refresh analysis for {domain}: (1) inventory all technology components with age, (2) assess against technology radar, (3) compute technical debt, (4) generate refresh roadmap.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: inventory + radar + debt + roadmap",
+    "sub_questions": 4,
+    "tags": []
+  },
+  {
+    "id": "cx_09",
+    "family": "roadmap_planning",
+    "template": "Vendor evaluation for {abb}: (1) list candidate SBBs, (2) check compliance for each, (3) compute TCO comparison, (4) assess vendor lock-in risk for each.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: SBB listing + compliance + cost + risk",
+    "sub_questions": 4,
+    "tags": []
+  },
+  {
+    "id": "cx_10",
+    "family": "roadmap_planning",
+    "template": "End-to-end {initiative} assessment: (1) transformation readiness, (2) cross-domain gap analysis, (3) stakeholder impact assessment, (4) detailed cost-benefit with NPV/IRR, (5) phased roadmap.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "retrieval",
+      "processing",
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: readiness + gaps + stakeholders + cost-benefit + roadmap",
+    "sub_questions": 5,
+    "tags": []
+  },
+  {
+    "id": "cx_11",
+    "family": "roadmap_planning",
+    "template": "Data governance assessment for {domain}: (1) catalog all data entities, (2) check classification compliance, (3) identify data quality gaps, (4) compute remediation priority based on business impact.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: data catalog + compliance + quality + prioritization",
+    "sub_questions": 4,
+    "tags": []
+  },
+  {
+    "id": "cx_12",
+    "family": "roadmap_planning",
+    "template": "Integration architecture review for {system}: (1) map all interfaces and data flows, (2) analyze bottlenecks and security gaps, (3) check API standards compliance, (4) recommend target architecture.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: interface mapping + analysis + compliance + recommendation",
+    "sub_questions": 4,
+    "tags": []
+  },
+  {
+    "id": "cx_13",
+    "family": "roadmap_planning",
+    "template": "Cloud migration assessment for {system}: (1) current state with dependencies, (2) workload analysis and cloud readiness, (3) compliance check for cloud deployment, (4) cost comparison on-prem vs cloud, (5) migration roadmap.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: state + readiness + compliance + cost + roadmap",
+    "sub_questions": 5,
+    "tags": []
+  },
+  {
+    "id": "cx_14",
+    "family": "roadmap_planning",
+    "template": "Security architecture assessment for {domain}: (1) identify all sensitive data flows, (2) map security controls, (3) check compliance against {security_standard}, (4) compute risk scores, (5) prioritize remediation.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: data flow + controls + compliance + risk + priority",
+    "sub_questions": 5,
+    "tags": []
+  },
+  {
+    "id": "cx_15",
+    "family": "roadmap_planning",
+    "template": "Portfolio rationalization for {domain}: (1) inventory all applications with metrics, (2) compute TIME classification, (3) identify consolidation opportunities, (4) compute savings from rationalization, (5) generate transition roadmap.",
+    "implied_pattern": [
+      "retrieval",
+      "processing",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: inventory + classification + consolidation + savings + roadmap",
+    "sub_questions": 5,
+    "tags": []
+  },
+  {
+    "id": "cx_16",
+    "family": "roadmap_planning",
+    "template": "Architecture principle compliance audit: (1) retrieve all principles, (2) check each domain for adherence, (3) identify all violations with severity, (4) compute remediation effort and cost.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: principles + domain checks + violations + cost",
+    "sub_questions": 4,
+    "tags": []
+  },
+  {
+    "id": "cx_17",
+    "family": "roadmap_planning",
+    "template": "Value stream optimization for {value_stream}: (1) map current stages and capabilities, (2) identify bottleneck stages, (3) gap analysis for each bottleneck, (4) compute improvement ROI.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 4,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: value stream + bottleneck + gaps + ROI",
+    "sub_questions": 4,
+    "tags": []
+  },
+  {
+    "id": "cx_18",
+    "family": "roadmap_planning",
+    "template": "M&A architecture due diligence for {company}: (1) assess technology landscape, (2) identify integration complexity, (3) compliance gap analysis, (4) estimate integration cost and timeline.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: landscape + complexity + compliance + cost",
+    "sub_questions": 4,
+    "tags": []
+  },
+  {
+    "id": "cx_19",
+    "family": "roadmap_planning",
+    "template": "API strategy assessment for {domain}: (1) inventory current APIs, (2) compare against API design standards, (3) assess API maturity, (4) identify monetization opportunities, (5) generate API roadmap.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: inventory + standards + maturity + monetization + roadmap",
+    "sub_questions": 5,
+    "tags": []
+  },
+  {
+    "id": "cx_20",
+    "family": "roadmap_planning",
+    "template": "Operating model transformation for {organization}: (1) assess current team topology, (2) map capabilities to teams, (3) identify skill gaps, (4) design target operating model, (5) create transformation roadmap.",
+    "implied_pattern": [
+      "retrieval",
+      "retrieval",
+      "processing",
+      "processing",
+      "processing"
+    ],
+    "complexity": 5,
+    "required_tool_types": [
+      "retrieval",
+      "processing"
+    ],
+    "description": "Complex: topology + capability mapping + skills + design + roadmap",
+    "sub_questions": 5,
+    "tags": []
+  }
+]
