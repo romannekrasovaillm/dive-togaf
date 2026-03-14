@@ -110,13 +110,13 @@ python3 run_synthesis.py [OPTIONS]
 
   --batch-size N         Количество циклов синтеза (default: 3)
   --k-iterations K       Итерации углубления на цикл (default: 3)
-  --max-tool-rounds M    Макс. tool calls на итерацию (default: 8)
+  --max-tool-rounds M    Макс. tool calls на итерацию (default: 4)
   --seed-category CAT    Фильтр по категории seed'ов (напр. bian_service_domain)
   --random-seed S        Фиксированный seed для воспроизводимости
   --output-dir DIR       Директория вывода (default: output/)
   --model MODEL          Модель Kimi (default: kimi-k2.5)
   --temperature T        Температура LLM (игнорируется для kimi-k2.5)
-  --verbose              Debug-логирование
+  --verbose              Debug-логирование + дампы промптов в output/prompt_dumps/
 ```
 
 ### Примеры
@@ -190,7 +190,7 @@ python3 run_synthesis.py --verbose --batch-size 1 --k-iterations 1
 |----------------|------------|----------|
 | **TOGAF ADM справочник** (~47) | ADM-фазы, deliverables, техники | Статическая база знаний по TOGAF Standard |
 | **BIAN/Compliance справочник** (~50) | BIAN-домены, compliance, reference models | Статическая база по BIAN, GDPR, PCI DSS и др. |
-| **ArchiMate справочник** (~40) | Элементы, viewpoints, метамодель | Статическая база по ArchiMate 3.2 |
+| **ArchiMate справочник** (~69) | Элементы, viewpoints, метамодель, анализ | Статическая база по ArchiMate 3.2 + 33 processing tools |
 | **NetworkX** (20) | Граф-анализ зависимостей | `graph_compute_centrality`, `graph_find_cycles`, `graph_compute_critical_path` |
 | **lxml** (10) | Парсинг ArchiMate XML | `archimate_parse_model_info`, `archimate_list_elements` |
 | **GitHub API** (5) | Поиск open-source | `github_search_repositories`, `github_get_repository` |
@@ -272,9 +272,10 @@ GROUNDING INVARIANT -- THIS IS NON-NEGOTIABLE:
 
 | Файл | Формат | Содержание |
 |------|--------|-----------|
-| `output/dataset.jsonl` | JSONL | Одна строка на задачу: question, answer, cited_evidence_ids, evidence_trajectory, grounding_score |
-| `output/full_results.jsonl` | JSONL | Полные результаты цикла: seed, все evidence items, все tasks |
+| `output/dataset.jsonl` | JSONL | Одна строка на задачу: question, answer, cited_evidence_ids, evidence_trajectory, grounding_score (инкрементальная запись) |
+| `output/full_results.jsonl` | JSONL | Полные результаты цикла: seed, все evidence items, все tasks (инкрементальная запись) |
 | `output/summary.json` | JSON | Статистика: grounding_rate, complexity_distribution, seed_categories, task_families |
+| `output/prompt_dumps/` | JSON | Дампы промптов (только в `--verbose` режиме) |
 
 ## Тесты
 
@@ -319,17 +320,17 @@ dive-togaf/
 │   │   └── live_tools/              # Реальные реализации
 │   │       ├── togaf_adm_tools.py     # TOGAF ADM справочник (~47 tools)
 │   │       ├── repository_reference_tools.py  # BIAN, compliance, repo (~50 tools)
-│   │       ├── archimate_reference_tools.py   # ArchiMate элементы/viewpoints (~40 tools)
+│   │       ├── archimate_reference_tools.py   # ArchiMate элементы/viewpoints/metamodel (~69 tools)
 │   │       ├── networkx_tools.py     # 20 граф-инструментов (NetworkX)
 │   │       ├── archimate_parser_tools.py  # 10 ArchiMate XML парсер (lxml)
 │   │       ├── wikipedia_tools.py    # 5 GitHub API
 │   │       └── wikidata_tools.py     # 5 Open Library API
 │   │
 │   └── synthesis/                    # Pipeline синтеза
-│       ├── kimi_client.py            # Клиент Moonshot/Kimi K2.5
+│       ├── kimi_client.py            # Клиент Moonshot/Kimi K2.5 (streaming, thinking, retry, logging)
 │       ├── collector.py              # Сбор evidence (K итераций)
 │       ├── generator.py             # Генерация Q/A + grounding validation
-│       ├── orchestrator.py          # Оркестрация + запись датасета
+│       ├── orchestrator.py          # Оркестрация + инкрементальная запись датасета
 │       └── tool_executor.py         # Live + LLM-симуляция инструментов
 │
 └── tests/
@@ -342,17 +343,35 @@ dive-togaf/
 
 Используется **Kimi-K2.5** через Moonshot API (`https://api.moonshot.ai/v1`), OpenAI-совместимый SDK.
 
-- Модель: `kimi-k2.5`
+- Модель: `kimi-k2.5` (thinking model)
 - Temperature: не настраивается для kimi-k2.5 (ограничение API Moonshot)
-- Retry: до 3 попыток с exponential backoff (2s, 4s, 8s)
+- **Thinking mode**: `reasoning_content` полностью сохраняется и эхо-передаётся обратно в API
+- **Streaming**: все вызовы через `stream=true` для предотвращения timeout'ов при длинном reasoning (15-30с на раунд)
+- **max_completion_tokens**: ≥ 32768 (требование Moonshot для thinking-моделей: `reasoning_content + content`)
+- Retry: до 5 попыток с exponential backoff (2s, 4s, ..., 32s); клиентские ошибки (400-499, кроме 429) не повторяются
+- Timeout: 120с на запрос
 - Tool calling: нативный через OpenAI-format function calling
+- **Rate limit pacing**: 2с пауза между tool-call раундами, 3с между K-итерациями
+- **Prompt caching**: `prompt_cache_key` на сессию (UUID) по документации Moonshot
+- **Инкрементальное сохранение**: результаты записываются на диск после каждого цикла (не теряются при сбое)
+- **On-the-fly sampling**: каждый цикл сэмплирует свежую конфигурацию из пулов (12-20 инструментов за цикл)
+
+### Логирование
+
+При `--verbose` включается расширенное логирование:
+
+- Размер payload (bytes, ~token estimate) на каждый API-вызов
+- Usage-статистика ответа: `prompt_tokens`, `completion_tokens`, `cached_tokens`
+- Время ответа, `finish_reason`
+- При ошибках: HTTP status, response headers (`retry-after`, `x-ratelimit-*`), request content length
+- Дампы полных промптов в `output/prompt_dumps/` (JSON с метаданными)
 
 ## Комбинаторное пространство
 
 При 172 инструментах, 501 seed'е и 265 exemplar'ах:
 
 ```
-N_configs = 501 × C(172, 30) × C(265, 4) ≈ 10^36
+N_configs = 501 × C(172, 16) × C(265, 4) ≈ 10^24
 ```
 
 Каждый цикл синтеза работает с уникальной комбинацией (seed, tools_subset, exemplars_subset), обеспечивая высокое разнообразие генерируемого датасета.
