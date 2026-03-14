@@ -229,6 +229,9 @@ class DatasetWriter:
                         "complexity": task["complexity"],
                         "family": task["family"],
                         "reasoning_trace": task["reasoning_trace"],
+                        "cited_evidence_ids": task.get("cited_evidence_ids", []),
+                        "evidence_trajectory": task.get("evidence_trajectory", []),
+                        "grounding_score": task.get("grounding_score", 0.0),
                         "evidence_count": len(result.evidence),
                         "tool_call_count": result.tool_call_count,
                     }
@@ -272,6 +275,7 @@ class DatasetWriter:
         categories = {}
         families = {}
         complexities = {}
+        grounding_scores = []
         for r in results:
             cat = r.seed.get("category", "unknown")
             categories[cat] = categories.get(cat, 0) + 1
@@ -280,6 +284,10 @@ class DatasetWriter:
                 families[fam] = families.get(fam, 0) + 1
                 cx = t.get("complexity", 0)
                 complexities[cx] = complexities.get(cx, 0) + 1
+                grounding_scores.append(t.get("grounding_score", 0.0))
+
+        avg_grounding = round(sum(grounding_scores) / max(len(grounding_scores), 1), 3)
+        fully_grounded = sum(1 for s in grounding_scores if s >= 0.9)
 
         summary = {
             "total_cycles": len(results),
@@ -288,6 +296,12 @@ class DatasetWriter:
             "total_tool_calls": total_tool_calls,
             "total_elapsed_seconds": round(total_time, 2),
             "avg_seconds_per_cycle": round(total_time / max(len(results), 1), 2),
+            "grounding": {
+                "avg_grounding_score": avg_grounding,
+                "fully_grounded_tasks": fully_grounded,
+                "total_tasks": total_tasks,
+                "grounding_rate": round(fully_grounded / max(total_tasks, 1), 3),
+            },
             "seed_categories": categories,
             "task_families": families,
             "complexity_distribution": complexities,
