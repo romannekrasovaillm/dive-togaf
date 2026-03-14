@@ -1,0 +1,104 @@
+{
+  "metadata": {
+    "domain": "TOGAF",
+    "scenario": "Banking Core Modernization"
+  },
+  "apis": [
+    {
+      "id": "world_bank",
+      "name": "World Bank Indicators API",
+      "base_url": "https://api.worldbank.org/v2",
+      "rationale": "Открытые макро- и финансовые индикаторы для baseline/gap анализа и управления рисками.",
+      "wrappers": [
+        {
+          "name": "wb_get_gdp_growth",
+          "type": "Retrieval",
+          "input_parameters": {"country_code": "ISO код страны", "date_range": "YYYY:YYYY"},
+          "endpoint_or_operation": "/country/{country_code}/indicator/NY.GDP.MKTP.KD.ZG?format=json&date={date_range}",
+          "expected_response": {"kind": "json-array", "fields": ["country.id", "date", "value", "indicator.id"]},
+          "togaf_link": "ADM B/C: baseline business/data architecture и оценка экономического контекста."
+        },
+        {
+          "name": "wb_get_financial_access",
+          "type": "Retrieval",
+          "input_parameters": {"country_code": "ISO код страны", "date_range": "YYYY:YYYY"},
+          "endpoint_or_operation": "/country/{country_code}/indicator/FB.ATM.TOTL.P5?format=json&date={date_range}",
+          "expected_response": {"kind": "json-array", "fields": ["country.id", "date", "value"]},
+          "togaf_link": "ADM C/D: digital channel readiness и целевая архитектура клиентских сервисов."
+        },
+        {
+          "name": "wb_get_regulatory_quality",
+          "type": "Retrieval",
+          "input_parameters": {"country_code": "ISO код страны", "date_range": "YYYY:YYYY"},
+          "endpoint_or_operation": "/country/{country_code}/indicator/IQ.CPA.REGQ.XQ?format=json&date={date_range}",
+          "expected_response": {"kind": "json-array", "fields": ["country.id", "date", "value"]},
+          "togaf_link": "ADM G/H: compliance risk monitoring и обновление требований в Architecture Repository."
+        },
+        {
+          "name": "wb_process_trend_summary",
+          "type": "Processing",
+          "input_parameters": {"series_payload": "Сырые ряды wb_get_*"},
+          "endpoint_or_operation": "operation: summarize_world_bank_series",
+          "expected_response": {"kind": "object", "fields": ["latest", "previous", "delta", "trend"]},
+          "togaf_link": "Gap analysis и Migration Planning (ADM E/F)."
+        },
+        {
+          "name": "wb_process_risk_flags",
+          "type": "Processing",
+          "input_parameters": {"trend_summary": "Результат wb_process_trend_summary", "thresholds": "Пороговые уровни"},
+          "endpoint_or_operation": "operation: derive_risk_flags",
+          "expected_response": {"kind": "object", "fields": ["risk_level", "flags", "recommendation"]},
+          "togaf_link": "ADM F/G: риск-контроли и governance checkpoints."
+        }
+      ]
+    },
+    {
+      "id": "exchangerate_host",
+      "name": "ExchangeRate.host API",
+      "base_url": "https://api.exchangerate.host",
+      "rationale": "Открытые курсовые данные для оценки рыночных рисков и влияния на core banking процессы.",
+      "wrappers": [
+        {
+          "name": "fx_get_latest",
+          "type": "Retrieval",
+          "input_parameters": {"base": "Базовая валюта", "symbols": "Список валют"},
+          "endpoint_or_operation": "/latest?base={base}&symbols={symbols}",
+          "expected_response": {"kind": "object", "fields": ["date", "base", "rates"]},
+          "togaf_link": "ADM B/C: внешние ограничения и data entities для продуктов."
+        },
+        {
+          "name": "fx_get_timeseries",
+          "type": "Retrieval",
+          "input_parameters": {"base": "Базовая валюта", "symbols": "Список валют", "start_date": "YYYY-MM-DD", "end_date": "YYYY-MM-DD"},
+          "endpoint_or_operation": "/timeframe?base={base}&symbols={symbols}&start_date={start_date}&end_date={end_date}",
+          "expected_response": {"kind": "object", "fields": ["base", "rates", "start_date", "end_date"]},
+          "togaf_link": "ADM C/F: интеграция и planning окон миграции для multi-currency."
+        },
+        {
+          "name": "fx_get_convert",
+          "type": "Retrieval",
+          "input_parameters": {"from_currency": "Исходная валюта", "to_currency": "Целевая валюта", "amount": "Сумма"},
+          "endpoint_or_operation": "/convert?from={from_currency}&to={to_currency}&amount={amount}",
+          "expected_response": {"kind": "object", "fields": ["query", "result", "info.rate"]},
+          "togaf_link": "ADM D/G: валидация application services для валютных операций."
+        },
+        {
+          "name": "fx_process_volatility",
+          "type": "Processing",
+          "input_parameters": {"timeseries_payload": "Ответ fx_get_timeseries"},
+          "endpoint_or_operation": "operation: compute_fx_volatility",
+          "expected_response": {"kind": "object", "fields": ["pair", "avg", "stdev", "volatility_bucket"]},
+          "togaf_link": "ADM F/G: оценка risk exposure и controls."
+        },
+        {
+          "name": "fx_process_compliance_exposure",
+          "type": "Processing",
+          "input_parameters": {"latest_payload": "Ответ fx_get_latest", "policy_limits": "Лимиты по валютам"},
+          "endpoint_or_operation": "operation: evaluate_compliance_exposure",
+          "expected_response": {"kind": "object", "fields": ["exposure_score", "breaches", "action"]},
+          "togaf_link": "ADM G/H: Architecture Compliance Review и governance decisions."
+        }
+      ]
+    }
+  ]
+}
