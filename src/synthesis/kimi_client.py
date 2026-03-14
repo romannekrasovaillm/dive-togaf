@@ -42,7 +42,7 @@ class KimiClient:
         model: str = DEFAULT_MODEL,
         base_url: str = DEFAULT_BASE_URL,
         temperature: float = 0.6,
-        max_retries: int = 3,
+        max_retries: int = 5,
     ):
         self.model = model
         self.temperature = temperature
@@ -50,6 +50,7 @@ class KimiClient:
         self._client = OpenAI(
             api_key=_get_api_key(),
             base_url=base_url,
+            timeout=120.0,
         )
 
     def chat(
@@ -83,9 +84,15 @@ class KimiClient:
                 return response
             except Exception as e:
                 last_err = e
+                # Don't retry client errors (400, 401, 403) — they won't self-heal
+                err_str = str(e)
+                status = getattr(e, "status_code", None)
+                if status and 400 <= status < 500 and status != 429:
+                    logger.error("Kimi API fatal error (HTTP %d): %s", status, e)
+                    raise
                 if attempt < self.max_retries:
                     wait = 2 ** attempt
-                    logger.warning("Kimi API attempt %d failed: %s. Retry in %ds", attempt, e, wait)
+                    logger.warning("Kimi API attempt %d/%d failed: %s. Retry in %ds", attempt, self.max_retries, e, wait)
                     time.sleep(wait)
         raise RuntimeError(f"Kimi API failed after {self.max_retries} attempts: {last_err}") from last_err
 
