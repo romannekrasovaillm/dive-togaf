@@ -1,6 +1,6 @@
 """Tool executor: dispatches tool calls to real or LLM-simulated implementations.
 
-Live tools (NetworkX graph analysis, ArchiMate parser, Wikipedia, Wikidata)
+Live tools (NetworkX graph analysis, ArchiMate parser, GitHub)
 execute against real libraries. All other tools from the pool are simulated
 by the LLM using the tool's definition, parameters, and seed context to
 produce domain-realistic structured outputs.
@@ -32,47 +32,47 @@ def _register_live_tools() -> None:
     try:
         from src.pools.live_tools.networkx_tools import (
             graph_get_node_info,
-            graph_get_neighbors,
+            graph_find_neighbors,
+            graph_find_paths,
+            graph_get_components,
+            graph_find_cycles,
+            graph_get_leaf_nodes,
+            graph_get_bridges,
             graph_get_subgraph,
-            graph_get_paths,
-            graph_get_layer_nodes,
-            graph_list_relationship_types,
-            graph_get_elements_by_type,
-            graph_search_nodes,
             graph_compute_centrality,
             graph_compute_coupling,
-            graph_compute_layer_metrics,
-            graph_detect_cycles,
-            graph_compute_impact_analysis,
             graph_compute_critical_path,
+            graph_compute_impact_score,
+            graph_compute_modularity,
+            graph_compute_topology_metrics,
+            graph_compute_dependency_depth,
+            graph_compute_similarity,
+            graph_compute_topological_sort,
             graph_compute_clustering,
-            graph_compute_dependency_matrix,
-            graph_compute_component_health,
-            graph_compute_complexity_metrics,
-            graph_compute_change_impact_score,
-            graph_detect_architecture_smells,
+            graph_compute_gap_analysis,
+            graph_compute_layer_crossing,
         )
         _LIVE_TOOLS.update({
             "graph_get_node_info": graph_get_node_info,
-            "graph_get_neighbors": graph_get_neighbors,
+            "graph_find_neighbors": graph_find_neighbors,
+            "graph_find_paths": graph_find_paths,
+            "graph_get_components": graph_get_components,
+            "graph_find_cycles": graph_find_cycles,
+            "graph_get_leaf_nodes": graph_get_leaf_nodes,
+            "graph_get_bridges": graph_get_bridges,
             "graph_get_subgraph": graph_get_subgraph,
-            "graph_get_paths": graph_get_paths,
-            "graph_get_layer_nodes": graph_get_layer_nodes,
-            "graph_list_relationship_types": graph_list_relationship_types,
-            "graph_get_elements_by_type": graph_get_elements_by_type,
-            "graph_search_nodes": graph_search_nodes,
             "graph_compute_centrality": graph_compute_centrality,
             "graph_compute_coupling": graph_compute_coupling,
-            "graph_compute_layer_metrics": graph_compute_layer_metrics,
-            "graph_detect_cycles": graph_detect_cycles,
-            "graph_compute_impact_analysis": graph_compute_impact_analysis,
             "graph_compute_critical_path": graph_compute_critical_path,
+            "graph_compute_impact_score": graph_compute_impact_score,
+            "graph_compute_modularity": graph_compute_modularity,
+            "graph_compute_topology_metrics": graph_compute_topology_metrics,
+            "graph_compute_dependency_depth": graph_compute_dependency_depth,
+            "graph_compute_similarity": graph_compute_similarity,
+            "graph_compute_topological_sort": graph_compute_topological_sort,
             "graph_compute_clustering": graph_compute_clustering,
-            "graph_compute_dependency_matrix": graph_compute_dependency_matrix,
-            "graph_compute_component_health": graph_compute_component_health,
-            "graph_compute_complexity_metrics": graph_compute_complexity_metrics,
-            "graph_compute_change_impact_score": graph_compute_change_impact_score,
-            "graph_detect_architecture_smells": graph_detect_architecture_smells,
+            "graph_compute_gap_analysis": graph_compute_gap_analysis,
+            "graph_compute_layer_crossing": graph_compute_layer_crossing,
         })
         logger.info("Registered %d NetworkX live tools", 20)
     except ImportError as e:
@@ -81,60 +81,50 @@ def _register_live_tools() -> None:
     # ArchiMate parser tools
     try:
         from src.pools.live_tools.archimate_parser_tools import (
-            archimate_parse_model,
+            archimate_parse_model_info,
             archimate_list_elements,
-            archimate_get_element,
             archimate_list_relationships,
-            archimate_get_relationships_for,
+            archimate_get_element_relationships,
             archimate_list_views,
-            archimate_get_view_elements,
             archimate_get_properties,
-            archimate_search,
-            archimate_model_stats,
+            archimate_compute_model_metrics,
+            archimate_compute_element_usage,
+            archimate_validate_relationships,
+            archimate_extract_to_graph,
         )
         _LIVE_TOOLS.update({
-            "archimate_parse_model": archimate_parse_model,
+            "archimate_parse_model_info": archimate_parse_model_info,
             "archimate_list_elements": archimate_list_elements,
-            "archimate_get_element": archimate_get_element,
             "archimate_list_relationships": archimate_list_relationships,
-            "archimate_get_relationships_for": archimate_get_relationships_for,
+            "archimate_get_element_relationships": archimate_get_element_relationships,
             "archimate_list_views": archimate_list_views,
-            "archimate_get_view_elements": archimate_get_view_elements,
             "archimate_get_properties": archimate_get_properties,
-            "archimate_search": archimate_search,
-            "archimate_model_stats": archimate_model_stats,
+            "archimate_compute_model_metrics": archimate_compute_model_metrics,
+            "archimate_compute_element_usage": archimate_compute_element_usage,
+            "archimate_validate_relationships": archimate_validate_relationships,
+            "archimate_extract_to_graph": archimate_extract_to_graph,
         })
         logger.info("Registered %d ArchiMate parser live tools", 10)
     except ImportError as e:
         logger.warning("ArchiMate tools unavailable: %s", e)
 
-    # Wikipedia / Wikidata tools
+    # GitHub tools
     try:
         from src.pools.live_tools.wikipedia_tools import (
-            wikipedia_search,
-            wikipedia_get_summary,
-            wikipedia_get_sections,
-            wikipedia_get_links,
-            wikipedia_get_categories,
-            github_search_repos,
-            github_get_repo_info,
+            github_search_repositories,
+            github_get_repository,
             github_get_repo_languages,
             github_get_repo_topics,
-            github_search_code,
+            github_list_repo_contents,
         )
         _LIVE_TOOLS.update({
-            "wikipedia_search": wikipedia_search,
-            "wikipedia_get_summary": wikipedia_get_summary,
-            "wikipedia_get_sections": wikipedia_get_sections,
-            "wikipedia_get_links": wikipedia_get_links,
-            "wikipedia_get_categories": wikipedia_get_categories,
-            "github_search_repos": github_search_repos,
-            "github_get_repo_info": github_get_repo_info,
+            "github_search_repositories": github_search_repositories,
+            "github_get_repository": github_get_repository,
             "github_get_repo_languages": github_get_repo_languages,
             "github_get_repo_topics": github_get_repo_topics,
-            "github_search_code": github_search_code,
+            "github_list_repo_contents": github_list_repo_contents,
         })
-        logger.info("Registered %d Wikipedia/GitHub live tools", 10)
+        logger.info("Registered %d GitHub live tools", 5)
     except ImportError as e:
         logger.warning("Wikipedia/GitHub tools unavailable: %s", e)
 

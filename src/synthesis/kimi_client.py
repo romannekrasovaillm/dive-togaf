@@ -1,7 +1,7 @@
 """Kimi/Moonshot API client using OpenAI-compatible SDK.
 
 Env var: KIMI_API_KEY (or MOONSHOT_API_KEY)
-Base URL: https://api.moonshot.cn/v1
+Base URL: https://api.moonshot.ai/v1
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ from openai.types.chat import ChatCompletion
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_BASE_URL = "https://api.moonshot.cn/v1"
+DEFAULT_BASE_URL = "https://api.moonshot.ai/v1"
 DEFAULT_MODEL = "kimi-k2.5"
 
 
