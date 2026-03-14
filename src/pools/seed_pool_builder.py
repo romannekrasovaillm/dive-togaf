@@ -1,8 +1,12 @@
-"""Builder for the TOGAF Seed Pool.
+"""Builder for the TOGAF/ArchiMate Seed Pool.
 
-Generates ~2000 seed concepts across TOGAF phases, artifacts, techniques,
-ArchiMate elements/viewpoints, industry cases, standards, capabilities,
-building blocks, and stakeholders.
+All entities are grounded in the TOGAF Standard 10th Edition and
+ArchiMate 3.2 specifications. Names, deliverables, metamodel entities,
+and viewpoints use EXACT spec terminology.
+
+Sources:
+- TOGAF Standard, 10th Edition (The Open Group, 2022)
+- ArchiMate 3.2 Specification (The Open Group, 2023)
 """
 
 from __future__ import annotations
@@ -12,674 +16,790 @@ from pathlib import Path
 from .models import SeedConcept, SeedCategory, save_pool
 
 
-def _togaf_phase_seeds() -> list[SeedConcept]:
-    """ADM phase-specific seeds."""
-    seeds = []
-    phases = {
-        "preliminary": ("Preliminary Phase", "Establishes architecture capability, principles, and governance framework"),
-        "vision_A": ("Phase A: Architecture Vision", "Develops high-level aspirational vision and obtains approval"),
-        "business_B": ("Phase B: Business Architecture", "Develops the Business Architecture to support the Architecture Vision"),
-        "infosys_C": ("Phase C: Information Systems Architecture", "Develops Data and Application Architectures"),
-        "tech_D": ("Phase D: Technology Architecture", "Develops the Technology Architecture"),
-        "opportunities_E": ("Phase E: Opportunities and Solutions", "Generates initial implementation and migration plan"),
-        "migration_F": ("Phase F: Migration Planning", "Finalizes detailed implementation and migration plan"),
-        "governance_G": ("Phase G: Implementation Governance", "Provides architecture oversight of implementation"),
-        "change_H": ("Phase H: Architecture Change Management", "Manages changes to the architecture"),
-        "requirements": ("Requirements Management", "Manages architecture requirements throughout ADM"),
-    }
+# =====================================================================
+# TOGAF ADM Phases — exact per spec
+# =====================================================================
 
-    for key, (name, desc) in phases.items():
+def _togaf_phase_seeds() -> list[SeedConcept]:
+    """ADM phases with exact inputs/outputs/steps per TOGAF Standard."""
+    phases = [
+        # Preliminary Phase
+        ("preliminary", "Preliminary Phase",
+         "Define Architecture Capability, establish Architecture Principles, select tools, define frameworks and methods",
+         {"inputs": ["TOGAF Library", "Other architecture frameworks", "Board strategies and board business plans",
+                     "Architecture governance and support strategies", "IT strategy", "Business principles, goals, and drivers"],
+          "outputs": ["Organizational Model for Enterprise Architecture", "Tailored Architecture Framework",
+                      "Architecture Principles", "Architecture Repository (initial)", "Request for Architecture Work (optional)",
+                      "Architecture Governance Framework"],
+          "steps": ["Define the enterprise", "Identify key drivers and elements", "Define architecture principles",
+                    "Define the framework and methodology", "Evaluate EA maturity", "Define architecture team and organization",
+                    "Identify and establish architecture governance"]}),
+
+        # Phase A
+        ("phase_A", "Phase A: Architecture Vision",
+         "Develop high-level aspirational vision, obtain approval for Statement of Architecture Work",
+         {"inputs": ["Request for Architecture Work", "Business principles, goals, and drivers",
+                     "Architecture Principles", "Enterprise Continuum", "Architecture Repository"],
+          "outputs": ["Approved Statement of Architecture Work", "Architecture Vision", "Refined statements of business principles, goals, and drivers",
+                      "Draft Architecture Definition Document", "Communications Plan", "Capability Assessment"],
+          "steps": ["Establish the architecture project", "Identify stakeholders, concerns, and business requirements",
+                    "Confirm and elaborate business goals, drivers, and constraints", "Evaluate business capabilities",
+                    "Assess readiness for transformation", "Define scope", "Confirm and elaborate Architecture Principles",
+                    "Develop Architecture Vision", "Define Target Architecture value propositions and KPIs",
+                    "Identify risks and mitigation activities", "Develop Statement of Architecture Work"]}),
+
+        # Phase B
+        ("phase_B", "Phase B: Business Architecture",
+         "Develop the Business Architecture that supports the Architecture Vision",
+         {"inputs": ["Request for Architecture Work", "Architecture Vision", "Architecture Principles",
+                     "Enterprise Continuum", "Architecture Repository", "Draft Architecture Definition Document"],
+          "outputs": ["Draft Architecture Definition Document (updated with Business Architecture)",
+                      "Draft Architecture Requirements Specification (Business)",
+                      "Business Architecture components of Architecture Roadmap"],
+          "steps": ["Select reference models, viewpoints, and tools", "Develop Baseline Business Architecture Description",
+                    "Develop Target Business Architecture Description", "Perform gap analysis",
+                    "Define candidate roadmap components", "Resolve impacts across the Architecture Landscape",
+                    "Conduct formal stakeholder review", "Finalize the Business Architecture",
+                    "Create Architecture Definition Document"]}),
+
+        # Phase C
+        ("phase_C", "Phase C: Information Systems Architectures",
+         "Develop Data Architecture and Application Architecture to support Business Architecture",
+         {"inputs": ["Request for Architecture Work", "Capability Assessment", "Architecture Vision",
+                     "Architecture Definition Document (with Business Architecture)", "Architecture Repository"],
+          "outputs": ["Draft Architecture Definition Document (updated with Data and Application Architectures)",
+                      "Draft Architecture Requirements Specification (IS)",
+                      "Data Architecture components of Architecture Roadmap",
+                      "Application Architecture components of Architecture Roadmap"],
+          "steps": ["Develop Data Architecture (select models/viewpoints, baseline, target, gap analysis)",
+                    "Develop Application Architecture (select models/viewpoints, baseline, target, gap analysis)",
+                    "Resolve impacts across the Architecture Landscape",
+                    "Conduct formal stakeholder review", "Finalize Information Systems Architectures",
+                    "Create/update Architecture Definition Document"]}),
+
+        # Phase D
+        ("phase_D", "Phase D: Technology Architecture",
+         "Develop the Technology Architecture that enables the IS Architectures",
+         {"inputs": ["Architecture Vision", "Architecture Definition Document (B, C)", "Architecture Requirements Specification",
+                     "Architecture Repository"],
+          "outputs": ["Draft Architecture Definition Document (updated with Technology Architecture)",
+                      "Draft Architecture Requirements Specification (Technology)",
+                      "Technology Architecture components of Architecture Roadmap"],
+          "steps": ["Select reference models, viewpoints, and tools", "Develop Baseline Technology Architecture Description",
+                    "Develop Target Technology Architecture Description", "Perform gap analysis",
+                    "Define candidate roadmap components", "Resolve impacts across the Architecture Landscape",
+                    "Conduct formal stakeholder review", "Finalize the Technology Architecture",
+                    "Create/update Architecture Definition Document"]}),
+
+        # Phase E
+        ("phase_E", "Phase E: Opportunities and Solutions",
+         "Generate the initial complete version of the Architecture Roadmap, based on gap analysis and candidate roadmap components from B-D",
+         {"inputs": ["Architecture Vision", "Architecture Definition Document (B, C, D)",
+                     "Architecture Requirements Specification", "Architecture Repository",
+                     "Candidate Architecture Roadmap components from B-D"],
+          "outputs": ["Architecture Roadmap (initial complete version)", "Transition Architectures",
+                      "Implementation and Migration Strategy"],
+          "steps": ["Determine/confirm key corporate change attributes", "Determine business constraints for implementation",
+                    "Review and consolidate gap analysis results from B-D", "Review consolidated requirements across functions",
+                    "Consolidate and reconcile interoperability requirements",
+                    "Refine and validate dependencies", "Confirm readiness and risk for transformation",
+                    "Formulate Implementation and Migration Strategy", "Identify and group major work packages",
+                    "Identify Transition Architectures", "Create the Architecture Roadmap and Implementation and Migration Plan"]}),
+
+        # Phase F
+        ("phase_F", "Phase F: Migration Planning",
+         "Finalize the Architecture Roadmap and the Implementation and Migration Plan",
+         {"inputs": ["Implementation and Migration Strategy", "Architecture Roadmap (from E)",
+                     "Architecture Definition Document", "Architecture Requirements Specification",
+                     "Transition Architectures", "Implementation Factor Assessment and Deduction Matrix"],
+          "outputs": ["Implementation and Migration Plan (finalized)", "Architecture Roadmap (finalized)",
+                      "Transition Architectures (finalized)", "Architecture contracts (in preparation)",
+                      "Implementation governance model"],
+          "steps": ["Confirm management framework interactions for Implementation and Migration Plan",
+                    "Assign a business value to each work package", "Estimate resource requirements, project timings, and availability",
+                    "Prioritize the migration projects through a cost/benefit assessment and risk validation",
+                    "Confirm Architecture Roadmap and update Architecture Definition Document",
+                    "Complete the Implementation and Migration Plan",
+                    "Complete the architecture development cycle and document lessons learned"]}),
+
+        # Phase G
+        ("phase_G", "Phase G: Implementation Governance",
+         "Provide architecture oversight of the implementation, ensure conformance with Target Architecture",
+         {"inputs": ["Implementation and Migration Plan", "Architecture contracts",
+                     "Architecture Definition Document", "Architecture Requirements Specification",
+                     "Architecture Roadmap", "Implementation governance model"],
+          "outputs": ["Architecture Contract (signed)", "Compliance Assessments",
+                      "Change Requests", "Architecture-compliant implemented system"],
+          "steps": ["Confirm scope and priorities for deployment with development management",
+                    "Identify deployment resources and skills", "Guide development of solutions deployment",
+                    "Perform enterprise architecture compliance reviews",
+                    "Implement business and IT operations", "Perform post-implementation review and close the implementation"]}),
+
+        # Phase H
+        ("phase_H", "Phase H: Architecture Change Management",
+         "Establish and support the implemented architecture, manage changes in an orderly fashion",
+         {"inputs": ["Implementation Governance phase outputs", "Architecture Definition Document",
+                     "Architecture Requirements Specification", "Architecture Roadmap",
+                     "Change Requests from lessons learned"],
+          "outputs": ["Architecture updates", "Changes to Architecture Framework and Principles",
+                      "New Request for Architecture Work (to initiate another ADM cycle)"],
+          "steps": ["Establish value realization process", "Deploy monitoring tools",
+                    "Manage risks", "Provide analysis for architecture change management",
+                    "Develop change requirements to meet performance targets",
+                    "Manage governance process", "Activate the process to implement change"]}),
+
+        # Requirements Management
+        ("requirements_mgmt", "Requirements Management",
+         "Continuous process of managing architecture requirements throughout all ADM phases",
+         {"inputs": ["Architecture requirements from any ADM phase"],
+          "outputs": ["Requirements Impact Assessment", "Updated Architecture Requirements Specification"],
+          "steps": ["Identify/document requirements", "Baseline requirements",
+                    "Monitor baseline requirements", "Identify changed requirements and record priorities",
+                    "Assess impact of changed requirements on current and previous ADM phases",
+                    "Implement requirements arising from Phase H",
+                    "Update the requirements repository", "Implement change in current phase",
+                    "Assess and revise gap analysis for changed requirements"]}),
+    ]
+
+    seeds = []
+    for key, name, desc, meta in phases:
         seeds.append(SeedConcept(
             id=f"phase_{key}", name=name, category=SeedCategory.TOGAF_PHASE,
-            description=desc, domain="adm",
-            tags=["phase", key],
+            description=desc, domain="adm", tags=["phase", key], metadata=meta,
         ))
-
-    # Sub-aspects of each phase
-    phase_aspects = [
-        ("B_business_process_modeling", "Phase B Business Process Modeling", "Modeling business processes for target architecture"),
-        ("B_organization_modeling", "Phase B Organization Modeling", "Defining target organizational structures"),
-        ("B_business_function_decomposition", "Phase B Business Function Decomposition", "Decomposing business functions to atomic level"),
-        ("B_business_service_identification", "Phase B Business Service Identification", "Identifying business services from processes"),
-        ("C_data_entity_modeling", "Phase C Data Entity Modeling", "Modeling logical data entities and relationships"),
-        ("C_data_migration_planning", "Phase C Data Migration Planning", "Planning data migration between systems"),
-        ("C_application_portfolio_rationalization", "Phase C Application Portfolio Rationalization", "Rationalizing the application landscape"),
-        ("C_application_integration_design", "Phase C Application Integration Design", "Designing integration between applications"),
-        ("D_platform_selection", "Phase D Platform Selection", "Selecting technology platforms for target architecture"),
-        ("D_infrastructure_consolidation", "Phase D Infrastructure Consolidation", "Consolidating infrastructure components"),
-        ("D_cloud_architecture_design", "Phase D Cloud Architecture Design", "Designing cloud-native technology architecture"),
-        ("D_network_architecture_design", "Phase D Network Architecture Design", "Designing network topology and security zones"),
-        ("E_consolidation_gaps", "Phase E Consolidation Gaps", "Consolidating gaps from all architecture domains"),
-        ("E_work_package_identification", "Phase E Work Package Identification", "Identifying discrete work packages for migration"),
-        ("E_transition_architecture_creation", "Phase E Transition Architecture Creation", "Creating intermediate transition architectures"),
-        ("F_implementation_factor_assessment", "Phase F Implementation Factor Assessment", "Assessing factors affecting migration sequencing"),
-        ("F_business_value_assessment", "Phase F Business Value Assessment", "Assessing business value of work packages"),
-        ("F_migration_risk_assessment", "Phase F Migration Risk Assessment", "Assessing risks of migration approach"),
-        ("G_compliance_review_setup", "Phase G Compliance Review Setup", "Setting up architecture compliance review process"),
-        ("G_implementation_monitoring", "Phase G Implementation Monitoring", "Monitoring conformance during implementation"),
-        ("H_change_impact_analysis", "Phase H Change Impact Analysis", "Analyzing impact of proposed architecture changes"),
-        ("H_architecture_refresh_trigger", "Phase H Architecture Refresh Trigger", "Identifying triggers for architecture refresh cycles"),
-    ]
-
-    for key, name, desc in phase_aspects:
-        seeds.append(SeedConcept(
-            id=f"phase_aspect_{key}", name=name, category=SeedCategory.TOGAF_PHASE,
-            description=desc, domain="adm",
-            tags=["phase", "aspect"],
-        ))
-
     return seeds
 
 
-def _togaf_artifact_seeds() -> list[SeedConcept]:
-    """TOGAF artifact-specific seeds."""
-    artifacts = [
-        # Catalogs
-        ("principles_catalog", "Principles Catalog", "Catalog of architecture principles with rationale and implications"),
-        ("stakeholder_map_catalog", "Stakeholder Map Catalog", "Catalog of stakeholders with power, interest, and concerns"),
-        ("value_chain_diagram", "Value Chain Diagram", "Visual representation of enterprise value chain activities"),
-        ("solution_concept_diagram", "Solution Concept Diagram", "High-level visual of proposed solution approach"),
-        ("organization_decomposition", "Organization Decomposition Diagram", "Hierarchical view of organizational structure"),
-        ("business_capability_map", "Business Capability Map", "Heat-mapped view of business capabilities"),
-        ("business_interaction_matrix", "Business Interaction Matrix", "Matrix of interactions between business functions"),
-        ("actor_role_matrix", "Actor/Role Matrix", "Mapping of actors to their roles"),
-        ("business_footprint_diagram", "Business Footprint Diagram", "Mapping of business goals to organizational units"),
-        ("business_service_info_diagram", "Business Service/Information Diagram", "Mapping between services and information"),
-        ("functional_decomposition", "Functional Decomposition Diagram", "Hierarchical decomposition of functions"),
-        ("product_lifecycle_diagram", "Product Lifecycle Diagram", "Lifecycle stages of products/services"),
-        ("goal_objective_service", "Goal/Objective/Service Diagram", "Mapping goals to services"),
+# =====================================================================
+# TOGAF Deliverables — exact spec names (Section 20.3)
+# =====================================================================
 
-        # Data artifacts
-        ("data_entity_relationship", "Data Entity/Relationship Diagram", "Logical data model with relationships"),
-        ("data_dissemination_diagram", "Data Dissemination Diagram", "Data flow between systems"),
-        ("data_lifecycle_diagram", "Data Lifecycle Diagram", "Lifecycle management of data entities"),
-        ("data_security_diagram", "Data Security Diagram", "Data classification and security controls"),
-        ("data_migration_diagram", "Data Migration Diagram", "Data migration approach and mapping"),
-        ("conceptual_data_model", "Conceptual Data Model", "High-level data concepts and relationships"),
-        ("logical_data_model", "Logical Data Model", "Detailed logical data structure"),
-        ("data_quality_model", "Data Quality Model", "Data quality dimensions and metrics"),
-
-        # Application artifacts
-        ("application_portfolio_catalog", "Application Portfolio Catalog", "Inventory of enterprise applications"),
-        ("application_interface_catalog", "Application/Interface Catalog", "Catalog of application interfaces"),
-        ("application_communication_diagram", "Application Communication Diagram", "Inter-application communication flows"),
-        ("application_migration_diagram", "Application Migration Diagram", "Application migration roadmap"),
-        ("application_use_case_diagram", "Application Use Case Diagram", "Application use cases and actors"),
-        ("software_distribution_diagram", "Software Distribution Diagram", "Software deployment topology"),
-        ("process_application_realization", "Process/Application Realization Diagram", "How applications realize processes"),
-        ("application_function_matrix", "Application/Function Matrix", "Mapping applications to business functions"),
-
-        # Technology artifacts
-        ("technology_standards_catalog", "Technology Standards Catalog", "Approved technology standards"),
-        ("technology_portfolio_catalog", "Technology Portfolio Catalog", "Technology component inventory"),
-        ("environments_locations_diagram", "Environments and Locations Diagram", "Physical and logical locations"),
-        ("platform_decomposition", "Platform Decomposition Diagram", "Platform component breakdown"),
-        ("processing_diagram", "Processing Diagram", "Processing flows and nodes"),
-        ("network_computing_diagram", "Network Computing/Hardware Diagram", "Network and compute infrastructure"),
-        ("communications_engineering", "Communications Engineering Diagram", "Communication infrastructure detail"),
-
-        # Governance artifacts
-        ("architecture_contract", "Architecture Contract", "Agreement on deliverables and conformance"),
-        ("compliance_assessment", "Compliance Assessment", "Assessment of implementation compliance"),
-        ("architecture_requirements_spec", "Architecture Requirements Specification", "Consolidated architecture requirements"),
-        ("architecture_definition_document", "Architecture Definition Document", "Comprehensive architecture definition"),
-        ("architecture_roadmap", "Architecture Roadmap", "Time-based view of architecture evolution"),
-        ("transition_architecture", "Transition Architecture", "Intermediate architecture state"),
-        ("implementation_migration_plan", "Implementation and Migration Plan", "Detailed implementation plan"),
-        ("architecture_vision_document", "Architecture Vision Document", "Approved architecture vision"),
-        ("statement_of_architecture_work", "Statement of Architecture Work", "Scope and approach agreement"),
-        ("architecture_change_request", "Architecture Change Request", "Formal request for architecture change"),
-        ("architecture_board_minutes", "Architecture Board Minutes", "Decisions and actions from board meetings"),
+def _togaf_deliverable_seeds() -> list[SeedConcept]:
+    """TOGAF deliverables as defined in the spec."""
+    deliverables = [
+        ("architecture_building_blocks", "Architecture Building Blocks", "Reusable architecture components: ABBs capture architecture requirements and direct SBBs"),
+        ("architecture_contract", "Architecture Contract", "Joint agreements between development partners and sponsors on deliverables, quality, and fitness-for-purpose of an architecture"),
+        ("architecture_definition_document", "Architecture Definition Document", "The deliverable container for the core architectural artifacts. Spans all domains: Business, Data, Application, Technology"),
+        ("architecture_principles", "Architecture Principles", "General rules and guidelines that inform and support how an organization fulfills its mission"),
+        ("architecture_repository", "Architecture Repository", "The holding area for all architecture-related materials: Architecture Metamodel, Architecture Capability, Architecture Landscape, Standards Information Base, Reference Library, Governance Log"),
+        ("architecture_requirements_spec", "Architecture Requirements Specification", "Set of quantitative statements that outline what an implementation project must do to comply with the architecture"),
+        ("architecture_roadmap", "Architecture Roadmap", "List of individual work packages showing a timeline of the changes, including Transition Architectures"),
+        ("architecture_vision", "Architecture Vision", "High-level summary of the changes to the enterprise that will accrue from successful deployment of the Target Architecture"),
+        ("business_principles_goals_drivers", "Business Principles, Business Goals, and Business Drivers", "Business principles, goals, and strategic drivers that provide context for architecture work"),
+        ("capability_assessment", "Capability Assessment", "Assessment of the capabilities and maturity levels of the enterprise, identifying areas of change"),
+        ("change_request", "Change Request", "Request for modification, raised through governance as a result of changes to the baseline or target architecture"),
+        ("communications_plan", "Communications Plan", "Plan to communicate architecture deliverables to the right stakeholders at the right time"),
+        ("compliance_assessment", "Compliance Assessment", "Assessment of architecture compliance of projects, identifying any architecture gaps"),
+        ("implementation_governance_model", "Implementation Governance Model", "Governance procedures and organization for managing the architecture implementation"),
+        ("implementation_migration_plan", "Implementation and Migration Plan", "Schedule of projects, resource allocations, and detailed migration approach for realizing Transition Architectures"),
+        ("org_model_for_ea", "Organizational Model for Enterprise Architecture", "Governance model, maturity assessments, budget, and roles/responsibilities for EA capability"),
+        ("request_for_architecture_work", "Request for Architecture Work", "Trigger document for architecture development, from sponsor to architecture organization"),
+        ("requirements_impact_assessment", "Requirements Impact Assessment", "Assessment of the impact of new/changed requirements on the current architecture"),
+        ("solution_building_blocks", "Solution Building Blocks", "Candidate solutions: implementations of ABBs that map to specific products or technologies"),
+        ("statement_of_architecture_work", "Statement of Architecture Work", "Defines scope and approach of the architecture project; a deliverable of Phase A"),
+        ("tailored_architecture_framework", "Tailored Architecture Framework", "Organization-specific version of the TOGAF framework"),
+        ("transition_architecture", "Transition Architecture", "Description of the enterprise at an architecturally significant state between the Baseline and Target Architectures"),
     ]
 
     seeds = []
-    for key, name, desc in artifacts:
+    for key, name, desc in deliverables:
         seeds.append(SeedConcept(
-            id=f"artifact_{key}", name=name, category=SeedCategory.TOGAF_ARTIFACT,
-            description=desc, domain="togaf",
-            tags=["artifact"],
+            id=f"deliverable_{key}", name=name, category=SeedCategory.TOGAF_DELIVERABLE,
+            description=desc, domain="togaf", tags=["deliverable"],
         ))
     return seeds
 
 
+# =====================================================================
+# TOGAF Artifacts — catalogs, matrices, diagrams (Section 20.4)
+# =====================================================================
+
+def _togaf_artifact_seeds() -> list[SeedConcept]:
+    """TOGAF artifacts: catalogs, matrices, diagrams per spec."""
+    artifacts = [
+        # Catalogs
+        ("principles_catalog", "Principles Catalog", "catalog", "Catalog of architecture principles with rationale and implications"),
+        ("stakeholder_map_catalog", "Stakeholder Map", "catalog", "Matrix of stakeholders against architecture viewpoints"),
+        ("role_catalog", "Role Catalog", "catalog", "Catalog of governance/process roles"),
+        ("business_service_function_catalog", "Business Service/Function Catalog", "catalog", "Functional decomposition of services/functions"),
+        ("location_catalog", "Location Catalog", "catalog", "List of all enterprise locations"),
+        ("process_event_catalog", "Process/Event/Control/Product Catalog", "catalog", "List of processes, events, controls, and products"),
+        ("contract_measure_catalog", "Contract/Measure Catalog", "catalog", "Catalog of contracts and SLAs"),
+        ("data_entity_catalog", "Data Entity/Data Component Catalog", "catalog", "Listing of data entities and data components"),
+        ("application_portfolio_catalog", "Application Portfolio Catalog", "catalog", "Full inventory of applications"),
+        ("interface_catalog", "Interface Catalog", "catalog", "Catalog of application-to-application interfaces"),
+        ("technology_standards_catalog", "Technology Standards Catalog", "catalog", "Approved technology standards list"),
+        ("technology_portfolio_catalog", "Technology Portfolio Catalog", "catalog", "Technology components with lifecycle status"),
+
+        # Matrices
+        ("stakeholder_role_matrix", "Stakeholder Map/Role Matrix", "matrix", "Mapping of stakeholders to their roles"),
+        ("business_interaction_matrix", "Business Interaction Matrix", "matrix", "Dependencies between business functions/organizations"),
+        ("actor_role_matrix", "Actor/Role Matrix", "matrix", "Mapping of actors to roles"),
+        ("application_data_matrix", "Application/Data Matrix", "matrix", "Mapping of applications to data entities"),
+        ("app_function_matrix", "Application/Function Matrix", "matrix", "Mapping of applications to business functions"),
+        ("app_org_matrix", "Application/Organization Matrix", "matrix", "Mapping of applications to organizational units"),
+        ("app_role_matrix", "Application/Role Matrix", "matrix", "Mapping of applications to user roles"),
+        ("app_technology_matrix", "Application/Technology Matrix", "matrix", "Mapping of applications to technology platforms"),
+        ("system_data_matrix", "System/Data Matrix", "matrix", "Mapping of systems to data flows"),
+        ("system_technology_matrix", "System/Technology Matrix", "matrix", "Mapping of systems to technology components"),
+
+        # Diagrams
+        ("value_chain_diagram", "Value Chain Diagram", "diagram", "High-level view of the enterprise value chain"),
+        ("solution_concept_diagram", "Solution Concept Diagram", "diagram", "High-level graphical view of the solution"),
+        ("business_footprint_diagram", "Business Footprint Diagram", "diagram", "Links between business goals, organizational units, business functions, and services"),
+        ("business_service_info_diagram", "Business Service/Information Diagram", "diagram", "Mapping of business services to information"),
+        ("functional_decomposition_diagram", "Functional Decomposition Diagram", "diagram", "Hierarchical decomposition of business functions"),
+        ("product_lifecycle_diagram", "Product Lifecycle Diagram", "diagram", "Lifecycle stages of products/services"),
+        ("goal_objective_service_diagram", "Goal/Objective/Service Diagram", "diagram", "Mapping of business goals to architecture services"),
+        ("business_use_case_diagram", "Business Use-Case Diagram", "diagram", "Business processes with actors"),
+        ("organization_decomposition_diagram", "Organization Decomposition Diagram", "diagram", "Organizational hierarchy"),
+        ("process_flow_diagram", "Process Flow Diagram", "diagram", "Business process flow sequences"),
+        ("event_diagram", "Event Diagram", "diagram", "Business events and their relationships"),
+        ("data_dissemination_diagram", "Data Dissemination Diagram", "diagram", "Data movement between systems"),
+        ("data_lifecycle_diagram", "Data Lifecycle Diagram", "diagram", "Data entity lifecycle"),
+        ("data_security_diagram", "Data Security Diagram", "diagram", "Data classification and access controls"),
+        ("class_hierarchy_diagram", "Class Hierarchy Diagram", "diagram", "Data entity class hierarchy"),
+        ("data_migration_diagram", "Data Migration Diagram", "diagram", "Data migration approach"),
+        ("application_communication_diagram", "Application Communication Diagram", "diagram", "Inter-application data flows"),
+        ("application_and_user_location_diagram", "Application and User Location Diagram", "diagram", "Geographic deployment of applications"),
+        ("application_use_case_diagram", "Application Use-Case Diagram", "diagram", "Application use cases"),
+        ("enterprise_manageability_diagram", "Enterprise Manageability Diagram", "diagram", "How systems are managed"),
+        ("process_application_realization_diagram", "Process/Application Realization Diagram", "diagram", "How applications realize business processes"),
+        ("software_engineering_diagram", "Software Engineering Diagram", "diagram", "Software engineering artifacts"),
+        ("application_migration_diagram", "Application Migration Diagram", "diagram", "Application migration steps"),
+        ("software_distribution_diagram", "Software Distribution Diagram", "diagram", "Software deployment topology"),
+        ("environments_locations_diagram", "Environments and Locations Diagram", "diagram", "Technology environments and physical locations"),
+        ("platform_decomposition_diagram", "Platform Decomposition Diagram", "diagram", "Platform component breakdown"),
+        ("processing_diagram", "Processing Diagram", "diagram", "Processing flows and nodes"),
+        ("network_computing_hw_diagram", "Networked Computing/Hardware Diagram", "diagram", "Network and compute infrastructure"),
+        ("communications_engineering_diagram", "Communications Engineering Diagram", "diagram", "Communication infrastructure detail"),
+    ]
+
+    seeds = []
+    for key, name, artifact_type, desc in artifacts:
+        seeds.append(SeedConcept(
+            id=f"artifact_{key}", name=name, category=SeedCategory.TOGAF_ARTIFACT,
+            description=desc, domain="togaf", tags=["artifact", artifact_type],
+            metadata={"artifact_type": artifact_type},
+        ))
+    return seeds
+
+
+# =====================================================================
+# TOGAF Content Metamodel Entities (Section 20.2)
+# =====================================================================
+
+def _togaf_metamodel_seeds() -> list[SeedConcept]:
+    """TOGAF Content Metamodel entity types — exact spec names."""
+    entities = [
+        # Architecture Core entities
+        ("cm_principle", "Principle", "core", "A qualitative statement of intent that should be met by the architecture"),
+        ("cm_constraint", "Constraint", "core", "An external factor that prevents the organization from pursuing approaches"),
+        ("cm_assumption", "Assumption", "core", "A statement of probable fact that has not been fully validated"),
+        ("cm_requirement", "Requirement", "core", "A quantitative statement of business need that must be met by architecture"),
+        ("cm_gap", "Gap", "core", "A statement of difference between two states. Used in gap analysis for each domain"),
+        ("cm_work_package", "Work Package", "core", "A set of actions identified to realize one or more objectives of the architecture"),
+        ("cm_capability", "Capability", "core", "A particular ability that a business may possess or exchange to achieve a purpose"),
+        ("cm_course_of_action", "Course of Action", "core", "Direction and focus for how the architecture contributes to achieving goals"),
+        ("cm_location", "Location", "core", "A place where business activity takes place and can be hierarchically decomposed"),
+
+        # Business Architecture entities
+        ("cm_organization_unit", "Organization Unit", "business", "Self-contained unit of resources with goals, objectives, and measures"),
+        ("cm_actor", "Actor", "business", "A person, organization, or system that is outside the consideration of the architecture model"),
+        ("cm_role", "Role", "business", "An actor assumes a role to perform a task. Multiple actors can assume same role"),
+        ("cm_business_service", "Business Service", "business", "Supports business capabilities through an explicitly defined interface"),
+        ("cm_business_function", "Function", "business", "Delivers business capabilities closely aligned to an organization"),
+        ("cm_business_process", "Process", "business", "A process that is a flow of activities. Orchestrated through business events"),
+        ("cm_business_event", "Event", "business", "An organizational state change that triggers further processing"),
+        ("cm_control", "Control", "business", "Ensures that a process produces the correct outcome"),
+        ("cm_product", "Product", "business", "Output generated by the business that provides value to a customer"),
+        ("cm_measure", "Measure", "business", "Indicator or factor that can be tracked, usually against a target or objective"),
+        ("cm_objective", "Objective", "business", "A time-bounded milestone for an organization"),
+        ("cm_contract", "Contract", "business", "An agreement between a service consumer and provider"),
+        ("cm_service_quality", "Service Quality", "business", "A preset/agreed-to QoS level: availability, service hours, etc."),
+
+        # Data Architecture entities
+        ("cm_data_entity", "Data Entity", "data", "An encapsulation of data managed/owned by the enterprise"),
+        ("cm_logical_data_component", "Logical Data Component", "data", "A boundary zone that encapsulates related data entities"),
+        ("cm_physical_data_component", "Physical Data Component", "data", "A physical implementation of a logical data component"),
+
+        # Application Architecture entities
+        ("cm_logical_application_component", "Logical Application Component", "application", "An encapsulation of application functionality independently deployable, reusable"),
+        ("cm_physical_application_component", "Physical Application Component", "application", "An application, module, sub-system, or object that realizes logical components"),
+        ("cm_information_system_service", "Information System Service", "application", "An automated service that provides a specific business interface"),
+
+        # Technology Architecture entities
+        ("cm_platform_service", "Platform Service", "technology", "A technical capability required to provide infrastructure for the architecture"),
+        ("cm_logical_technology_component", "Logical Technology Component", "technology", "A technology infrastructure component independent of specific products"),
+        ("cm_physical_technology_component", "Physical Technology Component", "technology", "A specific technology infrastructure product/component"),
+    ]
+
+    seeds = []
+    for key, name, domain, desc in entities:
+        seeds.append(SeedConcept(
+            id=f"metamodel_{key}", name=name, category=SeedCategory.TOGAF_METAMODEL_ENTITY,
+            description=desc, domain=domain, tags=["metamodel", domain],
+        ))
+    return seeds
+
+
+# =====================================================================
+# TOGAF Techniques (Section 21)
+# =====================================================================
+
 def _togaf_technique_seeds() -> list[SeedConcept]:
-    """TOGAF technique-specific seeds."""
+    """TOGAF techniques — exact names from the spec."""
     techniques = [
-        ("stakeholder_management", "Stakeholder Management Technique", "Identifying, classifying, and managing stakeholder engagement"),
-        ("architecture_principles_technique", "Architecture Principles Technique", "Defining and cataloging architecture principles"),
-        ("business_scenarios", "Business Scenarios Technique", "Using scenarios to discover and document requirements"),
-        ("gap_analysis_technique", "Gap Analysis Technique", "Identifying gaps between baseline and target"),
-        ("migration_planning_technique", "Migration Planning Technique", "Sequencing and planning migration"),
-        ("interoperability_technique", "Interoperability Requirements Technique", "Defining interoperability requirements"),
-        ("business_transformation_readiness", "Business Transformation Readiness Assessment", "Assessing organizational readiness for change"),
-        ("risk_management_technique", "Risk Management Technique", "Identifying and mitigating architecture risks"),
-        ("capability_based_planning", "Capability-Based Planning Technique", "Planning based on business capabilities"),
-        ("architecture_patterns_technique", "Architecture Patterns Technique", "Applying proven architecture patterns"),
-        ("architecture_compliance_review", "Architecture Compliance Review", "Reviewing implementations for conformance"),
-        ("architecture_maturity_assessment", "Architecture Maturity Assessment", "Assessing enterprise architecture maturity"),
-        ("value_chain_analysis", "Value Chain Analysis", "Analyzing value chain for optimization opportunities"),
-        ("swot_analysis", "SWOT Analysis for Architecture", "Strengths/Weaknesses/Opportunities/Threats analysis"),
-        ("time_classification", "TIME Classification", "Tolerate/Invest/Migrate/Eliminate application classification"),
-        ("wardley_mapping", "Wardley Mapping", "Value chain evolution mapping technique"),
-        ("business_model_canvas_ea", "Business Model Canvas for EA", "Applying BMC to enterprise architecture"),
-        ("architecture_decision_records", "Architecture Decision Records", "Documenting architecture decisions"),
-        ("fitness_function_design", "Fitness Function Design", "Defining automated architecture fitness functions"),
-        ("domain_driven_design_togaf", "Domain-Driven Design in TOGAF", "Applying DDD concepts within TOGAF"),
-        ("event_storming_architecture", "Event Storming for Architecture", "Using event storming for architecture discovery"),
-        ("architecture_runway_planning", "Architecture Runway Planning", "Planning architecture runway for agile delivery"),
+        ("principles_definition", "Architecture Principles", "Defining and cataloging architecture principles with name, statement, rationale, and implications"),
+        ("stakeholder_management", "Stakeholder Management", "Identifying, classifying, and managing stakeholder engagement using power/interest grids"),
+        ("architecture_patterns", "Architecture Patterns", "Reusable forms describing context, problem, and solution for recurring architectural challenges"),
+        ("gap_analysis", "Gap Analysis", "Systematic comparison of baseline and target architectures to identify gaps (new, modified, eliminated, retained)"),
+        ("migration_planning", "Migration Planning Techniques", "Implementation Factor Assessment, Deduction Matrix, business value assessment, and risk assessment for sequencing"),
+        ("interoperability", "Interoperability Requirements", "Determining interoperability requirements and classifying them on the Enterprise/ISA Interoperability spectrum"),
+        ("business_transformation_readiness", "Business Transformation Readiness Assessment", "Evaluating organizational readiness for change across maturity factors and readiness factors"),
+        ("risk_management", "Risk Management", "Classification and mitigation of risks: initial level of risk, residual level of risk, and risk mitigation activities"),
+        ("capability_based_planning", "Capability-Based Planning", "Planning based on business capabilities: capability increments, capability dimensions, and heat maps"),
+        ("business_scenarios", "Business Scenarios", "Technique for identifying and articulating business requirements using problem-goal-solution narrative"),
+        ("business_value_assessment", "Value Realization/Business Value Assessment", "Quantifying the business value of architecture work: financial metrics, KPIs, and value streams"),
+        ("architecture_compliance_review", "Architecture Compliance Reviews", "Formal reviews ensuring implementation conforms to architecture: tailored checklists per project type"),
+        ("maturity_models", "Architecture Maturity Models", "ACMM (Architecture Capability Maturity Model) levels 0-5 for assessing EA practice maturity"),
+        ("implementation_factor_assessment", "Implementation Factor Assessment and Deduction Matrix", "Assessing factors (risks, issues, dependencies, actions) and using deduction matrix to determine project sequencing"),
     ]
 
     seeds = []
     for key, name, desc in techniques:
         seeds.append(SeedConcept(
             id=f"technique_{key}", name=name, category=SeedCategory.TOGAF_TECHNIQUE,
-            description=desc, domain="togaf",
-            tags=["technique"],
+            description=desc, domain="togaf", tags=["technique"],
         ))
     return seeds
 
 
-def _archimate_element_seeds() -> list[SeedConcept]:
-    """ArchiMate element seeds across all layers."""
-    elements = [
-        # Strategy layer
-        ("resource", "Resource", "strategy", "Asset owned or controlled"),
-        ("capability", "Capability", "strategy", "Ability to employ resources to achieve goals"),
-        ("value_stream", "Value Stream", "strategy", "Sequence of activities creating stakeholder value"),
-        ("course_of_action", "Course of Action", "strategy", "Approach to achieve a goal"),
+# =====================================================================
+# TOGAF Architecture Viewpoints (Section 20.5, Architecture Views)
+# =====================================================================
 
-        # Business layer
-        ("business_actor", "Business Actor", "business", "Organizational entity capable of performing behavior"),
-        ("business_role", "Business Role", "business", "Responsibility for specific behavior"),
-        ("business_collaboration", "Business Collaboration", "business", "Aggregate of roles performing collective behavior"),
-        ("business_interface", "Business Interface", "business", "Point of access for business services"),
-        ("business_process", "Business Process", "business", "Sequence of business behaviors achieving a result"),
-        ("business_function", "Business Function", "business", "Collection of behavior based on criteria"),
-        ("business_interaction", "Business Interaction", "business", "Unit of collective behavior"),
-        ("business_event", "Business Event", "business", "Organizational state change"),
-        ("business_service", "Business Service", "business", "Externally visible unit of functionality"),
-        ("business_object", "Business Object", "business", "Concept relevant from a business perspective"),
-        ("contract", "Contract", "business", "Formal or informal specification of agreement"),
-        ("representation", "Representation", "business", "Perceptible form of business object"),
-        ("product", "Product", "business", "Coherent collection of services with contract"),
-
-        # Application layer
-        ("application_component", "Application Component", "application", "Encapsulated application functionality"),
-        ("application_collaboration", "Application Collaboration", "application", "Aggregate of components performing collective behavior"),
-        ("application_interface", "Application Interface", "application", "Point of access for application services"),
-        ("application_function", "Application Function", "application", "Automated behavior element"),
-        ("application_interaction", "Application Interaction", "application", "Unit of collective application behavior"),
-        ("application_process", "Application Process", "application", "Sequence of application behaviors"),
-        ("application_event", "Application Event", "application", "Application state change"),
-        ("application_service", "Application Service", "application", "Externally visible unit of app functionality"),
-        ("data_object", "Data Object", "application", "Data structured for automated processing"),
-
-        # Technology layer
-        ("node", "Node", "technology", "Computational or physical resource hosting artifacts"),
-        ("device", "Device", "technology", "Physical IT resource for processing"),
-        ("system_software", "System Software", "technology", "Platform software"),
-        ("technology_collaboration", "Technology Collaboration", "technology", "Aggregate of nodes performing collective behavior"),
-        ("technology_interface", "Technology Interface", "technology", "Point of access for technology services"),
-        ("path", "Path", "technology", "Link between two or more nodes"),
-        ("communication_network", "Communication Network", "technology", "Set of structures connecting nodes"),
-        ("technology_function", "Technology Function", "technology", "Collection of technology behavior"),
-        ("technology_process", "Technology Process", "technology", "Sequence of technology behaviors"),
-        ("technology_interaction", "Technology Interaction", "technology", "Unit of collective technology behavior"),
-        ("technology_event", "Technology Event", "technology", "Technology state change"),
-        ("technology_service", "Technology Service", "technology", "Externally visible unit of tech functionality"),
-        ("artifact", "Artifact", "technology", "Piece of data used or produced"),
-
-        # Physical layer
-        ("equipment", "Equipment", "physical", "Physical machine or instrument"),
-        ("facility", "Facility", "physical", "Physical structure or environment"),
-        ("distribution_network", "Distribution Network", "physical", "Physical medium for transport"),
-        ("material", "Material", "physical", "Tangible physical element"),
-
-        # Motivation layer
-        ("stakeholder_element", "Stakeholder", "motivation", "Role of individual or organization with interest"),
-        ("driver", "Driver", "motivation", "External or internal condition motivating change"),
-        ("assessment", "Assessment", "motivation", "Result of analysis of a driver"),
-        ("goal", "Goal", "motivation", "End state to be achieved"),
-        ("outcome", "Outcome", "motivation", "End result"),
-        ("principle", "Principle", "motivation", "Qualitative statement guiding design"),
-        ("requirement_element", "Requirement", "motivation", "Statement of need"),
-        ("constraint", "Constraint", "motivation", "Factor limiting realization"),
-        ("meaning", "Meaning", "motivation", "Knowledge or expertise"),
-        ("value", "Value", "motivation", "Relative worth"),
-
-        # Implementation & Migration
-        ("work_package", "Work Package", "implementation_migration", "Series of actions to achieve a result"),
-        ("deliverable", "Deliverable", "implementation_migration", "Precisely-defined outcome of work package"),
-        ("implementation_event", "Implementation Event", "implementation_migration", "State change during implementation"),
-        ("plateau", "Plateau", "implementation_migration", "Relatively stable state of architecture"),
-        ("gap_element", "Gap", "implementation_migration", "Difference between two plateaus"),
-    ]
-
-    seeds = []
-    for key, name, layer, desc in elements:
-        seeds.append(SeedConcept(
-            id=f"archimate_element_{key}", name=name,
-            category=SeedCategory.ARCHIMATE_ELEMENT,
-            description=desc, domain=f"archimate_{layer}",
-            tags=["archimate", "element", layer],
-        ))
-    return seeds
-
-
-def _archimate_viewpoint_seeds() -> list[SeedConcept]:
-    """ArchiMate viewpoint seeds."""
+def _togaf_viewpoint_seeds() -> list[SeedConcept]:
+    """TOGAF architecture viewpoints — per spec guidance."""
     viewpoints = [
-        ("organization_vp", "Organization Viewpoint", "Shows organizational structure of an enterprise"),
-        ("business_process_cooperation_vp", "Business Process Cooperation Viewpoint", "Shows relationships between business processes"),
-        ("product_vp", "Product Viewpoint", "Shows value a product offers to customers"),
-        ("application_cooperation_vp", "Application Cooperation Viewpoint", "Shows application components and their relationships"),
-        ("application_usage_vp", "Application Usage Viewpoint", "Shows how applications are used by business processes"),
-        ("technology_usage_vp", "Technology Usage Viewpoint", "Shows how technology supports applications"),
-        ("technology_vp", "Technology Viewpoint", "Shows technology infrastructure"),
-        ("information_structure_vp", "Information Structure Viewpoint", "Shows information structure including data types"),
-        ("service_realization_vp", "Service Realization Viewpoint", "Shows how services are realized by behavior and components"),
-        ("implementation_deployment_vp", "Implementation and Deployment Viewpoint", "Shows how applications map to technology"),
-        ("layered_vp", "Layered Viewpoint", "Provides overview across multiple layers"),
-        ("landscape_map_vp", "Landscape Map Viewpoint", "Shows architecture elements in a grid layout"),
-        ("goal_realization_vp", "Goal Realization Viewpoint", "Shows how goals are realized through requirements"),
-        ("requirements_realization_vp", "Requirements Realization Viewpoint", "Shows how requirements are realized by elements"),
-        ("motivation_vp", "Motivation Viewpoint", "Shows motivational elements and their relationships"),
-        ("strategy_vp", "Strategy Viewpoint", "Shows strategic course of action and resources"),
-        ("capability_map_vp", "Capability Map Viewpoint", "Shows business capabilities and their relationships"),
-        ("outcome_realization_vp", "Outcome Realization Viewpoint", "Shows how outcomes are achieved"),
-        ("resource_map_vp", "Resource Map Viewpoint", "Shows allocation of resources"),
-        ("value_stream_vp", "Value Stream Viewpoint", "Shows value streams and stages"),
-        ("migration_vp", "Migration Viewpoint", "Shows transition between architecture plateaus"),
-        ("project_vp", "Project Viewpoint", "Shows project structure and deliverables"),
-        ("stakeholder_vp", "Stakeholder Viewpoint", "Shows stakeholder interests and concerns"),
-        ("physical_vp", "Physical Viewpoint", "Shows physical environment and equipment"),
+        ("vp_business_arch_view", "Business Architecture View", "Addresses concerns of business management: services, processes, organization, functions, events"),
+        ("vp_data_arch_view", "Data Architecture View", "Addresses concerns of data management: entities, components, flows, governance"),
+        ("vp_application_arch_view", "Application Architecture View", "Addresses concerns of application development: components, interfaces, services, portfolios"),
+        ("vp_technology_arch_view", "Technology Architecture View", "Addresses concerns of IT operations: platforms, infrastructure, networks, middleware"),
+        ("vp_security_view", "Security Architecture View", "Addresses security aspects across all architecture domains"),
+        ("vp_performance_view", "Performance and Capacity Architecture View", "Addresses performance and capacity engineering across all domains"),
+        ("vp_interoperability_view", "System/Service Interoperability View", "Addresses interoperability concerns between systems and services"),
+        ("vp_governance_view", "Governance Architecture View", "Addresses concerns of architecture governance: compliance, decision-making, standards"),
+        ("vp_migration_view", "Migration Architecture View", "Addresses concerns of transition from baseline to target architecture"),
+        ("vp_requirements_view", "Requirements View", "Addresses traceability from requirements to architecture artifacts"),
     ]
 
     seeds = []
     for key, name, desc in viewpoints:
         seeds.append(SeedConcept(
-            id=f"archimate_{key}", name=name, category=SeedCategory.ARCHIMATE_VIEWPOINT,
-            description=desc, domain="archimate",
-            tags=["archimate", "viewpoint"],
+            id=f"togaf_{key}", name=name, category=SeedCategory.TOGAF_VIEWPOINT,
+            description=desc, domain="togaf", tags=["viewpoint", "togaf"],
         ))
     return seeds
 
 
+# =====================================================================
+# ArchiMate 3.2 Elements — complete per spec
+# =====================================================================
+
+def _archimate_element_seeds() -> list[SeedConcept]:
+    """ArchiMate 3.2 element types — exact names per spec."""
+    elements = [
+        # Strategy Layer (Chapter 7)
+        ("resource", "Resource", "strategy", "active_structure", "An asset owned or controlled by an individual or organization"),
+        ("capability", "Capability", "strategy", "behavior", "An ability that an active structure element possesses"),
+        ("value_stream", "Value Stream", "strategy", "behavior", "A sequence of activities that creates an overall result for a customer, stakeholder, or end user"),
+        ("course_of_action", "Course of Action", "strategy", "behavior", "An approach or plan for configuring capabilities and resources to achieve a goal"),
+
+        # Business Layer (Chapter 8)
+        ("business_actor", "Business Actor", "business", "active_structure", "A business entity that is capable of performing behavior"),
+        ("business_role", "Business Role", "business", "active_structure", "The responsibility for performing specific behavior, to which an actor can be assigned"),
+        ("business_collaboration", "Business Collaboration", "business", "active_structure", "An aggregate of two or more business internal active structure elements that work together"),
+        ("business_interface", "Business Interface", "business", "active_structure", "A point of access where a business service is made available to the environment"),
+        ("business_process", "Business Process", "business", "behavior", "A sequence of business behaviors that achieves a specific result"),
+        ("business_function", "Business Function", "business", "behavior", "A collection of business behavior based on a chosen set of criteria"),
+        ("business_interaction", "Business Interaction", "business", "behavior", "A unit of collective business behavior performed by a collaboration"),
+        ("business_event", "Business Event", "business", "behavior", "A business behavior element that denotes an organizational state change"),
+        ("business_service", "Business Service", "business", "behavior", "An explicitly defined exposed business behavior"),
+        ("business_object", "Business Object", "business", "passive_structure", "A concept used within a particular business domain"),
+        ("contract", "Contract", "business", "passive_structure", "A formal or informal specification of an agreement between a provider and a consumer"),
+        ("representation", "Representation", "business", "passive_structure", "A perceptible form of the information carried by a business object"),
+        ("product", "Product", "business", "composite", "A coherent collection of services and/or passive structure elements, accompanied by a contract/agreement"),
+
+        # Application Layer (Chapter 9)
+        ("application_component", "Application Component", "application", "active_structure", "An encapsulation of application functionality aligned to implementation structure"),
+        ("application_collaboration", "Application Collaboration", "application", "active_structure", "An aggregate of two or more application components that work together"),
+        ("application_interface", "Application Interface", "application", "active_structure", "A point of access where application services are made available"),
+        ("application_function", "Application Function", "application", "behavior", "Automated behavior that can be performed by an application component"),
+        ("application_interaction", "Application Interaction", "application", "behavior", "A unit of collective application behavior performed by a collaboration"),
+        ("application_process", "Application Process", "application", "behavior", "A sequence of application behaviors that achieves a specific result"),
+        ("application_event", "Application Event", "application", "behavior", "An application behavior element that denotes a state change"),
+        ("application_service", "Application Service", "application", "behavior", "An explicitly defined exposed application behavior"),
+        ("data_object", "Data Object", "application", "passive_structure", "Data structured for automated processing"),
+
+        # Technology Layer (Chapter 10)
+        ("node", "Node", "technology", "active_structure", "A computational or physical resource that hosts, manipulates, or interacts with other computational or physical resources"),
+        ("device", "Device", "technology", "active_structure", "A physical IT resource upon which system software and artifacts may be stored or deployed"),
+        ("system_software", "System Software", "technology", "active_structure", "Software that provides or contributes to an environment for storing, executing, and using software or data"),
+        ("technology_collaboration", "Technology Collaboration", "technology", "active_structure", "An aggregate of two or more technology internal active structure elements that work together"),
+        ("technology_interface", "Technology Interface", "technology", "active_structure", "A point of access where technology services are made available"),
+        ("path", "Path", "technology", "active_structure", "A link between two or more nodes, through which these nodes can exchange data, energy, or material"),
+        ("communication_network", "Communication Network", "technology", "active_structure", "A set of structures that connects nodes for transmission, routing, and reception"),
+        ("technology_function", "Technology Function", "technology", "behavior", "A collection of technology behavior that can be performed by a node"),
+        ("technology_process", "Technology Process", "technology", "behavior", "A sequence of technology behaviors that achieves a specific result"),
+        ("technology_interaction", "Technology Interaction", "technology", "behavior", "A unit of collective technology behavior performed by a collaboration"),
+        ("technology_event", "Technology Event", "technology", "behavior", "A technology behavior element that denotes a state change"),
+        ("technology_service", "Technology Service", "technology", "behavior", "An explicitly defined exposed technology behavior"),
+        ("artifact", "Artifact", "technology", "passive_structure", "A piece of data that is used or produced in a software development process, or by deployment and operation of an IT system"),
+
+        # Physical Elements (Chapter 11)
+        ("equipment", "Equipment", "physical", "active_structure", "One or more physical machines, tools, or instruments that can create, use, store, move, or transform materials"),
+        ("facility", "Facility", "physical", "active_structure", "A physical structure or environment"),
+        ("distribution_network", "Distribution Network", "physical", "active_structure", "A physical medium used to transport materials or energy"),
+        ("material", "Material", "physical", "passive_structure", "Tangible physical matter or energy"),
+
+        # Motivation Elements (Chapter 12)
+        ("stakeholder", "Stakeholder", "motivation", "active_structure", "The role of an individual, team, or organization that represents their interests in the architecture"),
+        ("driver", "Driver", "motivation", "passive_structure", "An external or internal condition that motivates an organization to define its goals and implement changes"),
+        ("assessment", "Assessment", "motivation", "passive_structure", "The result of an analysis of the state of affairs of the enterprise with respect to some driver"),
+        ("goal", "Goal", "motivation", "passive_structure", "A high-level statement of intent, direction, or desired end state"),
+        ("outcome", "Outcome", "motivation", "passive_structure", "An end result"),
+        ("principle", "Principle", "motivation", "passive_structure", "A qualitative statement of intent that should be met by the architecture"),
+        ("requirement", "Requirement", "motivation", "passive_structure", "A statement of need that must be realized by a system"),
+        ("constraint", "Constraint", "motivation", "passive_structure", "A factor that prevents or obstructs the realization of goals"),
+        ("meaning", "Meaning", "motivation", "passive_structure", "The knowledge or expertise present in, or the interpretation given to, a concept"),
+        ("value", "Value", "motivation", "passive_structure", "The relative worth, utility, or importance of a concept"),
+
+        # Implementation & Migration (Chapter 13)
+        ("work_package", "Work Package", "implementation_migration", "behavior", "A series of actions identified and designed to achieve specific results within specified time and resource constraints"),
+        ("deliverable", "Deliverable", "implementation_migration", "passive_structure", "A precisely-defined outcome of a work package"),
+        ("implementation_event", "Implementation Event", "implementation_migration", "behavior", "A state change related to implementation or migration"),
+        ("plateau", "Plateau", "implementation_migration", "composite", "A relatively stable state of the architecture that exists during a limited period of time"),
+        ("gap", "Gap", "implementation_migration", "passive_structure", "A statement of difference between two plateaus"),
+
+        # Composite Elements (Chapter 14)
+        ("grouping", "Grouping", "composite", "composite", "Aggregates or composes concepts that belong together based on some common characteristic"),
+        ("location", "Location", "composite", "composite", "A place or position where structure elements can be located or behavior can be performed"),
+    ]
+
+    seeds = []
+    for key, name, layer, aspect, desc in elements:
+        seeds.append(SeedConcept(
+            id=f"am_element_{key}", name=name, category=SeedCategory.ARCHIMATE_ELEMENT,
+            description=desc, domain=f"archimate_{layer}",
+            tags=["archimate", "element", layer, aspect],
+            metadata={"layer": layer, "aspect": aspect},
+        ))
+    return seeds
+
+
+# =====================================================================
+# ArchiMate 3.2 Relationships — complete per spec (Chapter 5)
+# =====================================================================
+
+def _archimate_relationship_seeds() -> list[SeedConcept]:
+    """ArchiMate 3.2 relationship types — exact per spec."""
+    relationships = [
+        # Structural relationships
+        ("composition", "Composition Relationship", "structural",
+         "Indicates that an element consists of one or more other concepts. The part is integral to the whole"),
+        ("aggregation", "Aggregation Relationship", "structural",
+         "Indicates that an element combines one or more other concepts. Parts can exist independently"),
+        ("assignment", "Assignment Relationship", "structural",
+         "Expresses the allocation of responsibility, performance of behavior, storage, or execution"),
+        ("realization", "Realization Relationship", "structural",
+         "Indicates that an entity plays a critical role in the creation, achievement, sustenance, or operation of a more abstract entity"),
+
+        # Dependency relationships
+        ("serving", "Serving Relationship", "dependency",
+         "Models that an element provides its functionality to another element. Previously called 'Used By'"),
+        ("access", "Access Relationship", "dependency",
+         "Models the ability of behavior and active structure elements to observe or act upon passive structure elements"),
+        ("influence", "Influence Relationship", "dependency",
+         "Models that an element affects the implementation or achievement of some motivation element. Can be positive or negative"),
+
+        # Dynamic relationships
+        ("triggering", "Triggering Relationship", "dynamic",
+         "Describes a temporal or causal relationship between elements. The source triggers the target"),
+        ("flow", "Flow Relationship", "dynamic",
+         "Describes the exchange or transfer of, for example, information or value between processes, function, interactions, and events"),
+
+        # Other relationships
+        ("specialization", "Specialization Relationship", "other",
+         "Indicates that an element is a particular kind of another element"),
+        ("association", "Association Relationship", "other",
+         "Models an unspecified relationship, or one that is not represented by another ArchiMate relationship"),
+
+        # Connectors
+        ("junction_and", "Junction (AND)", "connector",
+         "Used to connect relationships of the same type. AND junction: all paths are followed"),
+        ("junction_or", "Junction (OR)", "connector",
+         "Used to connect relationships of the same type. OR junction: one or more paths are followed"),
+    ]
+
+    seeds = []
+    for key, name, rel_category, desc in relationships:
+        seeds.append(SeedConcept(
+            id=f"am_rel_{key}", name=name, category=SeedCategory.ARCHIMATE_RELATIONSHIP,
+            description=desc, domain="archimate",
+            tags=["archimate", "relationship", rel_category],
+            metadata={"relationship_category": rel_category},
+        ))
+    return seeds
+
+
+# =====================================================================
+# ArchiMate 3.2 Viewpoints — complete per spec (Appendix C)
+# =====================================================================
+
+def _archimate_viewpoint_seeds() -> list[SeedConcept]:
+    """ArchiMate 3.2 example viewpoints — exact names from Appendix C."""
+    viewpoints = [
+        ("organization_vp", "Organization Viewpoint", "Shows the structure of the organization: actors, roles, and their relationships"),
+        ("business_process_cooperation_vp", "Business Process Cooperation Viewpoint", "Shows relationships and dependencies between business processes"),
+        ("product_vp", "Product Viewpoint", "Shows the value a product offers to customers, including the constituting services and contracts"),
+        ("application_cooperation_vp", "Application Cooperation Viewpoint", "Shows application components and their cooperation through information flows or services"),
+        ("application_usage_vp", "Application Usage Viewpoint", "Relates applications to their use by business processes"),
+        ("implementation_deployment_vp", "Implementation and Deployment Viewpoint", "Shows how applications are mapped onto the underlying technology"),
+        ("technology_vp", "Technology Viewpoint", "Shows the structure and connectivity of the technology infrastructure"),
+        ("technology_usage_vp", "Technology Usage Viewpoint", "Shows how applications are supported by the technology infrastructure"),
+        ("information_structure_vp", "Information Structure Viewpoint", "Shows the structure of the information used, including data types and relationships"),
+        ("service_realization_vp", "Service Realization Viewpoint", "Shows how services are realized by required behavior, performed by active structure elements"),
+        ("physical_vp", "Physical Viewpoint", "Shows the physical environment and how it relates to IT infrastructure"),
+        ("layered_vp", "Layered Viewpoint", "Provides an overview across two or more layers of the ArchiMate framework"),
+        ("landscape_map_vp", "Landscape Map Viewpoint", "Represents architecture elements as a map (matrix/grid) showing relationships between dimensions"),
+        ("goal_realization_vp", "Goal Realization Viewpoint", "Shows how goals are refined into requirements, and realized by core elements"),
+        ("requirements_realization_vp", "Requirements Realization Viewpoint", "Shows how requirements are realized by core elements such as actors, services, processes, applications"),
+        ("motivation_vp", "Motivation Viewpoint", "Shows motivational elements and their relationships: stakeholders, drivers, goals, principles, requirements"),
+        ("strategy_vp", "Strategy Viewpoint", "Shows strategic course of action, capabilities, and resources"),
+        ("capability_map_vp", "Capability Map Viewpoint", "Shows a structured overview of capabilities, typically as a heat map"),
+        ("outcome_realization_vp", "Outcome Realization Viewpoint", "Shows how outcomes contribute to value creation and how core elements realize outcomes"),
+        ("resource_map_vp", "Resource Map Viewpoint", "Shows structured overview of resources required to realize capabilities"),
+        ("value_stream_vp", "Value Stream Viewpoint", "Shows value stream stages and their relationships to capabilities, value, and stakeholders"),
+        ("project_vp", "Project Viewpoint", "Shows management of the change: work packages, deliverables, and migration from plateau to plateau"),
+        ("migration_vp", "Migration Viewpoint", "Shows transition from existing plateaus to target plateaus through transition architectures"),
+        ("implementation_migration_vp", "Implementation and Migration Viewpoint", "Shows how the implementation of projects relates to migration from current to future state"),
+    ]
+
+    seeds = []
+    for key, name, desc in viewpoints:
+        seeds.append(SeedConcept(
+            id=f"am_{key}", name=name, category=SeedCategory.ARCHIMATE_VIEWPOINT,
+            description=desc, domain="archimate", tags=["archimate", "viewpoint"],
+        ))
+    return seeds
+
+
+# =====================================================================
+# Industry Cases
+# =====================================================================
+
 def _industry_case_seeds() -> list[SeedConcept]:
-    """Industry-specific case seeds."""
+    """Industry-specific case seeds across domains."""
     cases = [
         # Banking & Finance
         ("banking_core_modernization", "Banking Core Modernization", "banking", "Modernizing legacy core banking systems to cloud-native architecture"),
         ("payment_hub_transformation", "Payment Hub Transformation", "banking", "Centralizing payment processing across channels"),
-        ("digital_banking_platform", "Digital Banking Platform", "banking", "Building omnichannel digital banking experience"),
-        ("open_banking_api_ecosystem", "Open Banking API Ecosystem", "banking", "Implementing PSD2/open banking API infrastructure"),
+        ("open_banking_api", "Open Banking API Ecosystem", "banking", "PSD2/open banking API infrastructure"),
         ("aml_kyc_platform", "AML/KYC Platform Modernization", "banking", "Anti-money laundering and KYC platform overhaul"),
-        ("wealth_management_digital", "Wealth Management Digitalization", "banking", "Digital transformation of wealth advisory services"),
-        ("trade_finance_blockchain", "Trade Finance Blockchain", "banking", "Blockchain-based trade finance platform"),
-        ("credit_scoring_ai", "AI-Powered Credit Scoring", "banking", "Machine learning-based credit risk assessment"),
-        ("real_time_payments", "Real-Time Payments Infrastructure", "banking", "Implementing instant payment capabilities"),
-        ("regulatory_reporting_platform", "Regulatory Reporting Platform", "banking", "Automated regulatory reporting infrastructure"),
-        ("mobile_banking_redesign", "Mobile Banking Redesign", "banking", "Redesigning mobile banking user experience"),
-        ("branch_transformation", "Branch Transformation", "banking", "Digital transformation of physical branches"),
         ("loan_origination_modernization", "Loan Origination System Modernization", "banking", "Modernizing end-to-end loan origination"),
-        ("fraud_detection_realtime", "Real-Time Fraud Detection", "banking", "Real-time fraud detection and prevention"),
-        ("data_warehouse_migration", "Data Warehouse Cloud Migration", "banking", "Migrating enterprise data warehouse to cloud"),
-
-        # Insurance
-        ("insurance_claims_digital", "Insurance Claims Digitalization", "insurance", "End-to-end digital claims processing"),
-        ("insurance_underwriting_ai", "AI-Powered Underwriting", "insurance", "Machine learning-based risk assessment for underwriting"),
-        ("insurance_policy_admin", "Policy Administration Modernization", "insurance", "Modernizing policy admin systems"),
-        ("insurtech_platform", "InsurTech Platform Integration", "insurance", "Integrating InsurTech capabilities into legacy ecosystem"),
-        ("telematics_iot_insurance", "Telematics/IoT Insurance Platform", "insurance", "Usage-based insurance with IoT data"),
+        ("real_time_payments", "Real-Time Payments Infrastructure", "banking", "Instant payment capabilities (ISO 20022)"),
+        ("regulatory_reporting", "Regulatory Reporting Platform", "banking", "Automated regulatory reporting (Basel III, BCBS 239)"),
 
         # Healthcare
-        ("healthcare_fhir_integration", "Healthcare FHIR Integration", "healthcare", "HL7 FHIR-based healthcare data interoperability"),
+        ("healthcare_fhir", "Healthcare FHIR Integration", "healthcare", "HL7 FHIR-based healthcare data interoperability"),
         ("ehr_modernization", "EHR System Modernization", "healthcare", "Electronic health record system modernization"),
-        ("telemedicine_platform", "Telemedicine Platform Architecture", "healthcare", "Scalable telemedicine platform design"),
         ("clinical_data_lake", "Clinical Data Lake", "healthcare", "Enterprise clinical data lake for analytics"),
-        ("patient_engagement_portal", "Patient Engagement Portal", "healthcare", "Patient-facing engagement and communication platform"),
-        ("medical_device_iot", "Medical Device IoT Platform", "healthcare", "IoT platform for medical device integration"),
-        ("drug_supply_chain", "Drug Supply Chain Traceability", "healthcare", "Pharmaceutical supply chain track and trace"),
-        ("health_information_exchange", "Health Information Exchange", "healthcare", "Regional health information exchange network"),
-        ("genomics_data_platform", "Genomics Data Platform", "healthcare", "Platform for genomics data analysis and storage"),
-        ("hospital_erp_migration", "Hospital ERP Migration", "healthcare", "Migrating hospital management systems"),
+        ("telemedicine_platform", "Telemedicine Platform Architecture", "healthcare", "Scalable telemedicine platform design"),
 
         # Telecom
-        ("telecom_5g_network_slicing", "Telecom 5G Network Slicing", "telecom", "5G network slicing architecture for multi-tenant services"),
-        ("telecom_bss_transformation", "BSS Transformation", "telecom", "Business support system transformation to TM Forum standards"),
-        ("telecom_oss_modernization", "OSS Modernization", "telecom", "Operations support system cloud migration"),
-        ("telecom_api_gateway", "Telecom API Gateway Platform", "telecom", "Unified API gateway for telecom services"),
-        ("telecom_edge_computing", "Edge Computing Platform", "telecom", "Multi-access edge computing architecture"),
-        ("telecom_iot_platform", "Telecom IoT Platform", "telecom", "IoT connectivity and device management platform"),
-        ("telecom_digital_twin", "Network Digital Twin", "telecom", "Digital twin for network planning and optimization"),
-        ("telecom_customer_360", "Customer 360 Platform", "telecom", "Unified customer view across all channels"),
+        ("telecom_5g_slicing", "5G Network Slicing Architecture", "telecom", "5G network slicing for multi-tenant services"),
+        ("bss_transformation", "BSS Transformation", "telecom", "Business support system transformation (TM Forum ODA)"),
+        ("oss_modernization", "OSS Modernization", "telecom", "Operations support system cloud migration"),
 
         # Manufacturing
         ("smart_factory", "Smart Factory Architecture", "manufacturing", "Industry 4.0 smart factory implementation"),
-        ("manufacturing_mes", "MES Modernization", "manufacturing", "Manufacturing execution system modernization"),
+        ("supply_chain_control_tower", "Supply Chain Control Tower", "manufacturing", "End-to-end supply chain visibility"),
         ("digital_twin_manufacturing", "Manufacturing Digital Twin", "manufacturing", "Digital twin for manufacturing processes"),
-        ("supply_chain_control_tower", "Supply Chain Control Tower", "manufacturing", "End-to-end supply chain visibility platform"),
-        ("predictive_maintenance_platform", "Predictive Maintenance Platform", "manufacturing", "IoT-based predictive maintenance architecture"),
-        ("quality_management_digital", "Digital Quality Management", "manufacturing", "Digitalized quality management processes"),
 
         # Government
         ("gov_digital_services", "Government Digital Services", "government", "Citizen-facing digital government services"),
-        ("gov_data_sharing", "Cross-Agency Data Sharing", "government", "Secure data sharing between government agencies"),
-        ("gov_legacy_modernization", "Government Legacy Modernization", "government", "Modernizing decades-old government IT systems"),
-        ("smart_city_platform", "Smart City Platform", "government", "Integrated smart city services architecture"),
-        ("gov_identity_platform", "Digital Identity Platform", "government", "National digital identity and authentication"),
-        ("defense_enterprise_arch", "Defense Enterprise Architecture", "government", "DoDAF/MODAF-aligned defense architecture"),
-
-        # Retail
-        ("omnichannel_retail", "Omnichannel Retail Platform", "retail", "Unified commerce across physical and digital channels"),
-        ("retail_supply_chain", "Retail Supply Chain Optimization", "retail", "AI-driven supply chain optimization"),
-        ("personalization_engine", "Personalization Engine", "retail", "Real-time customer personalization platform"),
-        ("retail_pos_modernization", "POS System Modernization", "retail", "Point-of-sale system cloud migration"),
-        ("marketplace_platform", "Marketplace Platform", "retail", "Multi-vendor marketplace architecture"),
-
-        # Energy & Utilities
-        ("smart_grid", "Smart Grid Architecture", "energy", "Intelligent electricity grid modernization"),
-        ("energy_trading_platform", "Energy Trading Platform", "energy", "Real-time energy trading and settlement"),
-        ("renewable_energy_management", "Renewable Energy Management", "energy", "Distributed renewable energy orchestration"),
-        ("utility_metering", "Advanced Metering Infrastructure", "energy", "Smart metering and demand response"),
-        ("carbon_tracking", "Carbon Emissions Tracking Platform", "energy", "Enterprise carbon footprint tracking and reporting"),
+        ("cross_agency_data_sharing", "Cross-Agency Data Sharing", "government", "Secure inter-agency data sharing"),
+        ("gov_legacy_modernization", "Government IT Modernization", "government", "Modernizing decades-old government systems"),
 
         # Cross-industry
         ("cloud_migration_enterprise", "Enterprise Cloud Migration", "cross_industry", "Comprehensive cloud migration program"),
-        ("microservices_decomposition", "Microservices Decomposition", "cross_industry", "Monolith to microservices transformation"),
-        ("api_platform_enterprise", "Enterprise API Platform", "cross_industry", "Organization-wide API management platform"),
-        ("data_mesh_implementation", "Data Mesh Implementation", "cross_industry", "Implementing data mesh architecture paradigm"),
-        ("zero_trust_architecture", "Zero Trust Security Architecture", "cross_industry", "Zero trust network architecture implementation"),
-        ("event_driven_architecture", "Event-Driven Architecture", "cross_industry", "Enterprise event-driven architecture transformation"),
-        ("multicloud_governance", "Multi-Cloud Governance", "cross_industry", "Governance framework for multi-cloud environments"),
-        ("devops_platform", "DevOps Platform Architecture", "cross_industry", "Enterprise DevOps platform and toolchain"),
-        ("ai_ml_platform", "AI/ML Platform Architecture", "cross_industry", "Enterprise AI and machine learning platform"),
-        ("integration_platform", "Integration Platform Modernization", "cross_industry", "ESB to iPaaS migration"),
-        ("identity_access_management", "IAM Platform Modernization", "cross_industry", "Identity and access management overhaul"),
-        ("observability_platform", "Observability Platform", "cross_industry", "Unified observability and monitoring"),
-        ("crm_transformation", "CRM Transformation", "cross_industry", "Customer relationship management modernization"),
-        ("erp_cloud_migration", "ERP Cloud Migration", "cross_industry", "Migrating ERP to cloud-based platform"),
-        ("content_management_headless", "Headless CMS Architecture", "cross_industry", "Headless content management system architecture"),
+        ("microservices_decomposition", "Monolith to Microservices", "cross_industry", "Monolith decomposition transformation"),
+        ("data_mesh", "Data Mesh Implementation", "cross_industry", "Data mesh architecture paradigm"),
+        ("zero_trust", "Zero Trust Architecture", "cross_industry", "Zero trust network architecture implementation"),
+        ("api_platform", "Enterprise API Platform", "cross_industry", "Organization-wide API management"),
+        ("event_driven", "Event-Driven Architecture", "cross_industry", "Enterprise EDA transformation"),
+        ("erp_cloud_migration", "ERP Cloud Migration", "cross_industry", "Migrating ERP to cloud platform"),
+        ("observability_platform", "Observability Platform", "cross_industry", "Unified monitoring and observability"),
+        ("iam_modernization", "IAM Modernization", "cross_industry", "Identity and access management overhaul"),
     ]
 
     seeds = []
     for key, name, industry, desc in cases:
         seeds.append(SeedConcept(
             id=f"case_{key}", name=name, category=SeedCategory.INDUSTRY_CASE,
-            description=desc, domain=industry,
-            tags=["industry_case", industry],
+            description=desc, domain=industry, tags=["industry_case", industry],
         ))
     return seeds
 
 
+# =====================================================================
+# Standards
+# =====================================================================
+
 def _standard_seeds() -> list[SeedConcept]:
-    """Standard/framework seeds."""
+    """Compliance standards relevant to architecture."""
     standards = [
         ("togaf_10", "TOGAF Standard 10th Edition", "The Open Group Architecture Framework version 10"),
-        ("togaf_9_2", "TOGAF Standard 9.2", "The Open Group Architecture Framework version 9.2"),
         ("archimate_3_2", "ArchiMate 3.2 Specification", "ArchiMate modeling language specification"),
         ("it4it", "IT4IT Reference Architecture", "IT value chain reference architecture"),
-        ("iso_42010", "ISO/IEC/IEEE 42010", "Systems and software engineering architecture description"),
-        ("zachman", "Zachman Framework", "Enterprise architecture classification taxonomy"),
-        ("feaf", "Federal Enterprise Architecture Framework", "US Federal government EA framework"),
-        ("dodaf", "DoDAF 2.02", "Department of Defense Architecture Framework"),
-        ("modaf", "MODAF", "UK Ministry of Defence Architecture Framework"),
-        ("nato_af", "NATO Architecture Framework", "NATO C3 systems architecture framework"),
-        ("sabsa", "SABSA Framework", "Security architecture framework"),
+        ("iso_42010", "ISO/IEC/IEEE 42010:2022", "Systems and software engineering — Architecture description"),
+        ("pci_dss_4", "PCI DSS v4.0", "Payment Card Industry Data Security Standard"),
+        ("sox", "SOX (Sarbanes-Oxley Act)", "Financial reporting and internal controls"),
+        ("gdpr", "GDPR", "General Data Protection Regulation"),
+        ("hipaa", "HIPAA", "Health Insurance Portability and Accountability Act"),
+        ("basel_iii", "Basel III/IV", "Banking regulatory capital framework"),
+        ("dora", "DORA", "Digital Operational Resilience Act"),
+        ("nis2", "NIS2 Directive", "Network and Information Security Directive 2"),
+        ("iso_27001", "ISO 27001:2022", "Information security management system"),
+        ("nist_csf", "NIST Cybersecurity Framework 2.0", "Cybersecurity risk management framework"),
         ("cobit_2019", "COBIT 2019", "IT governance and management framework"),
         ("itil_4", "ITIL 4", "IT service management framework"),
-        ("iso_27001_standard", "ISO 27001:2022", "Information security management system"),
-        ("nist_csf_standard", "NIST Cybersecurity Framework", "Cybersecurity risk management framework"),
-        ("pci_dss_standard", "PCI DSS v4.0", "Payment card industry data security standard"),
-        ("sox_standard", "SOX Compliance", "Sarbanes-Oxley Act compliance"),
-        ("gdpr_standard", "GDPR", "General Data Protection Regulation"),
-        ("hipaa_standard", "HIPAA", "Health Insurance Portability and Accountability Act"),
-        ("basel_iii_standard", "Basel III", "Banking regulatory framework"),
-        ("dora_standard", "DORA", "Digital Operational Resilience Act"),
-        ("nis2_standard", "NIS2 Directive", "Network and Information Security Directive 2"),
-        ("mifid2_standard", "MiFID II", "Markets in Financial Instruments Directive"),
-        ("psd2_standard", "PSD2", "Payment Services Directive 2"),
-        ("ccpa_standard", "CCPA", "California Consumer Privacy Act"),
-        ("bian_standard", "BIAN", "Banking Industry Architecture Network"),
-        ("tmforum_oda_standard", "TM Forum ODA", "Open Digital Architecture"),
-        ("acord_standard", "ACORD Standards", "Insurance data standards"),
-        ("hl7_fhir_standard", "HL7 FHIR", "Healthcare interoperability standard"),
-        ("openapi_spec", "OpenAPI Specification", "API description standard"),
-        ("asyncapi_spec", "AsyncAPI Specification", "Async API description standard"),
-        ("cncf_landscape", "CNCF Landscape", "Cloud Native Computing Foundation landscape"),
-        ("twelve_factor_app", "12-Factor App", "Methodology for building SaaS applications"),
-        ("well_architected_aws", "AWS Well-Architected Framework", "Cloud architecture best practices"),
-        ("azure_waf", "Azure Well-Architected Framework", "Microsoft cloud architecture guidance"),
-        ("gcp_arch_framework", "GCP Architecture Framework", "Google Cloud architecture guidance"),
-        ("safe_framework", "SAFe", "Scaled Agile Framework"),
-        ("less_framework", "LeSS", "Large-Scale Scrum framework"),
-        ("team_topologies", "Team Topologies", "Organizing business and technology teams"),
-        ("c4_model", "C4 Model", "Software architecture visualization model"),
+        ("safe_6", "SAFe 6.0", "Scaled Agile Framework"),
+        ("bian", "BIAN", "Banking Industry Architecture Network"),
+        ("tmforum_oda", "TM Forum ODA", "Open Digital Architecture for telecom"),
+        ("hl7_fhir", "HL7 FHIR R4", "Healthcare interoperability standard"),
     ]
 
     seeds = []
     for key, name, desc in standards:
         seeds.append(SeedConcept(
             id=f"standard_{key}", name=name, category=SeedCategory.STANDARD,
-            description=desc, domain="standards",
-            tags=["standard"],
+            description=desc, domain="standards", tags=["standard"],
         ))
     return seeds
 
 
+# =====================================================================
+# Capabilities, Building Blocks, Stakeholders
+# =====================================================================
+
 def _capability_seeds() -> list[SeedConcept]:
-    """Business capability seeds across industries."""
+    """Business capabilities across industries."""
     capabilities = [
-        # Banking capabilities
-        ("banking_payment_processing", "Payment Processing", "banking", "Processing financial transactions"),
-        ("banking_customer_onboarding", "Customer Onboarding", "banking", "Onboarding new banking customers"),
-        ("banking_loan_origination", "Loan Origination", "banking", "End-to-end loan processing"),
-        ("banking_risk_management", "Risk Management", "banking", "Financial risk assessment and mitigation"),
-        ("banking_regulatory_compliance", "Regulatory Compliance", "banking", "Ensuring regulatory adherence"),
-        ("banking_fraud_management", "Fraud Management", "banking", "Detecting and preventing fraud"),
-        ("banking_treasury_management", "Treasury Management", "banking", "Corporate treasury operations"),
-        ("banking_trade_settlement", "Trade Settlement", "banking", "Securities trade settlement"),
-        ("banking_customer_analytics", "Customer Analytics", "banking", "Customer behavior analysis"),
-        ("banking_digital_channels", "Digital Channel Management", "banking", "Managing digital banking channels"),
-        ("banking_account_management", "Account Management", "banking", "Managing customer accounts"),
-        ("banking_credit_decisioning", "Credit Decisioning", "banking", "Automated credit decisions"),
-        ("banking_collateral_management", "Collateral Management", "banking", "Managing loan collateral"),
-        ("banking_reconciliation", "Reconciliation", "banking", "Financial reconciliation processes"),
-        ("banking_reporting", "Regulatory Reporting", "banking", "Mandatory regulatory reporting"),
-
-        # Healthcare capabilities
-        ("health_patient_registration", "Patient Registration", "healthcare", "Registering and identifying patients"),
-        ("health_clinical_documentation", "Clinical Documentation", "healthcare", "Creating and managing clinical records"),
-        ("health_order_management", "Order Management", "healthcare", "Managing clinical orders"),
-        ("health_medication_management", "Medication Management", "healthcare", "Prescribing and dispensing medications"),
-        ("health_lab_management", "Laboratory Management", "healthcare", "Managing lab orders and results"),
-        ("health_imaging", "Medical Imaging", "healthcare", "DICOM imaging and PACS management"),
-        ("health_scheduling", "Patient Scheduling", "healthcare", "Scheduling appointments and resources"),
-        ("health_billing", "Medical Billing", "healthcare", "Claims processing and billing"),
-        ("health_population_health", "Population Health Management", "healthcare", "Managing health at population level"),
-        ("health_care_coordination", "Care Coordination", "healthcare", "Coordinating care across providers"),
-
-        # Telecom capabilities
-        ("telecom_network_planning", "Network Planning", "telecom", "Planning network infrastructure"),
-        ("telecom_service_provisioning", "Service Provisioning", "telecom", "Activating customer services"),
-        ("telecom_billing_rating", "Billing and Rating", "telecom", "Usage rating and billing"),
-        ("telecom_customer_care", "Customer Care", "telecom", "Customer support and service"),
-        ("telecom_network_monitoring", "Network Monitoring", "telecom", "Real-time network monitoring"),
-        ("telecom_spectrum_management", "Spectrum Management", "telecom", "Radio spectrum allocation"),
-        ("telecom_partner_management", "Partner Management", "telecom", "Managing MVNO and partner relationships"),
-        ("telecom_product_catalog", "Product Catalog Management", "telecom", "Managing telecom product offerings"),
-
-        # Manufacturing capabilities
-        ("mfg_production_planning", "Production Planning", "manufacturing", "Planning production schedules"),
-        ("mfg_quality_control", "Quality Control", "manufacturing", "Ensuring product quality"),
-        ("mfg_inventory_management", "Inventory Management", "manufacturing", "Managing raw materials and finished goods"),
-        ("mfg_supply_chain", "Supply Chain Management", "manufacturing", "Managing suppliers and logistics"),
-        ("mfg_maintenance", "Maintenance Management", "manufacturing", "Equipment maintenance and repair"),
-        ("mfg_product_lifecycle", "Product Lifecycle Management", "manufacturing", "Managing product from design to disposal"),
-        ("mfg_shop_floor", "Shop Floor Management", "manufacturing", "Managing shop floor operations"),
-        ("mfg_demand_forecasting", "Demand Forecasting", "manufacturing", "Predicting product demand"),
-
-        # Cross-industry capabilities
-        ("cross_identity_management", "Identity and Access Management", "cross_industry", "Managing user identities and access"),
-        ("cross_data_governance", "Data Governance", "cross_industry", "Governing data quality and lifecycle"),
-        ("cross_api_management", "API Management", "cross_industry", "Managing API lifecycle and access"),
-        ("cross_event_management", "Event Management", "cross_industry", "Managing business and technical events"),
-        ("cross_document_management", "Document Management", "cross_industry", "Managing enterprise documents"),
-        ("cross_workflow_automation", "Workflow Automation", "cross_industry", "Automating business workflows"),
-        ("cross_analytics_bi", "Analytics and BI", "cross_industry", "Business intelligence and analytics"),
-        ("cross_master_data", "Master Data Management", "cross_industry", "Managing master data entities"),
-        ("cross_notification", "Notification Management", "cross_industry", "Managing multi-channel notifications"),
-        ("cross_audit_logging", "Audit and Logging", "cross_industry", "Enterprise audit trail and logging"),
+        # Banking
+        ("payment_processing", "Payment Processing", "banking"), ("customer_onboarding", "Customer Onboarding", "banking"),
+        ("loan_origination", "Loan Origination", "banking"), ("risk_management_banking", "Financial Risk Management", "banking"),
+        ("fraud_detection", "Fraud Detection", "banking"), ("regulatory_compliance_banking", "Regulatory Compliance", "banking"),
+        ("credit_decisioning", "Credit Decisioning", "banking"), ("treasury_management", "Treasury Management", "banking"),
+        # Healthcare
+        ("patient_registration", "Patient Registration", "healthcare"), ("clinical_documentation", "Clinical Documentation", "healthcare"),
+        ("medication_management", "Medication Management", "healthcare"), ("medical_billing", "Medical Billing", "healthcare"),
+        # Telecom
+        ("network_planning", "Network Planning", "telecom"), ("service_provisioning", "Service Provisioning", "telecom"),
+        ("billing_rating", "Billing and Rating", "telecom"), ("network_monitoring", "Network Monitoring", "telecom"),
+        # Cross-industry
+        ("identity_access_mgmt", "Identity and Access Management", "cross_industry"), ("data_governance", "Data Governance", "cross_industry"),
+        ("api_management", "API Management", "cross_industry"), ("master_data_mgmt", "Master Data Management", "cross_industry"),
+        ("analytics_bi", "Analytics and BI", "cross_industry"), ("workflow_automation", "Workflow Automation", "cross_industry"),
     ]
 
     seeds = []
-    for key, name, domain, desc in capabilities:
+    for key, name, domain in capabilities:
         seeds.append(SeedConcept(
-            id=f"capability_{key}", name=name, category=SeedCategory.CAPABILITY,
-            description=desc, domain=domain,
-            tags=["capability", domain],
+            id=f"cap_{key}", name=name, category=SeedCategory.CAPABILITY,
+            description=f"Business capability: {name}", domain=domain, tags=["capability", domain],
         ))
     return seeds
 
 
 def _building_block_seeds() -> list[SeedConcept]:
-    """Architecture and Solution Building Block seeds."""
+    """ABB and SBB seeds."""
     blocks = [
-        # Architecture Building Blocks (ABBs)
-        ("abb_api_gateway", "API Gateway ABB", "Architecture building block for API management and gateway"),
-        ("abb_message_broker", "Message Broker ABB", "Architecture building block for asynchronous messaging"),
-        ("abb_identity_provider", "Identity Provider ABB", "Architecture building block for authentication/authorization"),
-        ("abb_data_store", "Data Store ABB", "Architecture building block for data persistence"),
-        ("abb_event_bus", "Event Bus ABB", "Architecture building block for event-driven communication"),
-        ("abb_service_mesh", "Service Mesh ABB", "Architecture building block for service-to-service communication"),
-        ("abb_etl_pipeline", "ETL Pipeline ABB", "Architecture building block for data extraction/transformation/loading"),
-        ("abb_monitoring", "Monitoring ABB", "Architecture building block for observability"),
-        ("abb_cache_layer", "Cache Layer ABB", "Architecture building block for caching"),
-        ("abb_search_engine", "Search Engine ABB", "Architecture building block for full-text search"),
-        ("abb_workflow_engine", "Workflow Engine ABB", "Architecture building block for workflow orchestration"),
-        ("abb_notification_service", "Notification Service ABB", "Architecture building block for notifications"),
-        ("abb_file_storage", "File Storage ABB", "Architecture building block for unstructured data storage"),
-        ("abb_container_platform", "Container Platform ABB", "Architecture building block for container orchestration"),
-        ("abb_cdn", "CDN ABB", "Architecture building block for content delivery"),
-        ("abb_load_balancer", "Load Balancer ABB", "Architecture building block for traffic distribution"),
-        ("abb_waf", "WAF ABB", "Architecture building block for web application firewall"),
-        ("abb_secret_management", "Secret Management ABB", "Architecture building block for secrets and keys"),
-        ("abb_ci_cd_pipeline", "CI/CD Pipeline ABB", "Architecture building block for continuous integration/deployment"),
-        ("abb_logging_aggregator", "Logging Aggregator ABB", "Architecture building block for centralized logging"),
-
-        # Solution Building Blocks (SBBs)
-        ("sbb_kong_gateway", "Kong API Gateway SBB", "Kong-based API gateway implementation"),
-        ("sbb_kafka_cluster", "Apache Kafka SBB", "Kafka-based message broker implementation"),
-        ("sbb_keycloak", "Keycloak SBB", "Keycloak-based identity provider implementation"),
-        ("sbb_postgresql", "PostgreSQL SBB", "PostgreSQL database implementation"),
-        ("sbb_mongodb", "MongoDB SBB", "MongoDB document store implementation"),
-        ("sbb_elasticsearch", "Elasticsearch SBB", "Elasticsearch search engine implementation"),
-        ("sbb_redis", "Redis SBB", "Redis cache implementation"),
-        ("sbb_kubernetes", "Kubernetes SBB", "Kubernetes container platform implementation"),
-        ("sbb_istio", "Istio Service Mesh SBB", "Istio service mesh implementation"),
-        ("sbb_airflow", "Apache Airflow SBB", "Airflow workflow orchestration implementation"),
-        ("sbb_prometheus_grafana", "Prometheus/Grafana SBB", "Prometheus + Grafana monitoring stack"),
-        ("sbb_vault", "HashiCorp Vault SBB", "Vault-based secret management implementation"),
-        ("sbb_jenkins", "Jenkins SBB", "Jenkins CI/CD implementation"),
-        ("sbb_github_actions", "GitHub Actions SBB", "GitHub Actions CI/CD implementation"),
-        ("sbb_terraform", "Terraform SBB", "Terraform infrastructure-as-code implementation"),
-        ("sbb_snowflake", "Snowflake SBB", "Snowflake cloud data warehouse implementation"),
-        ("sbb_databricks", "Databricks SBB", "Databricks data engineering platform"),
-        ("sbb_mulesoft", "MuleSoft SBB", "MuleSoft integration platform implementation"),
-        ("sbb_cloud_los_microservice", "Cloud LOS Microservice SBB", "Cloud-native loan origination microservice"),
-        ("sbb_api_gateway_v2", "API Gateway v2 SBB", "Next-generation API gateway implementation"),
+        # ABBs
+        ("abb_api_gateway", "API Gateway ABB", "abb"), ("abb_message_broker", "Message Broker ABB", "abb"),
+        ("abb_identity_provider", "Identity Provider ABB", "abb"), ("abb_data_store", "Data Store ABB", "abb"),
+        ("abb_event_bus", "Event Bus ABB", "abb"), ("abb_service_mesh", "Service Mesh ABB", "abb"),
+        ("abb_etl_pipeline", "ETL/ELT Pipeline ABB", "abb"), ("abb_monitoring", "Observability ABB", "abb"),
+        ("abb_cache_layer", "Cache Layer ABB", "abb"), ("abb_container_platform", "Container Platform ABB", "abb"),
+        ("abb_ci_cd", "CI/CD Pipeline ABB", "abb"), ("abb_secret_mgmt", "Secret Management ABB", "abb"),
+        # SBBs
+        ("sbb_kong", "Kong API Gateway", "sbb"), ("sbb_kafka", "Apache Kafka", "sbb"),
+        ("sbb_keycloak", "Keycloak", "sbb"), ("sbb_postgresql", "PostgreSQL", "sbb"),
+        ("sbb_elasticsearch", "Elasticsearch", "sbb"), ("sbb_kubernetes", "Kubernetes", "sbb"),
+        ("sbb_istio", "Istio Service Mesh", "sbb"), ("sbb_prometheus", "Prometheus/Grafana", "sbb"),
+        ("sbb_vault", "HashiCorp Vault", "sbb"), ("sbb_terraform", "Terraform", "sbb"),
     ]
 
     seeds = []
-    for key, name, desc in blocks:
+    for key, name, bb_type in blocks:
         seeds.append(SeedConcept(
-            id=f"block_{key}", name=name, category=SeedCategory.BUILDING_BLOCK,
-            description=desc, domain="architecture",
-            tags=["building_block", "abb" if key.startswith("abb") else "sbb"],
+            id=f"bb_{key}", name=name, category=SeedCategory.BUILDING_BLOCK,
+            description=f"{'Architecture' if bb_type == 'abb' else 'Solution'} Building Block: {name}",
+            domain="architecture", tags=["building_block", bb_type],
         ))
     return seeds
 
 
 def _stakeholder_seeds() -> list[SeedConcept]:
-    """Stakeholder role seeds."""
+    """Stakeholder roles per TOGAF."""
     stakeholders = [
-        # Executive
-        ("ceo", "Chief Executive Officer", "executive", "Overall enterprise strategy and direction"),
-        ("cto", "Chief Technology Officer", "executive", "Technology strategy and innovation"),
-        ("cio", "Chief Information Officer", "executive", "IT strategy and digital transformation"),
-        ("cfo", "Chief Financial Officer", "executive", "Financial strategy and cost management"),
-        ("coo", "Chief Operating Officer", "executive", "Operational excellence"),
-        ("cdo", "Chief Data Officer", "executive", "Data strategy and governance"),
-        ("ciso", "Chief Information Security Officer", "executive", "Information security strategy"),
-        ("cdto", "Chief Digital Transformation Officer", "executive", "Digital transformation leadership"),
-        ("cro", "Chief Risk Officer", "executive", "Enterprise risk management"),
-        ("cpo", "Chief Product Officer", "executive", "Product strategy and lifecycle"),
-
-        # Architecture
-        ("chief_architect", "Chief Enterprise Architect", "architecture", "Enterprise architecture leadership"),
-        ("domain_architect_business", "Business Domain Architect", "architecture", "Business architecture domain"),
-        ("domain_architect_data", "Data Architect", "architecture", "Data architecture domain"),
-        ("domain_architect_application", "Application Architect", "architecture", "Application architecture domain"),
-        ("domain_architect_technology", "Technology Architect", "architecture", "Technology/infrastructure architecture"),
-        ("solution_architect", "Solution Architect", "architecture", "Solution-level architecture design"),
-        ("security_architect", "Security Architect", "architecture", "Security architecture design"),
-        ("integration_architect", "Integration Architect", "architecture", "Integration architecture design"),
-        ("cloud_architect", "Cloud Architect", "architecture", "Cloud architecture design"),
-
-        # Business
-        ("business_unit_head", "Business Unit Head", "business", "Business unit P&L and strategy"),
-        ("product_manager", "Product Manager", "business", "Product requirements and roadmap"),
-        ("business_analyst", "Business Analyst", "business", "Requirements analysis and documentation"),
-        ("process_owner", "Business Process Owner", "business", "Business process design and optimization"),
-        ("head_of_lending", "Head of Lending", "business", "Lending operations and strategy"),
-        ("head_of_payments", "Head of Payments", "business", "Payment operations and strategy"),
-        ("head_of_compliance", "Head of Compliance", "business", "Regulatory compliance management"),
-        ("head_of_operations", "Head of Operations", "business", "Operational efficiency"),
-        ("head_of_customer_service", "Head of Customer Service", "business", "Customer service excellence"),
-
-        # Technical
-        ("dev_team_lead", "Development Team Lead", "technical", "Software development leadership"),
-        ("devops_engineer", "DevOps Engineer", "technical", "CI/CD and infrastructure automation"),
-        ("sre", "Site Reliability Engineer", "technical", "System reliability and performance"),
-        ("dba", "Database Administrator", "technical", "Database management and optimization"),
-        ("qa_lead", "QA Lead", "technical", "Quality assurance and testing"),
-        ("infra_manager", "Infrastructure Manager", "technical", "Infrastructure operations"),
-        ("network_engineer", "Network Engineer", "technical", "Network design and operations"),
-        ("security_engineer", "Security Engineer", "technical", "Security implementation and monitoring"),
-
-        # Governance
-        ("architecture_board_chair", "Architecture Board Chair", "governance", "Architecture governance decisions"),
-        ("program_manager", "Program Manager", "governance", "Program execution and governance"),
-        ("pmo_director", "PMO Director", "governance", "Portfolio and project management"),
-        ("audit_manager", "Internal Audit Manager", "governance", "Audit and compliance oversight"),
-        ("risk_manager", "Risk Manager", "governance", "Operational risk management"),
-        ("vendor_manager", "Vendor/Supplier Manager", "governance", "Vendor relationship management"),
-
-        # External
-        ("regulator", "Regulatory Authority", "external", "Regulatory oversight and requirements"),
-        ("external_auditor", "External Auditor", "external", "Independent audit and assurance"),
-        ("customer_representative", "Customer Representative", "external", "Customer needs and feedback"),
-        ("partner_integration", "Integration Partner", "external", "Third-party integration concerns"),
-        ("cloud_provider", "Cloud Service Provider", "external", "Cloud infrastructure and services"),
+        # Per TOGAF stakeholder taxonomy
+        ("ceo", "CEO", "executive"), ("cto", "CTO", "executive"), ("cio", "CIO", "executive"),
+        ("cfo", "CFO", "executive"), ("ciso", "CISO", "executive"), ("cdo", "CDO", "executive"),
+        ("chief_architect", "Chief Enterprise Architect", "architecture"),
+        ("business_arch", "Business Domain Architect", "architecture"),
+        ("data_arch", "Data Architect", "architecture"),
+        ("app_arch", "Application Architect", "architecture"),
+        ("tech_arch", "Technology/Infrastructure Architect", "architecture"),
+        ("solution_arch", "Solution Architect", "architecture"),
+        ("security_arch", "Security Architect", "architecture"),
+        ("product_manager", "Product Manager", "business"),
+        ("business_analyst", "Business Analyst", "business"),
+        ("process_owner", "Business Process Owner", "business"),
+        ("head_of_compliance", "Head of Compliance", "business"),
+        ("dev_lead", "Development Team Lead", "technical"),
+        ("sre", "Site Reliability Engineer", "technical"),
+        ("arch_board_chair", "Architecture Board Chair", "governance"),
+        ("program_manager", "Program Manager", "governance"),
+        ("regulator", "Regulatory Authority", "external"),
+        ("external_auditor", "External Auditor", "external"),
     ]
 
     seeds = []
-    for key, name, role_type, desc in stakeholders:
+    for key, name, role_type in stakeholders:
         seeds.append(SeedConcept(
             id=f"stakeholder_{key}", name=name, category=SeedCategory.STAKEHOLDER,
-            description=desc, domain=role_type,
-            tags=["stakeholder", role_type],
+            description=f"Stakeholder: {name}", domain=role_type, tags=["stakeholder", role_type],
         ))
     return seeds
 
+
+# =====================================================================
+# Build complete pool
+# =====================================================================
 
 def build_seed_pool() -> list[SeedConcept]:
     """Builds the complete seed pool."""
     seeds = []
     seeds.extend(_togaf_phase_seeds())
+    seeds.extend(_togaf_deliverable_seeds())
     seeds.extend(_togaf_artifact_seeds())
+    seeds.extend(_togaf_metamodel_seeds())
     seeds.extend(_togaf_technique_seeds())
+    seeds.extend(_togaf_viewpoint_seeds())
     seeds.extend(_archimate_element_seeds())
+    seeds.extend(_archimate_relationship_seeds())
     seeds.extend(_archimate_viewpoint_seeds())
     seeds.extend(_industry_case_seeds())
     seeds.extend(_standard_seeds())

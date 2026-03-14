@@ -23,11 +23,18 @@ class ToolDomain(str, Enum):
 
 
 class SeedCategory(str, Enum):
+    # TOGAF spec-grounded
     TOGAF_PHASE = "togaf_phase"
+    TOGAF_DELIVERABLE = "togaf_deliverable"
     TOGAF_ARTIFACT = "togaf_artifact"
     TOGAF_TECHNIQUE = "togaf_technique"
+    TOGAF_METAMODEL_ENTITY = "togaf_metamodel_entity"
+    TOGAF_VIEWPOINT = "togaf_viewpoint"
+    # ArchiMate spec-grounded
     ARCHIMATE_ELEMENT = "archimate_element"
+    ARCHIMATE_RELATIONSHIP = "archimate_relationship"
     ARCHIMATE_VIEWPOINT = "archimate_viewpoint"
+    # Cross-cutting
     INDUSTRY_CASE = "industry_case"
     STANDARD = "standard"
     CAPABILITY = "capability"
