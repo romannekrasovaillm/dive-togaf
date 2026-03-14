@@ -32,7 +32,7 @@ _THINKING_MIN_TOKENS = 32768
 
 # Max chars for tool result in API messages (context management).
 # Full results are preserved in tool_call_log for evidence.
-_MAX_TOOL_RESULT_CHARS = 1500
+_MAX_TOOL_RESULT_CHARS = 800
 
 
 def _get_api_key() -> str:
