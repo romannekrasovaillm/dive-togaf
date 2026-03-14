@@ -20,6 +20,9 @@ logger = logging.getLogger(__name__)
 DEFAULT_BASE_URL = "https://api.moonshot.ai/v1"
 DEFAULT_MODEL = "kimi-k2.5"
 
+# Models where temperature/top_p/n/presence_penalty/frequency_penalty cannot be modified
+_FIXED_TEMP_MODELS = {"kimi-k2.5"}
+
 
 def _get_api_key() -> str:
     key = os.environ.get("KIMI_API_KEY") or os.environ.get("MOONSHOT_API_KEY")
@@ -64,9 +67,11 @@ class KimiClient:
         kwargs: dict[str, Any] = {
             "model": self.model,
             "messages": messages,
-            "temperature": temperature if temperature is not None else self.temperature,
-            "max_tokens": max_tokens,
+            "max_completion_tokens": max_tokens,
         }
+        # kimi-k2.5 does not allow temperature to be set
+        if self.model not in _FIXED_TEMP_MODELS:
+            kwargs["temperature"] = temperature if temperature is not None else self.temperature
         if tools:
             kwargs["tools"] = tools
             kwargs["tool_choice"] = tool_choice or "auto"
