@@ -1,0 +1,1460 @@
+"""Builder for the TOGAF/ArchiMate Exemplar Pool.
+
+Generates spec-grounded exemplar task templates across different families of
+tool-use patterns. Each exemplar defines a structural template without
+binding to specific tools or answers, but references EXACT TOGAF/ArchiMate
+terminology from the specifications.
+
+Sources:
+- TOGAF Standard, 10th Edition (The Open Group, 2022)
+- ArchiMate 3.2 Specification (The Open Group, 2023)
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from .models import Exemplar, ExemplarFamily, save_pool
+
+
+# =====================================================================
+# Family 1: Retrieve → Compute (25 exemplars)
+# Pattern: fetch domain data, then compute a derived metric
+# =====================================================================
+
+def _retrieve_compute_exemplars() -> list[Exemplar]:
+    """Retrieve domain data then compute a metric or score."""
+    templates = [
+        # TOGAF Content Metamodel queries
+        ("rc_01",
+         "Retrieve all Organization Units that own {Business_Function} capabilities and compute the average number of Actor assignments per unit.",
+         ["retrieval", "retrieval", "processing"], 2, 2,
+         "Query metamodel Organization_Unit→Business_Function ownership, then compute actor distribution"),
+        ("rc_02",
+         "Fetch the Technology Components supporting {Information_System_Service} and compute the technology stack age risk score.",
+         ["retrieval", "processing"], 2, 1,
+         "Retrieve Technology_Component→IS_Service mapping then compute age-based risk"),
+        ("rc_03",
+         "Retrieve all Gaps identified during Phase B for {Business_Architecture_domain} and compute the overall transformation complexity score.",
+         ["retrieval", "processing"], 2, 1,
+         "Query Gap entities from Business Architecture then compute complexity metric"),
+        ("rc_04",
+         "Get all Work Packages in the Architecture Roadmap and compute the critical path duration.",
+         ["retrieval", "processing"], 3, 1,
+         "Retrieve Work_Package entities then compute critical path via graph analysis"),
+        ("rc_05",
+         "Retrieve the Plateau definitions from the Architecture Roadmap and compute the resource utilization across transition stages.",
+         ["retrieval", "processing"], 3, 1,
+         "Query Plateau→Work_Package assignments then compute resource distribution"),
+        # ArchiMate model analysis
+        ("rc_06",
+         "Parse the ArchiMate model and compute the coupling score between {Application_Component} elements based on Serving and Flow relationships.",
+         ["retrieval", "processing"], 3, 1,
+         "Extract ArchiMate elements/relationships then compute coupling via graph metrics"),
+        ("rc_07",
+         "List all Business Process elements in the ArchiMate model and compute the centrality of each based on Triggering relationships.",
+         ["retrieval", "processing"], 3, 1,
+         "Parse ArchiMate model, filter Business_Process, compute betweenness centrality"),
+        ("rc_08",
+         "Retrieve the Application Components from the ArchiMate model and compute the modularity score of the application landscape.",
+         ["retrieval", "processing"], 3, 1,
+         "Parse ArchiMate Application_Component elements then compute modularity via community detection"),
+        ("rc_09",
+         "Fetch Principle definitions from the Architecture Repository and compute the coverage score against {stakeholder_concern} requirements.",
+         ["retrieval", "retrieval", "processing"], 2, 2,
+         "Retrieve Principle and Requirement entities then compute coverage percentage"),
+        ("rc_10",
+         "Retrieve all Data Entities associated with {Application_Component} and compute the data ownership concentration index.",
+         ["retrieval", "processing"], 2, 1,
+         "Query Data_Entity→Application_Component mapping then compute Herfindahl index"),
+        # Graph-based computations
+        ("rc_11",
+         "Extract the dependency graph from the ArchiMate model and compute the maximum dependency depth from Technology to Strategy layer.",
+         ["retrieval", "processing"], 4, 1,
+         "Parse ArchiMate model to graph, compute dependency depth across layers"),
+        ("rc_12",
+         "Retrieve all Constraints from the Architecture Requirements Specification and compute the constraint conflict density score.",
+         ["retrieval", "processing"], 2, 1,
+         "Query Constraint entities then compute pairwise conflict density"),
+        ("rc_13",
+         "Parse ArchiMate model views and compute the element reuse ratio — how many elements appear in multiple views.",
+         ["retrieval", "processing"], 2, 1,
+         "Extract elements per view then compute reuse ratio"),
+        ("rc_14",
+         "Retrieve the Capability Assessment from Phase A and compute the maturity heat-map scores per business domain.",
+         ["retrieval", "processing"], 2, 1,
+         "Query Capability entities with maturity levels then compute domain aggregations"),
+        ("rc_15",
+         "Get all Location entities in the Content Metamodel and compute the geographic distribution entropy of Technology_Components.",
+         ["retrieval", "processing"], 3, 1,
+         "Retrieve Location→Technology_Component then compute Shannon entropy"),
+        ("rc_16",
+         "Retrieve ArchiMate Motivation elements (Stakeholder, Driver, Assessment, Goal) and compute the goal-to-driver traceability completeness.",
+         ["retrieval", "processing"], 2, 1,
+         "Parse Motivation layer elements then compute traceability coverage"),
+        ("rc_17",
+         "Fetch all IS_Service entities and their supporting Logical_Application_Components, then compute the redundancy ratio.",
+         ["retrieval", "processing"], 2, 1,
+         "Query IS_Service→Logical_Application_Component then compute service redundancy"),
+        ("rc_18",
+         "Retrieve Architecture Compliance review findings and compute the compliance score trend across review cycles.",
+         ["retrieval", "processing"], 2, 1,
+         "Query compliance findings then compute temporal trend"),
+        ("rc_19",
+         "Get the Process/Event/Control/Product catalog from Phase B and compute the automation coverage percentage.",
+         ["retrieval", "processing"], 2, 1,
+         "Retrieve TOGAF catalog artifacts then compute automation metric"),
+        ("rc_20",
+         "Extract all Composition and Aggregation relationships from the ArchiMate model and compute the structural complexity index.",
+         ["retrieval", "processing"], 3, 1,
+         "Parse structural relationships then compute complexity via graph density"),
+        ("rc_21",
+         "Retrieve Contract entities governing {IS_Service} and compute the SLA compliance margin.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "Query Contract→IS_Service mapping then compute SLA gap"),
+        ("rc_22",
+         "Parse the ArchiMate model and compute the layer-crossing count for each element.",
+         ["retrieval", "processing"], 3, 1,
+         "Extract elements and relationships then compute cross-layer interactions"),
+        ("rc_23",
+         "Retrieve all Building_Block definitions (ABBs and SBBs) and compute the reuse factor across projects.",
+         ["retrieval", "processing"], 2, 1,
+         "Query Architecture/Solution Building Blocks then compute reuse metric"),
+        ("rc_24",
+         "Get Technology_Component lifecycle data and compute the technical debt score based on end-of-life proximity.",
+         ["retrieval", "processing"], 2, 1,
+         "Retrieve technology lifecycle metadata then compute debt score"),
+        ("rc_25",
+         "Retrieve all Function entities and their Measure_of_Effectiveness and compute the value-delivery alignment score.",
+         ["retrieval", "processing"], 2, 2,
+         "Query Function→Measure mapping then compute alignment metric"),
+    ]
+    return [
+        Exemplar(id=t[0], family=ExemplarFamily.RETRIEVE_COMPUTE,
+                 template=t[1], implied_pattern=t[2], complexity=t[3],
+                 required_tool_types=["retrieval", "processing"],
+                 description=t[5], sub_questions=t[4],
+                 tags=["togaf_spec", "archimate_spec"])
+        for t in templates
+    ]
+
+
+# =====================================================================
+# Family 2: Multi-Hop Retrieval (25 exemplars)
+# Pattern: chain 2-4 retrieval calls, each building on prior results
+# =====================================================================
+
+def _multi_hop_retrieval_exemplars() -> list[Exemplar]:
+    """Multi-hop retrieval chains following metamodel relationships."""
+    templates = [
+        # Content Metamodel traversals
+        ("mh_01",
+         "Find all Actors who participate in {Business_Service}, then find the Organization Units those Actors belong to, then list the Locations of those units.",
+         ["retrieval", "retrieval", "retrieval"], 3, 1,
+         "3-hop: Actor→Business_Service, Actor→Organization_Unit, Organization_Unit→Location"),
+        ("mh_02",
+         "Start from {Goal} in the Motivation layer, find the Requirements that realize it, then find the Constraints that restrict those Requirements.",
+         ["retrieval", "retrieval", "retrieval"], 3, 1,
+         "3-hop through ArchiMate Motivation: Goal→Requirement→Constraint"),
+        ("mh_03",
+         "Given Architecture Principle '{principle_name}', find which Architecture Requirements reference it, then find which Gaps exist for those requirements.",
+         ["retrieval", "retrieval"], 2, 1,
+         "2-hop: Principle→Requirement→Gap through Content Metamodel"),
+        ("mh_04",
+         "Find all Application Components that realize {Business_Function}, then find the Technology Components they are deployed on, then get the Locations.",
+         ["retrieval", "retrieval", "retrieval"], 3, 1,
+         "3-hop: Application_Component→Business_Function, then Technology deployment, then Location"),
+        ("mh_05",
+         "Retrieve {deliverable} from Phase B, then find all Artifacts it contains, then list the catalog/matrix/diagram type of each.",
+         ["retrieval", "retrieval", "retrieval"], 2, 1,
+         "3-hop: Deliverable→Artifact→type classification per TOGAF"),
+        ("mh_06",
+         "Find the Stakeholders concerned with {Architecture_Viewpoint}, then retrieve their Concerns, then find related Architecture Views.",
+         ["retrieval", "retrieval", "retrieval"], 3, 1,
+         "3-hop: Viewpoint→Stakeholder→Concern→View"),
+        ("mh_07",
+         "Start from ArchiMate {Business_Object}, traverse Realization relationships to Data Objects, then traverse Access relationships to Application Components.",
+         ["retrieval", "retrieval", "retrieval"], 3, 1,
+         "3-hop ArchiMate: Business_Object→(Realization)→Data_Object→(Access)→Application_Component"),
+        ("mh_08",
+         "Find all Work Packages in the Implementation and Migration Plan, then find which Plateaus they target, then list affected Building Blocks.",
+         ["retrieval", "retrieval", "retrieval"], 3, 1,
+         "3-hop: Work_Package→Plateau→Building_Block per ADM Phase F"),
+        ("mh_09",
+         "Retrieve the Architecture Definition Document, find the Business Architecture section's catalogs, then get all entities in those catalogs.",
+         ["retrieval", "retrieval", "retrieval"], 2, 1,
+         "3-hop: ADD→Business catalogs→entity list"),
+        ("mh_10",
+         "Find ArchiMate elements of type {Resource} in the Strategy layer, follow Assignment relationships to Capabilities, then find Courses of Action.",
+         ["retrieval", "retrieval", "retrieval"], 3, 1,
+         "3-hop ArchiMate Strategy: Resource→Capability→Course_of_Action"),
+        ("mh_11",
+         "Given {Technology_Service}, find which Infrastructure Interfaces expose it, then find the Application Platform Services that consume it.",
+         ["retrieval", "retrieval"], 3, 1,
+         "2-hop: Technology_Service→Infrastructure_Interface→Application_Platform_Service"),
+        ("mh_12",
+         "Find all Business Processes in the ArchiMate model that trigger {Business_Event}, then find the Roles assigned to those processes.",
+         ["retrieval", "retrieval"], 2, 1,
+         "2-hop ArchiMate: Business_Event→(Triggering)→Business_Process→(Assignment)→Business_Role"),
+        ("mh_13",
+         "Retrieve all Architecture Requirements from the Specification, find which ones trace to Gaps, then find the Work Packages that address those Gaps.",
+         ["retrieval", "retrieval", "retrieval"], 3, 1,
+         "3-hop: Requirement→Gap→Work_Package through Content Metamodel"),
+        ("mh_14",
+         "Start from {Plateau} in the roadmap, find all Architecture Building Blocks in that plateau, then find their Solution Building Block implementations.",
+         ["retrieval", "retrieval"], 2, 1,
+         "2-hop: Plateau→ABB→SBB per Content Metamodel"),
+        ("mh_15",
+         "Find all Application Interfaces in the ArchiMate model, then find which Application Collaborations use them, then identify cross-domain data flows.",
+         ["retrieval", "retrieval", "retrieval"], 3, 1,
+         "3-hop ArchiMate: Application_Interface→Application_Collaboration→data flow analysis"),
+        ("mh_16",
+         "Retrieve the Statement of Architecture Work, find the approved scope boundaries, then list all ADM phases affected by scope constraints.",
+         ["retrieval", "retrieval"], 2, 1,
+         "2-hop: Statement_of_Arch_Work→scope→phase mapping"),
+        ("mh_17",
+         "Find all Driver elements in the ArchiMate Motivation layer, follow Influence relationships to Assessments, then find connected Stakeholders.",
+         ["retrieval", "retrieval", "retrieval"], 3, 1,
+         "3-hop ArchiMate Motivation: Driver→Assessment→Stakeholder"),
+        ("mh_18",
+         "Given a Logical Technology Component, find its Physical Technology Component deployments, then find the Locations where they are deployed.",
+         ["retrieval", "retrieval"], 2, 1,
+         "2-hop Content Metamodel: Logical_TC→Physical_TC→Location"),
+        ("mh_19",
+         "Find all views in the ArchiMate model, for each view find which viewpoint it conforms to, then retrieve the viewpoint's modeling conventions.",
+         ["retrieval", "retrieval", "retrieval"], 2, 1,
+         "3-hop: View→Viewpoint→conventions per ArchiMate 3.2"),
+        ("mh_20",
+         "Start from {Capability} in the Business Architecture, find the Value Streams it contributes to, then find the Stakeholders who benefit.",
+         ["retrieval", "retrieval", "retrieval"], 3, 1,
+         "3-hop: Capability→Value_Stream→Stakeholder"),
+        ("mh_21",
+         "Find all Serving relationships in the ArchiMate model, then for each serving pair find if there is also a Flow relationship, identifying bidirectional service patterns.",
+         ["retrieval", "retrieval"], 3, 1,
+         "2-hop ArchiMate relationship analysis: Serving + Flow co-occurrence"),
+        ("mh_22",
+         "Retrieve the Architecture Requirements Specification, find all functional requirements, then find the Architecture Building Blocks that satisfy them.",
+         ["retrieval", "retrieval", "retrieval"], 2, 1,
+         "3-hop: ARS→functional requirements→ABB realization"),
+        ("mh_23",
+         "Find all Implementation and Migration Architecture elements, follow their Association to Plateau elements, then find the related Deliverables.",
+         ["retrieval", "retrieval", "retrieval"], 3, 1,
+         "3-hop ArchiMate I&M layer: Implementation_Event→Plateau→Deliverable"),
+        ("mh_24",
+         "Find the Business Interaction elements in ArchiMate, trace to participating Business Roles, then find the Business Actors assigned to those roles.",
+         ["retrieval", "retrieval", "retrieval"], 2, 1,
+         "3-hop ArchiMate: Business_Interaction→Business_Role→Business_Actor"),
+        ("mh_25",
+         "Given Phase E Opportunities and Solutions output, find all candidate Solution Building Blocks, trace to their Architecture Building Block abstractions, then find related standards.",
+         ["retrieval", "retrieval", "retrieval"], 3, 1,
+         "3-hop: Phase_E→SBB→ABB→Standard"),
+    ]
+    return [
+        Exemplar(id=t[0], family=ExemplarFamily.MULTI_HOP_RETRIEVAL,
+                 template=t[1], implied_pattern=t[2], complexity=t[3],
+                 required_tool_types=["retrieval"],
+                 description=t[5], sub_questions=t[4],
+                 tags=["togaf_metamodel", "archimate_relationships"])
+        for t in templates
+    ]
+
+
+# =====================================================================
+# Family 3: Compare → Decide (20 exemplars)
+# Pattern: retrieve alternatives, then compare and recommend
+# =====================================================================
+
+def _compare_decide_exemplars() -> list[Exemplar]:
+    """Compare architecture alternatives and make recommendations."""
+    templates = [
+        ("cd_01",
+         "Compare the Baseline and Target Business Architectures for {business_domain} and recommend the optimal migration sequence.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Baseline vs Target Business Architecture comparison per Phase B"),
+        ("cd_02",
+         "Compare two candidate Solution Building Blocks for {IS_Service}: evaluate technology maturity, cost, and standards compliance.",
+         ["retrieval", "retrieval", "processing"], 3, 3,
+         "SBB comparison against Architecture Building Block requirements"),
+        ("cd_03",
+         "Compare the ArchiMate model's Application Landscape before and after merging {Application_Component_A} and {Application_Component_B}.",
+         ["retrieval", "retrieval", "processing"], 4, 2,
+         "Pre/post merge analysis via graph topology comparison"),
+        ("cd_04",
+         "Evaluate three implementation approaches for {Gap}: in-house build, COTS procurement, and cloud SaaS — using the Architecture Decision Record framework.",
+         ["retrieval", "retrieval", "retrieval", "processing"], 3, 3,
+         "Three-way comparison per TOGAF Architecture Decision Record"),
+        ("cd_05",
+         "Compare two candidate Architecture Principles for governing {architecture_domain} and assess their impact on existing Building Blocks.",
+         ["retrieval", "retrieval", "processing"], 3, 2,
+         "Principle impact comparison on Building Block portfolio"),
+        ("cd_06",
+         "Compare the centrality scores of {Application_Component_A} vs {Application_Component_B} in the ArchiMate dependency graph to decide which is more critical.",
+         ["retrieval", "processing", "processing"], 3, 1,
+         "Graph centrality comparison for architecture criticality assessment"),
+        ("cd_07",
+         "Evaluate whether to decompose or consolidate {Business_Service} based on coupling metrics and stakeholder impact.",
+         ["retrieval", "processing", "processing"], 3, 2,
+         "Decomposition vs consolidation decision using graph modularity"),
+        ("cd_08",
+         "Compare two candidate Architecture Viewpoints for communicating {concern} to {stakeholder_group} and recommend the most effective one.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "Viewpoint comparison per stakeholder concern mapping"),
+        ("cd_09",
+         "Evaluate two Plateau transition sequences in the roadmap and recommend based on risk and value delivery.",
+         ["retrieval", "retrieval", "processing"], 4, 2,
+         "Plateau sequence comparison per Phase F criteria"),
+        ("cd_10",
+         "Compare integration patterns (point-to-point vs ESB vs event-driven) for connecting {Application_Component} to {Technology_Service}.",
+         ["retrieval", "retrieval", "retrieval", "processing"], 3, 3,
+         "Integration pattern comparison using ArchiMate relationship analysis"),
+        ("cd_11",
+         "Compare the modularity scores of the current vs proposed Application Architecture using graph community detection.",
+         ["retrieval", "retrieval", "processing"], 4, 1,
+         "Modularity comparison via graph analysis pre/post refactoring"),
+        ("cd_12",
+         "Evaluate two competing standards for {technology_domain} against the Standards Information Base and recommend adoption.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "Standards comparison against TOGAF Standards Information Base"),
+        ("cd_13",
+         "Compare the stakeholder impact of two Work Package sequencing options in the Implementation and Migration Plan.",
+         ["retrieval", "retrieval", "processing"], 3, 2,
+         "Work Package ordering comparison per stakeholder impact"),
+        ("cd_14",
+         "Compare Capability maturity assessments across {org_unit_A} and {org_unit_B} and identify capability sharing opportunities.",
+         ["retrieval", "retrieval", "processing"], 2, 2,
+         "Cross-unit Capability maturity comparison per Phase A assessment"),
+        ("cd_15",
+         "Evaluate whether an ArchiMate Grouping or Plateau element better represents the target state transition for {migration_scenario}.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "ArchiMate modeling decision: Grouping vs Plateau element usage"),
+        ("cd_16",
+         "Compare two candidate Data Architecture patterns (centralized vs federated) for {Business_Function} using data entity dependency analysis.",
+         ["retrieval", "retrieval", "processing"], 3, 2,
+         "Data Architecture pattern comparison per Phase C"),
+        ("cd_17",
+         "Evaluate the trade-offs between Realization vs Serving relationships for modeling {Application_Component} to {Business_Service} in ArchiMate.",
+         ["retrieval", "processing"], 2, 1,
+         "ArchiMate relationship type decision based on semantics"),
+        ("cd_18",
+         "Compare Architecture Governance board structures: centralized vs federated model for {enterprise_scope}.",
+         ["retrieval", "retrieval", "processing"], 3, 2,
+         "Governance model comparison per TOGAF Phase H"),
+        ("cd_19",
+         "Evaluate two Technology Component alternatives for hosting {Physical_Application_Component}: on-premise vs cloud-native.",
+         ["retrieval", "retrieval", "processing"], 3, 2,
+         "Technology hosting decision using Technology Architecture analysis"),
+        ("cd_20",
+         "Compare risk profiles of two migration paths: big-bang vs incremental transition for {Architecture_Landscape} transformation.",
+         ["retrieval", "retrieval", "processing"], 4, 2,
+         "Migration strategy comparison per Phase E/F risk assessment"),
+    ]
+    return [
+        Exemplar(id=t[0], family=ExemplarFamily.COMPARE_DECIDE,
+                 template=t[1], implied_pattern=t[2], complexity=t[3],
+                 required_tool_types=["retrieval", "processing"],
+                 description=t[5], sub_questions=t[4],
+                 tags=["togaf_decision", "architecture_alternatives"])
+        for t in templates
+    ]
+
+
+# =====================================================================
+# Family 4: Gap Analysis (20 exemplars)
+# Pattern: retrieve baseline & target, then identify and classify gaps
+# =====================================================================
+
+def _gap_analysis_exemplars() -> list[Exemplar]:
+    """Gap analysis per TOGAF ADM gap analysis technique."""
+    templates = [
+        ("ga_01",
+         "Perform gap analysis between Baseline and Target Business Architecture: identify eliminated, replaced, new, and retained Business Functions.",
+         ["retrieval", "retrieval", "processing"], 3, 4,
+         "Full gap analysis matrix per TOGAF technique for Business Functions"),
+        ("ga_02",
+         "Identify gaps between current Application Components and the target Application Portfolio — classify each as eliminate, replace, re-engineer, or retain.",
+         ["retrieval", "retrieval", "processing"], 3, 4,
+         "Application landscape gap analysis per Phase C"),
+        ("ga_03",
+         "Compare Baseline and Target Data Entity models and identify data gaps, redundancies, and new data requirements.",
+         ["retrieval", "retrieval", "processing"], 3, 3,
+         "Data Architecture gap analysis per Content Metamodel"),
+        ("ga_04",
+         "Analyze the Technology Architecture gap between current Technology Components and target platform requirements.",
+         ["retrieval", "retrieval", "processing"], 3, 3,
+         "Technology Architecture gap analysis per Phase D"),
+        ("ga_05",
+         "Identify Capability gaps by comparing the current Capability Assessment (Phase A) against target Capability model.",
+         ["retrieval", "retrieval", "processing"], 2, 2,
+         "Capability gap analysis across maturity levels"),
+        ("ga_06",
+         "Perform ArchiMate model gap analysis: find elements in Target that have no Baseline counterpart and vice versa.",
+         ["retrieval", "retrieval", "processing"], 3, 2,
+         "ArchiMate element-level gap analysis between model versions"),
+        ("ga_07",
+         "Identify gaps between Architecture Principles and their implementation in Solution Building Blocks.",
+         ["retrieval", "retrieval", "processing"], 2, 2,
+         "Principle-to-implementation gap analysis"),
+        ("ga_08",
+         "Analyze gaps between the Standards Information Base requirements and actual Technology Component standards compliance.",
+         ["retrieval", "retrieval", "processing"], 3, 2,
+         "Standards compliance gap analysis per Architecture Governance"),
+        ("ga_09",
+         "Identify stakeholder coverage gaps: which Stakeholders from the Stakeholder Map have no associated Architecture Viewpoints?",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "Stakeholder-to-viewpoint coverage gap analysis"),
+        ("ga_10",
+         "Perform security architecture gap analysis between current and target states using the ArchiMate model's technology layer.",
+         ["retrieval", "retrieval", "processing"], 3, 2,
+         "Security-focused gap analysis in Technology Architecture"),
+        ("ga_11",
+         "Identify missing Realization relationships in the ArchiMate model where Business Processes have no supporting Application Services.",
+         ["retrieval", "processing"], 3, 1,
+         "Cross-layer realization gap detection via relationship analysis"),
+        ("ga_12",
+         "Find gaps in the Architecture Requirements Specification where Requirements have no traced Building Block implementations.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "Requirements traceability gap analysis per Content Metamodel"),
+        ("ga_13",
+         "Identify Value Stream stages with no associated Capability and flag as capability gaps requiring investment.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "Value Stream to Capability mapping gap analysis"),
+        ("ga_14",
+         "Analyze ArchiMate model for orphaned elements — nodes with no relationships — and classify them as gaps or modeling errors.",
+         ["retrieval", "processing"], 2, 1,
+         "Orphan element detection via graph connectivity analysis"),
+        ("ga_15",
+         "Identify Integration Architecture gaps where Application Components interact but have no defined Application Interface.",
+         ["retrieval", "processing"], 3, 1,
+         "Interface gap detection using ArchiMate relationship patterns"),
+        ("ga_16",
+         "Compare deliverable completeness: which TOGAF deliverables required by Phase B are incomplete or missing in the Architecture Repository?",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "Deliverable completeness gap per ADM phase requirements"),
+        ("ga_17",
+         "Find Organization Units that own Business Functions but lack assigned Actors — an organizational staffing gap.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "Organizational assignment gap via Content Metamodel traversal"),
+        ("ga_18",
+         "Identify ArchiMate Implementation & Migration elements (Work Package, Deliverable, Plateau) that are disconnected from the Architecture layer.",
+         ["retrieval", "processing"], 3, 1,
+         "Implementation planning gap via graph connectivity"),
+        ("ga_19",
+         "Perform catalog completeness analysis: which Content Metamodel entity types have zero entries in the Architecture Repository?",
+         ["retrieval", "processing"], 2, 1,
+         "Repository completeness gap per metamodel entity types"),
+        ("ga_20",
+         "Identify gaps between TOGAF Architecture Viewpoint definitions and the actual Views created in the ArchiMate model.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "Viewpoint-to-view realization gap analysis"),
+    ]
+    return [
+        Exemplar(id=t[0], family=ExemplarFamily.GAP_ANALYSIS,
+                 template=t[1], implied_pattern=t[2], complexity=t[3],
+                 required_tool_types=["retrieval", "processing"],
+                 description=t[5], sub_questions=t[4],
+                 tags=["togaf_gap_analysis", "baseline_target"])
+        for t in templates
+    ]
+
+
+# =====================================================================
+# Family 5: Aggregate (20 exemplars)
+# Pattern: collect multiple data points and aggregate/summarize
+# =====================================================================
+
+def _aggregate_exemplars() -> list[Exemplar]:
+    """Aggregate data across multiple architecture domains."""
+    templates = [
+        ("ag_01",
+         "Aggregate all ArchiMate elements by layer (Strategy, Business, Application, Technology, Physical, Implementation) and report element counts per layer.",
+         ["retrieval", "processing"], 1, 1,
+         "Element distribution aggregation across ArchiMate layers"),
+        ("ag_02",
+         "Summarize the Architecture Roadmap: count Work Packages per Plateau and total effort estimates.",
+         ["retrieval", "processing"], 2, 2,
+         "Roadmap summary aggregation per Phase F output"),
+        ("ag_03",
+         "Aggregate all Content Metamodel entities across Business, Data, Application, and Technology domains and report repository completeness.",
+         ["retrieval", "retrieval", "retrieval", "retrieval", "processing"], 2, 1,
+         "Cross-domain metamodel entity count aggregation"),
+        ("ag_04",
+         "Summarize Architecture Compliance findings: group by severity, count per domain, identify top-3 recurring issues.",
+         ["retrieval", "processing"], 2, 3,
+         "Compliance findings aggregation per Architecture Governance"),
+        ("ag_05",
+         "Aggregate ArchiMate relationship counts by type (Composition, Aggregation, Assignment, Realization, Serving, Access, Influence, Triggering, Flow, Specialization, Association).",
+         ["retrieval", "processing"], 1, 1,
+         "Relationship type distribution aggregation from ArchiMate model"),
+        ("ag_06",
+         "Summarize stakeholder concerns: aggregate all Concerns by Stakeholder group and identify the most frequently cited concerns.",
+         ["retrieval", "processing"], 2, 2,
+         "Stakeholder concern aggregation per Architecture Vision"),
+        ("ag_07",
+         "Aggregate Gap entities from all four ADM architecture phases (B, C-Data, C-App, D) and classify by gap type.",
+         ["retrieval", "retrieval", "retrieval", "retrieval", "processing"], 3, 1,
+         "Cross-phase gap aggregation for transition planning"),
+        ("ag_08",
+         "Summarize the Architecture Building Block portfolio: count ABBs per domain, identify domains with lowest coverage.",
+         ["retrieval", "processing"], 2, 2,
+         "ABB portfolio coverage aggregation"),
+        ("ag_09",
+         "Aggregate all ArchiMate viewpoints used in the model and report which of the 24 example viewpoints are actually instantiated.",
+         ["retrieval", "processing"], 1, 1,
+         "Viewpoint usage aggregation against ArchiMate 3.2 Appendix C"),
+        ("ag_10",
+         "Summarize the Standards Information Base: count standards per technology domain and identify standard expiry timelines.",
+         ["retrieval", "processing"], 2, 2,
+         "Standards portfolio aggregation per Architecture Governance"),
+        ("ag_11",
+         "Aggregate graph topology metrics from the ArchiMate model: node count, edge count, density, average degree, diameter.",
+         ["retrieval", "processing"], 2, 1,
+         "Model-wide graph metric aggregation via NetworkX analysis"),
+        ("ag_12",
+         "Summarize TOGAF deliverable status across all ADM phases: count completed, in-progress, and not-started per phase.",
+         ["retrieval", "processing"], 2, 1,
+         "ADM deliverable status aggregation"),
+        ("ag_13",
+         "Aggregate Actor-to-Role assignments from the ArchiMate model and identify actors with the most diverse role portfolio.",
+         ["retrieval", "processing"], 2, 1,
+         "Actor-Role assignment aggregation via ArchiMate relationships"),
+        ("ag_14",
+         "Summarize the Architecture Contract terms: aggregate contracts by type (business, technology, data) and compliance status.",
+         ["retrieval", "processing"], 2, 2,
+         "Architecture Contract portfolio aggregation per Phase G"),
+        ("ag_15",
+         "Aggregate all ArchiMate views by viewpoint type and report the average number of elements per view.",
+         ["retrieval", "processing"], 2, 1,
+         "View complexity aggregation across viewpoint types"),
+        ("ag_16",
+         "Collect all Requirement entities and aggregate by priority and status across architecture domains.",
+         ["retrieval", "processing"], 2, 2,
+         "Requirements portfolio aggregation per ARS"),
+        ("ag_17",
+         "Summarize the Application Portfolio: aggregate Application Components by lifecycle status (planned, active, retiring, retired).",
+         ["retrieval", "processing"], 2, 1,
+         "Application lifecycle status aggregation"),
+        ("ag_18",
+         "Aggregate ArchiMate Motivation layer: count Goals, Principles, Requirements, and Constraints and compute the ratio of constraints to goals.",
+         ["retrieval", "processing"], 2, 2,
+         "Motivation layer element aggregation and ratio computation"),
+        ("ag_19",
+         "Summarize cross-reference matrices from Phase B: aggregate Business Service/Function matrix coverage percentages.",
+         ["retrieval", "processing"], 2, 1,
+         "Matrix coverage aggregation per TOGAF artifact types"),
+        ("ag_20",
+         "Aggregate the total number of architecture artifacts (catalogs, matrices, diagrams) produced per ADM phase.",
+         ["retrieval", "processing"], 1, 1,
+         "Artifact production aggregation across ADM cycle"),
+    ]
+    return [
+        Exemplar(id=t[0], family=ExemplarFamily.AGGREGATE,
+                 template=t[1], implied_pattern=t[2], complexity=t[3],
+                 required_tool_types=["retrieval", "processing"],
+                 description=t[5], sub_questions=t[4],
+                 tags=["togaf_reporting", "archimate_metrics"])
+        for t in templates
+    ]
+
+
+# =====================================================================
+# Family 6: Compliance Check (20 exemplars)
+# Pattern: retrieve rules/standards, retrieve target, check conformance
+# =====================================================================
+
+def _compliance_check_exemplars() -> list[Exemplar]:
+    """Architecture compliance checking per TOGAF governance."""
+    templates = [
+        ("cc_01",
+         "Check whether {Application_Component} complies with all Architecture Principles defined in the Architecture Repository.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "Principle compliance check for specific Application Component"),
+        ("cc_02",
+         "Validate ArchiMate model relationships: check that all Composition relationships are between elements of the same layer per ArchiMate 3.2 rules.",
+         ["retrieval", "processing"], 3, 1,
+         "ArchiMate relationship validity check per specification rules"),
+        ("cc_03",
+         "Check whether the Architecture Definition Document contains all required sections per TOGAF Standard deliverable specification.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "ADD completeness compliance check per TOGAF deliverable template"),
+        ("cc_04",
+         "Verify that all Technology Components comply with the Standards Information Base — flag non-compliant components.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Technology standards compliance check per Architecture Governance"),
+        ("cc_05",
+         "Check whether the Statement of Architecture Work covers all mandatory elements per TOGAF: scope, constraints, principles, budget, timeline.",
+         ["retrieval", "processing"], 2, 1,
+         "SoAW completeness check per TOGAF deliverable specification"),
+        ("cc_06",
+         "Validate that all ArchiMate Access relationships correctly use read/write/read-write modifiers per the specification.",
+         ["retrieval", "processing"], 2, 1,
+         "ArchiMate Access relationship modifier validation"),
+        ("cc_07",
+         "Check whether the Architecture Requirements Specification traces all requirements to at least one Principle, Gap, or Stakeholder Concern.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Requirements traceability compliance check"),
+        ("cc_08",
+         "Verify that the Architecture Vision document addresses all stakeholder concerns identified in the Stakeholder Map.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "Stakeholder concern coverage compliance per Phase A"),
+        ("cc_09",
+         "Check that all ArchiMate Triggering relationships connect behavioral elements only, not structural elements.",
+         ["retrieval", "processing"], 2, 1,
+         "ArchiMate Triggering relationship validity per spec constraints"),
+        ("cc_10",
+         "Verify that each Architecture Building Block in the portfolio has at least one associated Solution Building Block.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "ABB-to-SBB realization compliance check"),
+        ("cc_11",
+         "Check that ArchiMate Influence relationships are used only with Motivation elements per specification rules.",
+         ["retrieval", "processing"], 2, 1,
+         "ArchiMate Influence relationship constraint validation"),
+        ("cc_12",
+         "Verify that the Architecture Roadmap includes all Gaps identified during phases B through D as Work Packages.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Gap-to-Work Package coverage compliance per Phase E/F"),
+        ("cc_13",
+         "Check whether the ArchiMate model has any invalid cross-layer Serving relationships that skip intermediate layers.",
+         ["retrieval", "processing"], 3, 1,
+         "Cross-layer relationship validity check via graph layer analysis"),
+        ("cc_14",
+         "Verify that all Contracts in the Architecture Repository reference specific SLA metrics and have defined review dates.",
+         ["retrieval", "processing"], 2, 1,
+         "Contract completeness compliance per Architecture Governance"),
+        ("cc_15",
+         "Check that the Implementation and Migration Plan addresses all Architecture Requirements marked as 'must-have' priority.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Implementation plan requirements coverage compliance"),
+        ("cc_16",
+         "Validate ArchiMate model naming conventions: check that elements follow the organization's naming standards.",
+         ["retrieval", "retrieval", "processing"], 1, 1,
+         "Naming convention compliance check across ArchiMate model"),
+        ("cc_17",
+         "Check that the Architecture Governance framework defines review points for each ADM phase as required by TOGAF.",
+         ["retrieval", "processing"], 2, 1,
+         "Governance review point compliance per ADM cycle"),
+        ("cc_18",
+         "Verify that all Data Entity definitions in the Content Metamodel include data owner, classification, and retention policy attributes.",
+         ["retrieval", "processing"], 2, 1,
+         "Data governance attribute compliance per data architecture standards"),
+        ("cc_19",
+         "Check that ArchiMate Specialization relationships are only used between elements of the same type per specification.",
+         ["retrieval", "processing"], 2, 1,
+         "ArchiMate Specialization relationship type constraint validation"),
+        ("cc_20",
+         "Verify that the Transition Architecture deliverable includes a complete mapping from current to target state for every affected Building Block.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Transition Architecture completeness compliance per Phase F"),
+    ]
+    return [
+        Exemplar(id=t[0], family=ExemplarFamily.COMPLIANCE_CHECK,
+                 template=t[1], implied_pattern=t[2], complexity=t[3],
+                 required_tool_types=["retrieval", "processing"],
+                 description=t[5], sub_questions=t[4],
+                 tags=["togaf_governance", "archimate_validation"])
+        for t in templates
+    ]
+
+
+# =====================================================================
+# Family 7: Risk Assessment (20 exemplars)
+# Pattern: identify risk factors, assess probability/impact, prioritize
+# =====================================================================
+
+def _risk_assessment_exemplars() -> list[Exemplar]:
+    """Architecture risk assessment per TOGAF risk management."""
+    templates = [
+        ("ra_01",
+         "Assess the risk of {Application_Component} failure by analyzing its dependency graph — identify single points of failure via bridge detection.",
+         ["retrieval", "processing"], 4, 2,
+         "Single point of failure risk via graph bridge detection"),
+        ("ra_02",
+         "Evaluate technology obsolescence risk for all Technology Components approaching end-of-life within 24 months.",
+         ["retrieval", "processing"], 3, 2,
+         "Technology lifecycle risk assessment per Phase D"),
+        ("ra_03",
+         "Assess the migration risk for transitioning from {Plateau_A} to {Plateau_B}: identify affected stakeholders, data migration complexity, and rollback capability.",
+         ["retrieval", "retrieval", "processing"], 4, 3,
+         "Plateau transition risk assessment per Phase F"),
+        ("ra_04",
+         "Analyze the impact propagation if {Technology_Service} fails: trace through ArchiMate Serving relationships to identify affected Business Services.",
+         ["retrieval", "processing"], 4, 1,
+         "Failure impact propagation analysis via graph traversal"),
+        ("ra_05",
+         "Evaluate vendor lock-in risk for Technology Components: identify components with single-vendor dependency and no standard interfaces.",
+         ["retrieval", "processing"], 3, 2,
+         "Vendor dependency risk assessment in Technology Architecture"),
+        ("ra_06",
+         "Assess data sovereignty risk: identify Data Entities that cross Location boundaries per Content Metamodel Location→Data_Entity mapping.",
+         ["retrieval", "retrieval", "processing"], 3, 2,
+         "Data sovereignty risk via Location-Data cross-referencing"),
+        ("ra_07",
+         "Evaluate the risk of Architecture Principle violations: which Building Blocks are most likely to deviate from principles given their change frequency?",
+         ["retrieval", "retrieval", "processing"], 3, 2,
+         "Principle violation risk assessment based on change history"),
+        ("ra_08",
+         "Assess integration complexity risk: identify Application Components with the highest number of interfaces and Serving relationships.",
+         ["retrieval", "processing"], 3, 1,
+         "Integration complexity risk via ArchiMate relationship degree analysis"),
+        ("ra_09",
+         "Evaluate the risk to the Architecture Roadmap if {Work_Package} is delayed: compute schedule impact using critical path analysis.",
+         ["retrieval", "processing"], 4, 2,
+         "Schedule risk via critical path impact of Work Package delay"),
+        ("ra_10",
+         "Assess skill gap risk: identify Technology Components requiring specialized skills not currently available in Organization Units.",
+         ["retrieval", "retrieval", "processing"], 3, 2,
+         "Skill gap risk per Organization Unit capability assessment"),
+        ("ra_11",
+         "Evaluate the blast radius if ArchiMate element {element} is removed: compute impact score via graph traversal of all relationship types.",
+         ["retrieval", "processing"], 4, 1,
+         "Element removal blast radius via graph impact propagation"),
+        ("ra_12",
+         "Assess compliance risk: identify Architecture Requirements with no compliance verification plan in the Architecture Contract.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Requirements verification gap risk per Architecture Governance"),
+        ("ra_13",
+         "Evaluate security risk exposure: identify Application Components with external-facing Interfaces that lack security controls in the model.",
+         ["retrieval", "processing"], 3, 2,
+         "Security exposure risk via ArchiMate interface analysis"),
+        ("ra_14",
+         "Assess portfolio concentration risk: identify Business Functions supported by only one Application Component with no redundancy.",
+         ["retrieval", "processing"], 3, 1,
+         "Application support concentration risk analysis"),
+        ("ra_15",
+         "Evaluate Architecture Decision risk: identify decisions with high reversibility cost and no documented alternatives.",
+         ["retrieval", "processing"], 2, 2,
+         "Architecture decision reversibility risk assessment"),
+        ("ra_16",
+         "Assess data quality risk: identify Data Entities with no defined data standards or validation rules in the metamodel.",
+         ["retrieval", "processing"], 2, 1,
+         "Data quality governance risk per Data Architecture"),
+        ("ra_17",
+         "Evaluate the risk of scope creep in the current ADM cycle by comparing approved Statement of Architecture Work scope against actual artifacts produced.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Scope adherence risk per ADM governance"),
+        ("ra_18",
+         "Assess interoperability risk: identify Technology Components using non-standard protocols not listed in the Standards Information Base.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Interoperability standards compliance risk assessment"),
+        ("ra_19",
+         "Evaluate change impact risk for modifying {Business_Process}: trace through ArchiMate relationships to all dependent elements across layers.",
+         ["retrieval", "processing"], 4, 1,
+         "Change impact risk via multi-layer dependency traversal"),
+        ("ra_20",
+         "Assess the risk of the Architecture Repository becoming stale: identify entities with last-modified dates exceeding governance review thresholds.",
+         ["retrieval", "processing"], 2, 1,
+         "Repository staleness risk per Architecture Governance cycle"),
+    ]
+    return [
+        Exemplar(id=t[0], family=ExemplarFamily.RISK_ASSESSMENT,
+                 template=t[1], implied_pattern=t[2], complexity=t[3],
+                 required_tool_types=["retrieval", "processing"],
+                 description=t[5], sub_questions=t[4],
+                 tags=["togaf_risk", "impact_analysis"])
+        for t in templates
+    ]
+
+
+# =====================================================================
+# Family 8: Roadmap Planning (25 exemplars)
+# Pattern: plan transitions, sequence work packages, manage plateaus
+# =====================================================================
+
+def _roadmap_planning_exemplars() -> list[Exemplar]:
+    """Architecture roadmap planning per TOGAF ADM Phase E/F."""
+    templates = [
+        ("rp_01",
+         "Given the Gaps from phases B-D, generate a candidate set of Work Packages and sequence them by dependency using topological sort.",
+         ["retrieval", "processing"], 4, 1,
+         "Work Package generation and topological ordering per Phase E"),
+        ("rp_02",
+         "Define Plateau transitions: group Work Packages into 3 transition architectures based on business value delivery milestones.",
+         ["retrieval", "processing"], 4, 1,
+         "Plateau definition per Phase F transition architecture planning"),
+        ("rp_03",
+         "Create a migration plan for retiring {legacy_system}: identify all dependent Application Components and plan their migration sequence.",
+         ["retrieval", "retrieval", "processing"], 4, 1,
+         "Legacy system retirement planning via dependency analysis"),
+        ("rp_04",
+         "Sequence Building Block implementations: determine the optimal order for deploying SBBs given ABB dependencies.",
+         ["retrieval", "processing"], 3, 1,
+         "SBB deployment sequencing per ABB dependency graph"),
+        ("rp_05",
+         "Plan the data migration roadmap: sequence Data Entity migrations based on Application Component dependencies.",
+         ["retrieval", "retrieval", "processing"], 4, 1,
+         "Data migration sequencing per Data Architecture dependencies"),
+        ("rp_06",
+         "Generate an Implementation Factor Assessment: catalog factors (risks, issues, assumptions, dependencies) for each Work Package.",
+         ["retrieval", "processing"], 3, 1,
+         "Implementation factor cataloging per Phase E technique"),
+        ("rp_07",
+         "Create a consolidated gaps, solutions, and dependencies matrix from the Architecture Roadmap for executive review.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Consolidated matrix per TOGAF Phase E deliverable"),
+        ("rp_08",
+         "Plan the Architecture Contract negotiation sequence: identify which contracts need to be in place before each Work Package can begin.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Contract-Work Package prerequisite planning per Phase G"),
+        ("rp_09",
+         "Sequence the deployment of ArchiMate Implementation & Migration elements to achieve incremental capability delivery.",
+         ["retrieval", "processing"], 3, 1,
+         "Incremental deployment sequencing via I&M layer analysis"),
+        ("rp_10",
+         "Plan a standards adoption roadmap: schedule transitions from current to target standards per the Standards Information Base.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Standards transition planning per Architecture Governance"),
+        ("rp_11",
+         "Generate a resource allocation plan across Work Packages: identify skill requirements and map to available Organization Unit capabilities.",
+         ["retrieval", "retrieval", "processing"], 3, 2,
+         "Resource planning per Work Package skill requirements"),
+        ("rp_12",
+         "Plan the stakeholder communication schedule per ADM phase: which Architecture Views should be presented to which stakeholders at each phase gate.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "Stakeholder communication planning per TOGAF Communications Plan"),
+        ("rp_13",
+         "Create an architecture maturity roadmap: define target maturity levels per Capability and sequence improvement initiatives.",
+         ["retrieval", "processing"], 3, 1,
+         "Capability maturity improvement roadmap planning"),
+        ("rp_14",
+         "Plan the Technology Component refresh cycle: schedule replacements based on end-of-life dates, dependency impact, and budget constraints.",
+         ["retrieval", "processing"], 4, 1,
+         "Technology refresh planning per Phase D and Phase E"),
+        ("rp_15",
+         "Sequence Architecture Governance reviews: plan review board meetings aligned with Work Package milestones and Plateau transitions.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "Governance review scheduling per Architecture Governance framework"),
+        ("rp_16",
+         "Plan the ArchiMate model evolution: define modeling milestones aligned with ADM phase completions.",
+         ["retrieval", "processing"], 2, 1,
+         "ArchiMate model update planning per ADM cycle"),
+        ("rp_17",
+         "Generate a Business Transformation Readiness Assessment and plan readiness improvement activities per readiness factor.",
+         ["retrieval", "processing"], 3, 1,
+         "Transformation readiness planning per TOGAF Phase A technique"),
+        ("rp_18",
+         "Plan the integration architecture roadmap: sequence interface deployments based on Application Component migration order.",
+         ["retrieval", "retrieval", "processing"], 4, 1,
+         "Integration roadmap per Application Architecture dependencies"),
+        ("rp_19",
+         "Create a value realization plan: map Work Package completions to measurable business outcome KPIs per Architecture Vision.",
+         ["retrieval", "retrieval", "processing"], 3, 2,
+         "Value realization tracking plan per Phase A KPIs"),
+        ("rp_20",
+         "Plan the Architecture Repository population strategy: sequence which Content Metamodel entity types to populate first based on dependency order.",
+         ["retrieval", "processing"], 2, 1,
+         "Repository population sequencing per metamodel dependencies"),
+        ("rp_21",
+         "Sequence Principle implementation: determine which Architecture Principles should be enforced first based on risk reduction impact.",
+         ["retrieval", "processing"], 3, 1,
+         "Principle enforcement priority planning"),
+        ("rp_22",
+         "Plan a multi-project Architecture Roadmap: resolve cross-project Work Package dependencies and identify shared Building Blocks.",
+         ["retrieval", "retrieval", "processing"], 4, 1,
+         "Multi-project roadmap coordination per Phase F"),
+        ("rp_23",
+         "Generate phase-gate criteria for each Plateau transition: define the mandatory deliverables and compliance checks required.",
+         ["retrieval", "processing"], 3, 1,
+         "Phase-gate criteria definition per ADM governance"),
+        ("rp_24",
+         "Plan the training and organizational change roadmap: align capability building activities with Work Package deployment schedule.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Organizational change management planning per Phase F"),
+        ("rp_25",
+         "Create an Architecture Decision Log roadmap: identify when key architecture decisions must be made relative to Work Package dependencies.",
+         ["retrieval", "processing"], 3, 1,
+         "Decision timing planning per Architecture Roadmap dependencies"),
+    ]
+    return [
+        Exemplar(id=t[0], family=ExemplarFamily.ROADMAP_PLANNING,
+                 template=t[1], implied_pattern=t[2], complexity=t[3],
+                 required_tool_types=["retrieval", "processing"],
+                 description=t[5], sub_questions=t[4],
+                 tags=["togaf_adm_phase_e_f", "migration_planning"])
+        for t in templates
+    ]
+
+
+# =====================================================================
+# Family 9: Stakeholder Analysis (20 exemplars)
+# Pattern: identify stakeholders, analyze concerns, plan engagement
+# =====================================================================
+
+def _stakeholder_analysis_exemplars() -> list[Exemplar]:
+    """Stakeholder analysis per TOGAF stakeholder management."""
+    templates = [
+        ("sa_01",
+         "Identify all Stakeholders affected by changes to {Business_Service} and classify their concerns by TOGAF concern category.",
+         ["retrieval", "retrieval", "processing"], 2, 2,
+         "Stakeholder identification via Business Service impact analysis"),
+        ("sa_02",
+         "Map Stakeholders to Architecture Viewpoints: for each stakeholder group, determine which TOGAF viewpoints address their concerns.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "Stakeholder-Viewpoint mapping per TOGAF stakeholder management"),
+        ("sa_03",
+         "Analyze the ArchiMate Stakeholder elements and their Influence/Association relationships to Driver elements to identify key decision-makers.",
+         ["retrieval", "processing"], 2, 1,
+         "Decision-maker identification via ArchiMate Motivation layer analysis"),
+        ("sa_04",
+         "Build a stakeholder power-interest grid: classify all identified stakeholders by influence level and interest in {architecture_change}.",
+         ["retrieval", "processing"], 2, 1,
+         "Power-interest matrix construction per stakeholder analysis technique"),
+        ("sa_05",
+         "Identify stakeholders who are impacted by Work Packages in {Plateau} transition and assess their change readiness.",
+         ["retrieval", "retrieval", "processing"], 3, 2,
+         "Plateau stakeholder impact and readiness assessment"),
+        ("sa_06",
+         "Analyze the Communication Plan: which stakeholders receive which Architecture Views and is the coverage complete?",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "Communication plan coverage analysis per Phase A deliverable"),
+        ("sa_07",
+         "Identify conflicting stakeholder concerns for {Architecture_Decision} and recommend a resolution approach.",
+         ["retrieval", "retrieval", "processing"], 3, 2,
+         "Stakeholder concern conflict resolution per TOGAF technique"),
+        ("sa_08",
+         "Map ArchiMate Business Actors and Business Roles to TOGAF Stakeholder categories and identify coverage gaps.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "ArchiMate-to-TOGAF stakeholder mapping and gap identification"),
+        ("sa_09",
+         "Analyze stakeholder engagement levels across ADM phases: identify phases where stakeholder participation drops.",
+         ["retrieval", "processing"], 2, 1,
+         "Stakeholder engagement trend analysis across ADM cycle"),
+        ("sa_10",
+         "Identify the stakeholders who should approve the Architecture Contract for {Work_Package} based on their concerns and authority.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "Contract approval stakeholder identification per Phase G"),
+        ("sa_11",
+         "Analyze the impact of proposed Architecture Principle changes on each stakeholder group and prioritize communication.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Principle change stakeholder impact analysis"),
+        ("sa_12",
+         "Build a RACI matrix for Architecture Governance activities: map Stakeholders to governance roles (Responsible, Accountable, Consulted, Informed).",
+         ["retrieval", "processing"], 2, 1,
+         "Governance RACI matrix construction per Architecture Governance"),
+        ("sa_13",
+         "Identify stakeholders for the Architecture Board and assess their suitability based on domain expertise and organizational authority.",
+         ["retrieval", "processing"], 2, 2,
+         "Architecture Board member identification per TOGAF governance"),
+        ("sa_14",
+         "Analyze how stakeholder concerns evolve from Phase A (Architecture Vision) through Phase F (Migration Planning) for {stakeholder_group}.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Stakeholder concern evolution analysis across ADM phases"),
+        ("sa_15",
+         "Map the influence network: which ArchiMate Stakeholder elements influence which Goal and Requirement elements, and what is the influence topology?",
+         ["retrieval", "processing"], 3, 1,
+         "Stakeholder influence network analysis via graph topology"),
+        ("sa_16",
+         "Identify external stakeholders (regulators, partners, customers) from the ArchiMate model and map their concerns to Compliance Requirements.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "External stakeholder compliance concern mapping"),
+        ("sa_17",
+         "Assess stakeholder satisfaction risk: identify stakeholders whose key concerns are not addressed by any Work Package in the Architecture Roadmap.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Stakeholder concern coverage risk in Architecture Roadmap"),
+        ("sa_18",
+         "Analyze the Organization Map: which Organization Units are most affected by the proposed architecture changes and who leads them?",
+         ["retrieval", "retrieval", "processing"], 2, 2,
+         "Organizational impact analysis per TOGAF Organization Map"),
+        ("sa_19",
+         "Build a viewpoint recommendation matrix: for each stakeholder concern, recommend the most appropriate ArchiMate viewpoint from Appendix C.",
+         ["retrieval", "retrieval", "processing"], 2, 1,
+         "ArchiMate viewpoint recommendation per stakeholder concern"),
+        ("sa_20",
+         "Identify the minimum set of Architecture Views needed to address all stakeholder concerns with no redundancy.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Optimal view set computation via set cover analysis"),
+    ]
+    return [
+        Exemplar(id=t[0], family=ExemplarFamily.STAKEHOLDER_ANALYSIS,
+                 template=t[1], implied_pattern=t[2], complexity=t[3],
+                 required_tool_types=["retrieval", "processing"],
+                 description=t[5], sub_questions=t[4],
+                 tags=["togaf_stakeholder", "viewpoint_management"])
+        for t in templates
+    ]
+
+
+# =====================================================================
+# Family 10: Cost-Benefit Analysis (20 exemplars)
+# Pattern: quantify costs and benefits, compute ROI/NPV, recommend
+# =====================================================================
+
+def _cost_benefit_exemplars() -> list[Exemplar]:
+    """Cost-benefit and value analysis for architecture decisions."""
+    templates = [
+        ("cb_01",
+         "Calculate the total cost of ownership for {Application_Component}: sum infrastructure, license, support, and operational costs from Technology Components.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "TCO computation via Application→Technology cost aggregation"),
+        ("cb_02",
+         "Compute the ROI of implementing {Architecture_Building_Block}: estimate cost of SBB alternatives vs. value of capability enablement.",
+         ["retrieval", "retrieval", "processing"], 3, 2,
+         "ABB implementation ROI per building block portfolio analysis"),
+        ("cb_03",
+         "Assess the cost of Gap remediation: estimate effort for each Gap entity based on affected entity count and complexity score.",
+         ["retrieval", "processing"], 3, 1,
+         "Gap remediation cost estimation per Phase E planning"),
+        ("cb_04",
+         "Calculate the business value impact of completing {Plateau}: aggregate the value of all Work Packages in the plateau transition.",
+         ["retrieval", "processing"], 3, 1,
+         "Plateau business value computation per Phase F"),
+        ("cb_05",
+         "Compute the cost of technical debt remediation: estimate cost per Technology Component based on age, compliance gaps, and dependency count.",
+         ["retrieval", "processing"], 3, 1,
+         "Technical debt cost estimation per Technology Architecture analysis"),
+        ("cb_06",
+         "Evaluate the cost-benefit of consolidating {count} Application Components into a single platform using ArchiMate model metrics.",
+         ["retrieval", "processing"], 4, 2,
+         "Application consolidation cost-benefit via graph simplification analysis"),
+        ("cb_07",
+         "Calculate the standards compliance cost: estimate effort to bring non-compliant Technology Components up to Standards Information Base requirements.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Standards compliance cost per technology portfolio gap"),
+        ("cb_08",
+         "Assess the value of Architecture Repository maturity: estimate productivity gains from improving repository completeness per Content Metamodel.",
+         ["retrieval", "processing"], 2, 1,
+         "Repository maturity value estimation"),
+        ("cb_09",
+         "Compute the risk-adjusted cost of {Work_Package}: factor in probability of risk events and their financial impact.",
+         ["retrieval", "retrieval", "processing"], 3, 2,
+         "Risk-adjusted Work Package costing per Phase E"),
+        ("cb_10",
+         "Calculate the integration cost savings from adopting a shared {Technology_Service} across multiple Application Components.",
+         ["retrieval", "processing"], 3, 1,
+         "Shared service cost savings via ArchiMate Serving relationship analysis"),
+        ("cb_11",
+         "Assess the opportunity cost of delaying {Work_Package}: compute business value foregone per month of delay.",
+         ["retrieval", "processing"], 3, 1,
+         "Delay opportunity cost per Architecture Roadmap schedule"),
+        ("cb_12",
+         "Calculate the cost of maintaining redundant Application Components vs. consolidation cost using ArchiMate model analysis.",
+         ["retrieval", "processing"], 3, 2,
+         "Redundancy maintenance vs consolidation cost comparison"),
+        ("cb_13",
+         "Estimate the governance overhead cost: compute the resource requirement for Architecture Compliance reviews per ADM cycle.",
+         ["retrieval", "processing"], 2, 1,
+         "Governance resource cost estimation per TOGAF governance framework"),
+        ("cb_14",
+         "Compute the value of reducing application landscape complexity: estimate operational savings from lowering graph density metrics.",
+         ["retrieval", "processing"], 3, 1,
+         "Complexity reduction value via graph metric improvement estimation"),
+        ("cb_15",
+         "Assess the business case for adopting {standard}: estimate compliance cost vs. interoperability value.",
+         ["retrieval", "retrieval", "processing"], 2, 2,
+         "Standard adoption business case per Standards Information Base"),
+        ("cb_16",
+         "Calculate the training cost for organizational change required by {Plateau} transition: estimate per Organization Unit.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Organizational change training cost per Plateau"),
+        ("cb_17",
+         "Compute the value-at-risk if the Architecture Roadmap is executed without addressing identified high-priority Gaps.",
+         ["retrieval", "processing"], 3, 1,
+         "Gap non-remediation value-at-risk computation"),
+        ("cb_18",
+         "Assess the cost impact of an Architecture Principle change: estimate rework cost across affected Building Blocks.",
+         ["retrieval", "retrieval", "processing"], 3, 1,
+         "Principle change rework cost estimation"),
+        ("cb_19",
+         "Calculate the expected value delivery per ADM iteration: aggregate value across all Work Packages weighted by completion probability.",
+         ["retrieval", "processing"], 3, 1,
+         "ADM iteration expected value computation"),
+        ("cb_20",
+         "Estimate the cost-benefit of creating additional ArchiMate views: model the effort cost vs. stakeholder decision-making value improvement.",
+         ["retrieval", "processing"], 2, 2,
+         "ArchiMate view creation cost-benefit assessment"),
+    ]
+    return [
+        Exemplar(id=t[0], family=ExemplarFamily.COST_BENEFIT,
+                 template=t[1], implied_pattern=t[2], complexity=t[3],
+                 required_tool_types=["retrieval", "processing"],
+                 description=t[5], sub_questions=t[4],
+                 tags=["togaf_business_case", "value_analysis"])
+        for t in templates
+    ]
+
+
+# =====================================================================
+# Complex multi-step exemplars (high complexity, cross-family)
+# =====================================================================
+
+def _complex_multi_step_exemplars() -> list[Exemplar]:
+    """Complex multi-step tasks combining multiple patterns."""
+    templates = [
+        # Cross-domain analysis combining graph + retrieval + compliance
+        ("cx_01",
+         "Perform a full Architecture Landscape assessment: parse the ArchiMate model, compute topology metrics, identify critical components via centrality, and generate a risk heat-map.",
+         ["retrieval", "processing", "processing", "processing"], 5, 4,
+         "Full landscape assessment: parse → metrics → centrality → risk scoring"),
+        ("cx_02",
+         "Execute an end-to-end ADM Phase B cycle: retrieve Business Architecture inputs, identify stakeholders, perform gap analysis, generate roadmap components, and validate compliance.",
+         ["retrieval", "retrieval", "processing", "processing", "processing"], 5, 5,
+         "Complete Phase B workflow simulation"),
+        ("cx_03",
+         "Conduct a Technology Architecture rationalization: parse current ArchiMate model, compute redundancy metrics, identify consolidation candidates, assess migration risk, and plan sequencing.",
+         ["retrieval", "processing", "processing", "processing", "processing"], 5, 5,
+         "Full technology rationalization workflow"),
+        ("cx_04",
+         "Build a complete Stakeholder Management Package: identify stakeholders, map concerns to viewpoints, select ArchiMate views, build communication plan, and assess engagement risk.",
+         ["retrieval", "retrieval", "processing", "processing", "processing"], 5, 5,
+         "End-to-end stakeholder management workflow per TOGAF"),
+        ("cx_05",
+         "Execute a full gap-to-roadmap pipeline: aggregate Gaps from all architecture phases, generate Work Packages, compute dependencies, sequence via topological sort, and define Plateaus.",
+         ["retrieval", "retrieval", "retrieval", "retrieval", "processing", "processing"], 5, 4,
+         "Complete Phase E pipeline: gaps → work packages → dependencies → plateaus"),
+        ("cx_06",
+         "Perform a cross-model consistency check: validate ArchiMate model against TOGAF Content Metamodel, check relationship rules, verify viewpoint conformance, and generate compliance report.",
+         ["retrieval", "retrieval", "processing", "processing"], 5, 4,
+         "Full cross-specification consistency validation"),
+        ("cx_07",
+         "Conduct an Application Portfolio assessment: retrieve all Application Components, compute coupling/cohesion metrics, identify candidates for elimination/consolidation/retention, and estimate migration costs.",
+         ["retrieval", "processing", "processing", "processing"], 5, 4,
+         "Complete application portfolio rationalization workflow"),
+        ("cx_08",
+         "Build an Architecture Decision Record: retrieve alternatives, analyze trade-offs using graph impact analysis, assess stakeholder concerns, compute cost-benefit, and document the decision.",
+         ["retrieval", "retrieval", "processing", "processing", "processing"], 5, 5,
+         "End-to-end architecture decision process"),
+        ("cx_09",
+         "Perform an enterprise-wide dependency audit: parse ArchiMate model, extract full dependency graph, compute layer-crossing metrics, identify circular dependencies, and generate remediation plan.",
+         ["retrieval", "processing", "processing", "processing", "processing"], 5, 5,
+         "Full dependency audit from model parsing to remediation"),
+        ("cx_10",
+         "Execute Architecture Governance review: check deliverable completeness across ADM phases, validate principle compliance, assess risk posture, review contract status, and generate board report.",
+         ["retrieval", "retrieval", "processing", "processing", "processing"], 5, 5,
+         "Complete governance review cycle per TOGAF Phase H"),
+        ("cx_11",
+         "Conduct a Business-IT alignment assessment: map Business Functions to Application Services via ArchiMate, compute alignment scores, identify misalignments, and recommend corrective actions.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "Business-IT alignment assessment workflow"),
+        ("cx_12",
+         "Build a Transition Architecture: retrieve target state, define intermediate plateaus, assign Work Packages, validate constraints, and compute critical path.",
+         ["retrieval", "processing", "processing", "processing"], 5, 4,
+         "Complete Transition Architecture construction per Phase F"),
+        ("cx_13",
+         "Perform a Value Stream analysis: map Value Stream stages to Capabilities, assess maturity, identify investment priorities, compute expected value improvement, and generate roadmap.",
+         ["retrieval", "retrieval", "processing", "processing", "processing"], 5, 5,
+         "End-to-end Value Stream to investment roadmap"),
+        ("cx_14",
+         "Execute a Security Architecture assessment: identify external-facing elements in ArchiMate, trace data flows through the model, assess vulnerability exposure per Technology Component, and plan mitigations.",
+         ["retrieval", "processing", "processing", "processing"], 4, 4,
+         "Security architecture assessment via ArchiMate model analysis"),
+        ("cx_15",
+         "Conduct a full Architecture Repository health check: assess completeness per Content Metamodel type, check for stale entries, validate cross-references, compute overall health score, and generate improvement plan.",
+         ["retrieval", "processing", "processing", "processing", "processing"], 5, 5,
+         "Complete Architecture Repository health assessment"),
+    ]
+    return [
+        Exemplar(id=t[0], family=ExemplarFamily.RETRIEVE_COMPUTE,
+                 template=t[1], implied_pattern=t[2], complexity=t[3],
+                 required_tool_types=["retrieval", "processing"],
+                 description=t[5], sub_questions=t[4],
+                 tags=["complex_multi_step", "cross_domain"])
+        for t in templates
+    ]
+
+
+# =====================================================================
+# Family 12: Architecture Decision Records (ADR)
+# Pattern: context → alternatives → trade-offs → decision → consequences
+# Inspired by public ADR repositories and Michael Nygard's ADR format
+# =====================================================================
+
+def _architecture_decision_exemplars() -> list[Exemplar]:
+    """ADR-style exemplars: given context X, chose Y because Z, rejected W."""
+    templates = [
+        # Infrastructure decisions
+        ("adr_01",
+         "Draft an ADR for selecting {Container_Orchestration_Platform}: document the context (microservices deployment needs), "
+         "evaluate Kubernetes vs ECS vs Nomad, analyze trade-offs (operational complexity vs ecosystem breadth vs vendor lock-in), "
+         "and justify the decision based on team skills and scale requirements.",
+         ["retrieval", "retrieval", "processing", "processing"], 3, 4,
+         "ADR: container orchestration platform selection"),
+        ("adr_02",
+         "Draft an ADR for choosing between synchronous REST APIs and asynchronous event-driven messaging "
+         "for {Inter_Service_Communication}. Evaluate latency, coupling, reliability, and debugging complexity. "
+         "Recommend a hybrid approach where applicable and document the decision boundary.",
+         ["retrieval", "processing", "processing"], 3, 3,
+         "ADR: sync vs async inter-service communication"),
+        ("adr_03",
+         "Draft an ADR for {Database_Selection}: compare relational (PostgreSQL) vs document (MongoDB) vs wide-column (Cassandra) "
+         "for the given workload profile. Evaluate consistency model, query patterns, operational cost, and team expertise. "
+         "Document rejected alternatives with specific reasons.",
+         ["retrieval", "retrieval", "processing", "processing"], 3, 4,
+         "ADR: database technology selection"),
+        ("adr_04",
+         "Draft an ADR for adopting {Service_Mesh} (Istio vs Linkerd vs no mesh). Analyze mTLS requirements, "
+         "observability gains, latency overhead, memory footprint, and operational complexity. "
+         "Consider the team size and maturity constraints.",
+         ["retrieval", "processing", "processing"], 3, 3,
+         "ADR: service mesh adoption decision"),
+        ("adr_05",
+         "Draft an ADR for {Authentication_Strategy}: evaluate OAuth2/OIDC vs SAML vs API keys vs mutual TLS. "
+         "Consider user-facing vs service-to-service scenarios, token lifecycle management, "
+         "and compliance requirements (SOC2, GDPR). Document the chosen hybrid approach.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "ADR: authentication and authorization strategy"),
+
+        # Data architecture decisions
+        ("adr_06",
+         "Draft an ADR for {Event_Sourcing_vs_CRUD}: analyze the trade-offs of event sourcing vs traditional CRUD "
+         "for the domain. Evaluate audit requirements, temporal query needs, read/write ratio, "
+         "eventual consistency tolerance, and development complexity.",
+         ["retrieval", "processing", "processing"], 3, 3,
+         "ADR: event sourcing vs CRUD data pattern"),
+        ("adr_07",
+         "Draft an ADR for {Data_Partitioning_Strategy}: evaluate horizontal sharding vs vertical partitioning "
+         "vs federation for scaling the data tier. Analyze query routing complexity, cross-partition joins, "
+         "rebalancing cost, and consistency implications.",
+         ["retrieval", "processing", "processing"], 4, 3,
+         "ADR: data partitioning and sharding strategy"),
+        ("adr_08",
+         "Draft an ADR for {CQRS_Adoption}: analyze whether to separate read and write models. "
+         "Evaluate query complexity, write throughput requirements, consistency requirements, "
+         "and the cost of maintaining dual models. Document the bounded contexts where CQRS applies.",
+         ["retrieval", "processing", "processing"], 3, 3,
+         "ADR: CQRS pattern adoption"),
+
+        # Integration decisions
+        ("adr_09",
+         "Draft an ADR for {API_Gateway_Strategy}: evaluate centralized gateway vs BFF (Backend for Frontend) "
+         "vs direct service calls. Analyze routing flexibility, team autonomy, single point of failure risk, "
+         "and cross-cutting concern management (auth, rate limiting, observability).",
+         ["retrieval", "retrieval", "processing", "processing"], 3, 4,
+         "ADR: API gateway strategy"),
+        ("adr_10",
+         "Draft an ADR for {Message_Broker_Selection}: compare Kafka vs RabbitMQ vs Pulsar for the given workload. "
+         "Evaluate throughput requirements, ordering guarantees, consumer group semantics, "
+         "operational complexity, and exactly-once delivery needs.",
+         ["retrieval", "retrieval", "processing", "processing"], 3, 4,
+         "ADR: message broker selection"),
+
+        # Organizational architecture decisions
+        ("adr_11",
+         "Draft an ADR for {Monolith_vs_Microservices}: analyze whether to decompose the monolith. "
+         "Evaluate team size and structure, deployment frequency needs, domain boundary clarity, "
+         "data coupling, and operational readiness. Apply the Inverse Conway Maneuver.",
+         ["retrieval", "processing", "processing", "processing"], 4, 4,
+         "ADR: monolith decomposition decision"),
+        ("adr_12",
+         "Draft an ADR for {Multi_Tenancy_Strategy}: evaluate siloed (per-tenant infra) vs pooled (shared infra) "
+         "vs hybrid multi-tenancy. Analyze isolation requirements, cost per tenant, noisy neighbor risk, "
+         "compliance constraints, and operational complexity scaling.",
+         ["retrieval", "processing", "processing"], 4, 3,
+         "ADR: multi-tenancy architecture strategy"),
+        ("adr_13",
+         "Draft an ADR for {Observability_Strategy}: decide between unified observability platform "
+         "(Grafana stack) vs best-of-breed (Datadog/New Relic) vs build-on-OSS (OpenTelemetry + backends). "
+         "Evaluate cost at scale, vendor lock-in, correlation capabilities, and team adoption curve.",
+         ["retrieval", "retrieval", "processing", "processing"], 3, 4,
+         "ADR: observability platform strategy"),
+        ("adr_14",
+         "Draft an ADR for {CI_CD_Pipeline_Architecture}: evaluate GitHub Actions vs Jenkins vs GitLab CI "
+         "vs ArgoCD+Tekton. Analyze GitOps compatibility, pipeline-as-code maturity, self-hosted vs SaaS, "
+         "secrets management, and deployment strategy (blue-green, canary, rolling).",
+         ["retrieval", "retrieval", "processing", "processing"], 3, 4,
+         "ADR: CI/CD pipeline architecture"),
+        ("adr_15",
+         "Draft an ADR for {Frontend_Architecture}: evaluate micro-frontends vs monolithic SPA vs server-side "
+         "rendering. Analyze team autonomy, shared component strategy, performance budget, "
+         "deployment independence, and user experience consistency.",
+         ["retrieval", "processing", "processing"], 3, 3,
+         "ADR: frontend architecture pattern"),
+
+        # Cloud architecture decisions
+        ("adr_16",
+         "Draft an ADR for {Cloud_Provider_Strategy}: evaluate single-cloud vs multi-cloud vs hybrid-cloud. "
+         "Analyze vendor lock-in risk, portability cost, operational complexity, "
+         "regulatory requirements, and total cost of ownership.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "ADR: cloud provider strategy"),
+        ("adr_17",
+         "Draft an ADR for {Serverless_vs_Containers}: evaluate when to use serverless functions "
+         "vs containerized services. Define the decision boundary based on execution duration, "
+         "cold start tolerance, state requirements, and cost at different traffic patterns.",
+         ["retrieval", "processing", "processing"], 3, 3,
+         "ADR: serverless vs container workload placement"),
+        ("adr_18",
+         "Draft an ADR for {Data_Lake_Architecture}: evaluate medallion architecture (bronze/silver/gold) "
+         "vs data mesh vs traditional data warehouse. Analyze data ownership, governance model, "
+         "query latency requirements, and organizational data literacy.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "ADR: data lake/mesh architecture"),
+
+        # Security decisions
+        ("adr_19",
+         "Draft an ADR for {Secrets_Management}: evaluate HashiCorp Vault vs AWS Secrets Manager vs "
+         "sealed secrets in Git. Analyze rotation policies, access audit requirements, "
+         "cross-environment consistency, and disaster recovery of secrets.",
+         ["retrieval", "retrieval", "processing", "processing"], 3, 4,
+         "ADR: secrets management strategy"),
+        ("adr_20",
+         "Draft an ADR for {Zero_Trust_Architecture}: decide the scope and phasing of zero-trust adoption. "
+         "Evaluate identity-aware proxy vs service mesh mTLS vs network segmentation. "
+         "Analyze impact on developer experience, performance overhead, and compliance mapping.",
+         ["retrieval", "processing", "processing", "processing"], 4, 4,
+         "ADR: zero-trust network architecture"),
+    ]
+    return [
+        Exemplar(id=t[0], family=ExemplarFamily.ARCHITECTURE_DECISION,
+                 template=t[1], implied_pattern=t[2], complexity=t[3],
+                 required_tool_types=["retrieval", "processing"],
+                 description=t[5], sub_questions=t[4],
+                 tags=["adr", "decision_record", "cross_domain"])
+        for t in templates
+    ]
+
+
+# =====================================================================
+# Family 13: Architecture Kata
+# Pattern: requirements → constraints → quality attributes → design → trade-offs
+# Inspired by O'Reilly Architecture Katas and Neal Ford's exercises
+# =====================================================================
+
+def _architecture_kata_exemplars() -> list[Exemplar]:
+    """Architecture kata exemplars: design exercises with constraints."""
+    templates = [
+        # Classic kata patterns
+        ("kata_01",
+         "Design an architecture for a {Real_Time_Bidding_Platform}: 50ms latency SLA, 1M requests/sec peak, "
+         "geographic distribution across 3 regions. Define component topology, data flow, "
+         "and the trade-off between consistency and latency. Apply ArchiMate Technology Layer modeling.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "Kata: real-time bidding platform with strict latency SLA"),
+        ("kata_02",
+         "Design an architecture for a {Healthcare_Records_System}: HIPAA compliance, audit trail for all access, "
+         "integration with HL7/FHIR, multi-tenant for hospital groups. Map to TOGAF Business and Application layers, "
+         "identify key architecture decisions and document as ADRs.",
+         ["retrieval", "retrieval", "processing", "processing", "processing"], 5, 5,
+         "Kata: healthcare records system with compliance constraints"),
+        ("kata_03",
+         "Design an architecture for a {Global_E-Commerce_Platform}: handle flash sales (100x traffic spikes), "
+         "eventual consistency for inventory, strong consistency for payments, multi-currency support. "
+         "Apply TOGAF Phase B-D deliverables and compute cost-scalability trade-offs.",
+         ["retrieval", "processing", "processing", "processing"], 4, 4,
+         "Kata: e-commerce platform handling flash sale traffic spikes"),
+        ("kata_04",
+         "Design an architecture for a {Ride_Sharing_Platform}: real-time matching, location streaming, "
+         "surge pricing computation, driver/rider rating system. Focus on event streaming architecture, "
+         "geospatial data handling, and Team Topologies for the engineering org.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "Kata: ride-sharing platform with real-time matching"),
+        ("kata_05",
+         "Design an architecture for a {Banking_Core_Modernization}: migrate from mainframe COBOL to cloud-native. "
+         "Apply Strangler Fig pattern, define transition architectures (TOGAF Phase F), "
+         "map to BIAN service domains, and compute migration risk per service.",
+         ["retrieval", "retrieval", "processing", "processing", "processing"], 5, 5,
+         "Kata: core banking modernization from mainframe to cloud"),
+
+        # Constraint-focused katas
+        ("kata_06",
+         "Design a {Disaster_Recovery_Architecture} with RPO < 15min and RTO < 1hr across two regions. "
+         "Evaluate active-active vs active-passive vs pilot light strategies. "
+         "Map infrastructure components in ArchiMate Technology Layer and compute cost per 9 of availability.",
+         ["retrieval", "processing", "processing"], 3, 3,
+         "Kata: disaster recovery architecture with RPO/RTO constraints"),
+        ("kata_07",
+         "Design a {Multi_Region_Data_Architecture} satisfying GDPR data residency requirements. "
+         "Evaluate data replication strategies, define data classification tiers, "
+         "and design the consent management architecture. Map to TOGAF Information Architecture.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "Kata: multi-region data architecture with GDPR compliance"),
+        ("kata_08",
+         "Design an architecture for an {IoT_Fleet_Management} system: 100K connected devices, "
+         "telemetry ingestion at 10K events/sec, edge computing for anomaly detection, "
+         "cloud aggregation for analytics. Apply ArchiMate Physical and Technology layers.",
+         ["retrieval", "processing", "processing", "processing"], 4, 4,
+         "Kata: IoT fleet management with edge computing"),
+        ("kata_09",
+         "Design a {Regulatory_Reporting_Platform} for a bank: aggregate data from 20+ source systems, "
+         "apply Basel III/IV calculations, generate reports in XBRL format, ensure data lineage. "
+         "Map to BIAN service domains and TOGAF Data Architecture.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "Kata: regulatory reporting platform with data lineage"),
+        ("kata_10",
+         "Design a {Machine_Learning_Platform}: support experiment tracking, feature store, model registry, "
+         "A/B testing infrastructure, and model monitoring. Define team topologies (platform team + ML stream teams), "
+         "and evaluate build vs buy for each component.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "Kata: ML platform with build-vs-buy decisions"),
+
+        # Migration & evolution katas
+        ("kata_11",
+         "Design a migration path for {Monolith_to_Event_Driven}: decompose a monolithic order management system "
+         "into event-driven microservices. Identify bounded contexts via domain events, "
+         "design the event schema evolution strategy, and plan the strangler fig migration phases.",
+         ["retrieval", "processing", "processing", "processing"], 4, 4,
+         "Kata: monolith to event-driven decomposition"),
+        ("kata_12",
+         "Design a {Platform_Engineering} initiative: build an internal developer platform "
+         "providing golden paths for deployment, observability, and security. "
+         "Apply platform team topology, define the self-service API catalog, and compute ROI.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "Kata: internal developer platform engineering"),
+        ("kata_13",
+         "Design a {Telco_BSS_Modernization}: migrate BSS stack to TMForum ODA-compliant architecture. "
+         "Map existing capabilities to ODA functional blocks, define API-first integration, "
+         "plan the transition architecture, and assess vendor ecosystem.",
+         ["retrieval", "retrieval", "processing", "processing", "processing"], 5, 5,
+         "Kata: telco BSS modernization to TMForum ODA"),
+        ("kata_14",
+         "Design a {Supply_Chain_Digital_Twin}: real-time visibility across suppliers, warehouses, and logistics. "
+         "Define the event streaming backbone, digital twin data model, simulation engine, "
+         "and integration with SAP S/4HANA. Apply TOGAF Application Architecture.",
+         ["retrieval", "retrieval", "processing", "processing"], 4, 4,
+         "Kata: supply chain digital twin architecture"),
+        ("kata_15",
+         "Design a {Zero_Downtime_Database_Migration}: migrate from Oracle to PostgreSQL "
+         "while maintaining 99.99% availability. Define the dual-write strategy, data validation pipeline, "
+         "cutover plan, and rollback procedure. Compute risk per migration phase.",
+         ["retrieval", "processing", "processing", "processing"], 4, 4,
+         "Kata: zero-downtime database migration strategy"),
+    ]
+    return [
+        Exemplar(id=t[0], family=ExemplarFamily.ARCHITECTURE_KATA,
+                 template=t[1], implied_pattern=t[2], complexity=t[3],
+                 required_tool_types=["retrieval", "processing"],
+                 description=t[5], sub_questions=t[4],
+                 tags=["kata", "design_exercise", "cross_domain"])
+        for t in templates
+    ]
+
+
+# =====================================================================
+# Build all
+# =====================================================================
+
+def build_exemplar_pool() -> list[Exemplar]:
+    """Build the complete spec-grounded exemplar pool."""
+    exemplars: list[Exemplar] = []
+    exemplars.extend(_retrieve_compute_exemplars())
+    exemplars.extend(_multi_hop_retrieval_exemplars())
+    exemplars.extend(_compare_decide_exemplars())
+    exemplars.extend(_gap_analysis_exemplars())
+    exemplars.extend(_aggregate_exemplars())
+    exemplars.extend(_compliance_check_exemplars())
+    exemplars.extend(_risk_assessment_exemplars())
+    exemplars.extend(_roadmap_planning_exemplars())
+    exemplars.extend(_stakeholder_analysis_exemplars())
+    exemplars.extend(_cost_benefit_exemplars())
+    exemplars.extend(_complex_multi_step_exemplars())
+    # Cross-domain exemplar families
+    exemplars.extend(_architecture_decision_exemplars())
+    exemplars.extend(_architecture_kata_exemplars())
+    return exemplars
+
+
+def save_exemplar_pool(output_path: Path | None = None) -> tuple[Path, int]:
+    """Builds and saves the exemplar pool. Returns (path, count)."""
+    exemplars = build_exemplar_pool()
+    path = output_path or Path("pools/exemplars/exemplar_pool.json")
+    save_pool(exemplars, path)
+    return path, len(exemplars)
+
+
+if __name__ == "__main__":
+    path, count = save_exemplar_pool()
+    pool = build_exemplar_pool()
+    by_family = {}
+    for e in pool:
+        fam = e.family.value
+        by_family[fam] = by_family.get(fam, 0) + 1
+    print(f"Exemplar pool saved to {path}: {count} exemplars")
+    for fam, n in sorted(by_family.items()):
+        print(f"  {fam}: {n}")
