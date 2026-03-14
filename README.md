@@ -108,7 +108,7 @@ python3 run_synthesis.py        # запустить синтез
 ```
 python3 run_synthesis.py [OPTIONS]
 
-  --batch-size N         Количество циклов синтеза (default: 3)
+  --batch-size N         Количество циклов синтеза (default: 334, ~1000 задач)
   --k-iterations K       Итерации углубления на цикл (default: 3)
   --max-tool-rounds M    Макс. tool calls на итерацию (default: 4)
   --seed-category CAT    Фильтр по категории seed'ов (напр. bian_service_domain)

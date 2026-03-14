@@ -8,7 +8,7 @@ Environment:
     KIMI_API_KEY or MOONSHOT_API_KEY — Moonshot/Kimi API key (required)
 
 Options:
-    --batch-size N       Number of synthesis cycles to run (default: 3)
+    --batch-size N       Number of synthesis cycles to run (default: 334, ~1000 tasks)
     --k-iterations K     Deepening iterations per cycle (default: 3)
     --max-tool-rounds M  Max tool-call rounds per iteration (default: 8)
     --seed-category CAT  Filter seeds by category (e.g., bian_service_domain)
@@ -37,8 +37,8 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="DIVE-TOGAF Phase 2: Evidence-Driven Synthesis",
     )
-    parser.add_argument("--batch-size", type=int, default=3,
-                        help="Number of synthesis cycles (default: 3)")
+    parser.add_argument("--batch-size", type=int, default=334,
+                        help="Number of synthesis cycles (default: 334, ~1000 tasks with k=3)")
     parser.add_argument("--k-iterations", type=int, default=3,
                         help="Deepening iterations per cycle (default: 3)")
     parser.add_argument("--max-tool-rounds", type=int, default=4,
