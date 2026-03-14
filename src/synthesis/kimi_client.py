@@ -64,6 +64,7 @@ class KimiClient:
             api_key=_get_api_key(),
             base_url=base_url,
             timeout=120.0,
+            max_retries=0,  # We handle retries ourselves; avoid double-retry
         )
         # Session-level cache key for prompt caching (per Moonshot docs)
         self._cache_key = f"dive-togaf-{uuid.uuid4().hex[:12]}"
