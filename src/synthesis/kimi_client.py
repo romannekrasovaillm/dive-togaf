@@ -25,7 +25,6 @@ DEFAULT_MODEL = "kimi-k2.5"
 _FIXED_TEMP_MODELS = {"kimi-k2.5"}
 
 # Limits to prevent context explosion in multi-round tool-calling loops
-_MAX_TOOL_RESULT_CHARS = 1500      # truncate tool result strings in messages
 _MAX_REASONING_CHARS = 500         # truncate reasoning_content echo-back
 
 
@@ -300,17 +299,17 @@ class KimiClient:
                     result = tool_executor(fn_name, fn_args)
                     result_str = json.dumps(result, ensure_ascii=False) if isinstance(result, (dict, list)) else str(result)
 
-                    # Full result goes to log (for evidence), truncated to API
                     tool_call_log.append({
                         "tool_name": fn_name,
                         "arguments": fn_args,
                         "result": result,
                     })
 
+                    # Full tool results — evidence must be complete
                     msgs.append({
                         "role": "tool",
                         "tool_call_id": tc.id,
-                        "content": _truncate(result_str, _MAX_TOOL_RESULT_CHARS),
+                        "content": result_str,
                     })
 
                 logger.info(
