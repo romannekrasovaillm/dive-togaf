@@ -41,8 +41,8 @@ def parse_args() -> argparse.Namespace:
                         help="Number of synthesis cycles (default: 3)")
     parser.add_argument("--k-iterations", type=int, default=3,
                         help="Deepening iterations per cycle (default: 3)")
-    parser.add_argument("--max-tool-rounds", type=int, default=8,
-                        help="Max tool-call rounds per iteration (default: 8)")
+    parser.add_argument("--max-tool-rounds", type=int, default=4,
+                        help="Max tool-call rounds per iteration (default: 4)")
     parser.add_argument("--seed-category", type=str, default=None,
                         help="Filter seeds by category")
     parser.add_argument("--random-seed", type=int, default=None,
@@ -85,6 +85,7 @@ def main() -> None:
     kimi = KimiClient(
         model=args.model,
         temperature=args.temperature,
+        verbose=args.verbose,
     )
 
     sampler = PoolSampler(
@@ -107,30 +108,35 @@ def main() -> None:
         max_tool_rounds_per_iter=args.max_tool_rounds,
     )
 
-    # Run synthesis batch
-    print("Starting synthesis...")
+    # Prepare writer for incremental saves
+    writer = DatasetWriter(output_dir=Path(args.output_dir))
+    dataset_path = Path(args.output_dir) / "dataset.jsonl"
+    full_path = Path(args.output_dir) / "full_results.jsonl"
+
+    # Run synthesis batch — results saved to disk after each cycle
+    print("Starting synthesis (results saved incrementally)...")
     results = orchestrator.run_batch(
         batch_size=args.batch_size,
         seed=args.random_seed,
         seed_category=args.seed_category,
+        writer=writer,
     )
 
     if not results:
         print("ERROR: No synthesis results produced.")
         sys.exit(1)
 
-    # Write outputs
-    writer = DatasetWriter(output_dir=Path(args.output_dir))
-
-    dataset_path = writer.write_results(results, "dataset.jsonl")
-    full_path = writer.write_full_results(results, "full_results.jsonl")
+    # Write final summary (uses all accumulated results)
     summary_path = writer.write_summary(results, "summary.json")
 
     # Print summary
     total_tasks = sum(len(r.tasks) for r in results)
     total_evidence = sum(len(r.evidence) for r in results)
     total_calls = sum(r.tool_call_count for r in results)
+    total_live = sum(r.live_tool_count for r in results)
+    total_simulated = sum(r.simulated_tool_count for r in results)
     total_time = sum(r.elapsed_seconds for r in results)
+    live_rate = total_live / max(total_calls, 1)
 
     print()
     print("=" * 70)
@@ -139,7 +145,7 @@ def main() -> None:
     print(f"  Cycles completed: {len(results)}/{args.batch_size}")
     print(f"  Tasks generated:  {total_tasks}")
     print(f"  Evidence items:   {total_evidence}")
-    print(f"  Tool calls:       {total_calls}")
+    print(f"  Tool calls:       {total_calls} ({total_live} live, {total_simulated} simulated, {live_rate:.0%} live rate)")
     print(f"  Total time:       {total_time:.1f}s")
     print()
     print(f"  Dataset:          {dataset_path}")

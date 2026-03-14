@@ -28,7 +28,7 @@
 │                        Три декуплированных пула                      │
 ├──────────────────┬──────────────────┬────────────────────────────────┤
 │   Tool Pool      │   Seed Pool      │   Exemplar Pool               │
-│   373 инструмента│   250+ концептов │   100+ шаблонов               │
+│   172 инструмента│   501 концепт    │   265 шаблонов                │
 │                  │                  │                                │
 │   5 доменов:     │   15 категорий:  │   12 семейств:                │
 │   ADM, ArchiMate,│   TOGAF phases,  │   retrieve_compute,           │
@@ -37,8 +37,8 @@
 │   General        │   ArchiMate,     │   gap_analysis,               │
 │                  │   BIAN, ...      │   compliance_check, ...       │
 │   2 типа:        │                  │                                │
-│   retrieval (300)│                  │   complexity: 1-5             │
-│   processing (70)│                  │   sub_questions: 1-5          │
+│   retrieval (138)│                  │   complexity: 1-5             │
+│   processing (34)│                  │   sub_questions: 1-5          │
 └──────────────────┴──────────────────┴────────────────────────────────┘
                             │
                     PoolSampler.sample_config()
@@ -115,7 +115,7 @@ python3 run_synthesis.py [OPTIONS]
   --random-seed S        Фиксированный seed для воспроизводимости
   --output-dir DIR       Директория вывода (default: output/)
   --model MODEL          Модель Kimi (default: kimi-k2.5)
-  --temperature T        Температура LLM (default: 0.6)
+  --temperature T        Температура LLM (игнорируется для kimi-k2.5)
   --verbose              Debug-логирование
 ```
 
@@ -134,21 +134,23 @@ python3 run_synthesis.py --verbose --batch-size 1 --k-iterations 1
 
 ## Три пула
 
-### Tool Pool (373 инструмента)
+### Tool Pool (172 инструмента)
 
-Два типа инструментов, пять доменов:
+Два типа инструментов, семь доменов:
 
 | Домен | Retrieval | Processing | Всего |
 |-------|-----------|------------|-------|
-| ADM (фазы A-H) | ~60 | ~15 | ~75 |
-| ArchiMate | ~80 | ~20 | ~100 |
-| Repository | ~60 | ~15 | ~75 |
-| Governance | ~50 | ~10 | ~60 |
-| General / Analysis | ~50 | ~13 | ~63 |
+| ADM (фазы A-H) | 47 | 5 | 52 |
+| ArchiMate | 33 | 1 | 34 |
+| Repository | 28 | 1 | 29 |
+| Governance | 19 | 4 | 23 |
+| General | 8 | 11 | 19 |
+| Analysis | 0 | 12 | 12 |
+| Technology Radar | 1 | 2 | 3 |
 
 Каждый инструмент содержит: `id`, `name`, `description`, `parameters` (с типами и enum'ами), `return_schema`, `examples`.
 
-### Seed Pool (250+ концептов)
+### Seed Pool (501 концепт)
 
 | Категория | Количество | Примеры |
 |-----------|-----------|---------|
@@ -163,7 +165,7 @@ python3 run_synthesis.py --verbose --batch-size 1 --k-iterations 1
 | `industry_case` | ~10 | Banking Reference Architecture |
 | `togaf_viewpoint` | ~20 | Business Process Viewpoint |
 
-### Exemplar Pool (100+ шаблонов)
+### Exemplar Pool (265 шаблонов)
 
 | Семейство | Кол-во | Complexity | Описание |
 |-----------|--------|-----------|----------|
@@ -180,21 +182,25 @@ python3 run_synthesis.py --verbose --batch-size 1 --k-iterations 1
 | `architecture_kata` | 8 | 2-5 | Учебные упражнения |
 | `aggregate` | 8 | 2-3 | Агрегация из нескольких источников |
 
-## Live Tools (45+ реальных инструментов)
+## Live Tools
 
-Помимо ~370 инструментов из пула (которые симулируются LLM при отсутствии live-реализации), 45+ инструментов выполняются на реальных библиотеках:
+Из 172 инструментов пула большинство имеет live-реализацию на статических справочниках или реальных библиотеках:
 
-| Библиотека | Инструменты | Примеры |
-|------------|------------|---------|
-| **NetworkX** (20) | Граф-анализ зависимостей | `graph_compute_centrality`, `graph_detect_cycles`, `graph_compute_impact_analysis`, `graph_compute_critical_path` |
-| **lxml** (10) | Парсинг ArchiMate XML | `archimate_parse_model`, `archimate_list_elements`, `archimate_get_relationships_for` |
-| **GitHub API** (5) | Поиск open-source | `github_search_repos`, `github_get_repo_info` |
-| **Open Library** (5) | Поиск публикаций | `openlibrary_search_books`, `openlibrary_get_work` |
+| Источник данных | Инструменты | Описание |
+|----------------|------------|----------|
+| **TOGAF ADM справочник** (~47) | ADM-фазы, deliverables, техники | Статическая база знаний по TOGAF Standard |
+| **BIAN/Compliance справочник** (~50) | BIAN-домены, compliance, reference models | Статическая база по BIAN, GDPR, PCI DSS и др. |
+| **ArchiMate справочник** (~40) | Элементы, viewpoints, метамодель | Статическая база по ArchiMate 3.2 |
+| **NetworkX** (20) | Граф-анализ зависимостей | `graph_compute_centrality`, `graph_find_cycles`, `graph_compute_critical_path` |
+| **lxml** (10) | Парсинг ArchiMate XML | `archimate_parse_model_info`, `archimate_list_elements` |
+| **GitHub API** (5) | Поиск open-source | `github_search_repositories`, `github_get_repository` |
 
 При вызове `ToolExecutor`:
-1. Если есть live-реализация -- выполняет на реальной библиотеке
-2. Если live-вызов упал -- fallback на LLM-симуляцию
-3. Если live-реализации нет -- LLM генерирует реалистичный JSON по `return_schema`
+1. Если есть live-реализация — выполняет на справочнике/библиотеке (быстро, без LLM)
+2. Если live-вызов упал — fallback на LLM-симуляцию
+3. Если live-реализации нет — LLM генерирует JSON по `return_schema` (помечается `_simulated: true`)
+
+Результаты симулированных вызовов помечаются `_simulated: true`, а при ошибке парсинга JSON — `_parse_failed: true`. Grounding validation штрафует score задач, опирающихся на симулированные данные.
 
 ## Grounding Invariant: как он обеспечивается
 
@@ -286,7 +292,7 @@ python -m pytest tests/test_core_tools.py -v
 python -m pytest tests/test_live_tools.py -v
 ```
 
-17 тестов пулов проверяют: размеры (>= 100 tools, >= 200 seeds, >= 100 exemplars), уникальность ID, покрытие типов/доменов/категорий/семейств, сериализацию, декуплированность пулов.
+17 тестов пулов проверяют: размеры (>= 150 tools, >= 400 seeds, >= 200 exemplars), уникальность ID, покрытие типов/доменов/категорий/семейств, сериализацию, декуплированность пулов.
 
 30+ тестов core tools проверяют: граф-операции NetworkX, парсинг ArchiMate XML, centrality/coupling/critical path, интеграцию ArchiMate-to-NetworkX pipeline.
 
@@ -306,13 +312,16 @@ dive-togaf/
 ├── src/
 │   ├── pools/                        # Построители пулов
 │   │   ├── models.py                 # Enum'ы и dataclass'ы
-│   │   ├── tool_pool_builder.py      # 373 инструмента
-│   │   ├── seed_pool_builder.py      # 250+ seed-концептов
-│   │   ├── exemplar_pool_builder.py  # 100+ шаблонов задач
+│   │   ├── tool_pool_builder.py      # 172 инструмента
+│   │   ├── seed_pool_builder.py      # 501 seed-концепт
+│   │   ├── exemplar_pool_builder.py  # 265 шаблонов задач
 │   │   ├── sampler.py               # Декуплированная выборка
 │   │   └── live_tools/              # Реальные реализации
-│   │       ├── networkx_tools.py     # 20 граф-инструментов
-│   │       ├── archimate_parser_tools.py  # 10 ArchiMate-парсер
+│   │       ├── togaf_adm_tools.py     # TOGAF ADM справочник (~47 tools)
+│   │       ├── repository_reference_tools.py  # BIAN, compliance, repo (~50 tools)
+│   │       ├── archimate_reference_tools.py   # ArchiMate элементы/viewpoints (~40 tools)
+│   │       ├── networkx_tools.py     # 20 граф-инструментов (NetworkX)
+│   │       ├── archimate_parser_tools.py  # 10 ArchiMate XML парсер (lxml)
 │   │       ├── wikipedia_tools.py    # 5 GitHub API
 │   │       └── wikidata_tools.py     # 5 Open Library API
 │   │
@@ -331,19 +340,19 @@ dive-togaf/
 
 ## Модель
 
-Используется **Kimi-K2.5** через Moonshot API (`https://api.moonshot.cn/v1`), OpenAI-совместимый SDK.
+Используется **Kimi-K2.5** через Moonshot API (`https://api.moonshot.ai/v1`), OpenAI-совместимый SDK.
 
 - Модель: `kimi-k2.5`
-- Temperature: `0.6` (сбор evidence), `0.5` (генерация задач), `0.4` (симуляция инструментов)
+- Temperature: не настраивается для kimi-k2.5 (ограничение API Moonshot)
 - Retry: до 3 попыток с exponential backoff (2s, 4s, 8s)
 - Tool calling: нативный через OpenAI-format function calling
 
 ## Комбинаторное пространство
 
-При 373 инструментах, 250+ seed'ах и 100+ exemplar'ах:
+При 172 инструментах, 501 seed'е и 265 exemplar'ах:
 
 ```
-N_configs = 250 × C(373, 30) × C(100, 4) ≈ 10^45
+N_configs = 501 × C(172, 30) × C(265, 4) ≈ 10^36
 ```
 
 Каждый цикл синтеза работает с уникальной комбинацией (seed, tools_subset, exemplars_subset), обеспечивая высокое разнообразие генерируемого датасета.

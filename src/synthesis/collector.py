@@ -168,7 +168,7 @@ class CollectorAgent:
             tools=self._tool_schemas,
             tool_executor=self._executor,
             max_rounds=max_tool_rounds,
-            max_tokens=4096,
+            max_tokens=32768,
         )
 
         # Record evidence items

@@ -35,8 +35,10 @@ class SynthesisResult:
     evidence: list[dict[str, Any]]
     tasks: list[dict[str, Any]]
     tool_call_count: int
-    iterations: int
-    elapsed_seconds: float
+    live_tool_count: int = 0
+    simulated_tool_count: int = 0
+    iterations: int = 0
+    elapsed_seconds: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -45,6 +47,8 @@ class SynthesisResult:
             "evidence_count": len(self.evidence),
             "task_count": len(self.tasks),
             "tool_call_count": self.tool_call_count,
+            "live_tool_count": self.live_tool_count,
+            "simulated_tool_count": self.simulated_tool_count,
             "iterations": self.iterations,
             "elapsed_seconds": self.elapsed_seconds,
             "evidence": self.evidence,
@@ -60,7 +64,7 @@ class SynthesisOrchestrator:
         kimi_client: KimiClient,
         sampler: PoolSampler,
         k_iterations: int = 3,
-        max_tool_rounds_per_iter: int = 8,
+        max_tool_rounds_per_iter: int = 4,
     ):
         self._kimi = kimi_client
         self._sampler = sampler
@@ -140,11 +144,20 @@ class SynthesisOrchestrator:
             prev_query = task.question
 
             logger.info(
-                "K=%d: evidence=%d items, task complexity=%d, Q='%s'",
-                k, len(evidence), task.complexity, task.question[:100],
+                "K=%d: evidence=%d items, task complexity=%d, grounding=%.2f, Q='%s'",
+                k, len(evidence), task.complexity, task.grounding_score, task.question[:100],
             )
 
+            # Rate limit pacing between iterations
+            if k < self._k:
+                time.sleep(3)
+
         elapsed = time.time() - start
+
+        logger.info(
+            "Cycle done: %d tool calls (%d live, %d simulated) in %.1fs",
+            executor.call_count, executor.live_count, executor.simulated_count, elapsed,
+        )
 
         return SynthesisResult(
             config_id=config.config_id,
@@ -152,6 +165,8 @@ class SynthesisOrchestrator:
             evidence=evidence.to_list(),
             tasks=[t.to_dict() for t in tasks],
             tool_call_count=executor.call_count,
+            live_tool_count=executor.live_count,
+            simulated_tool_count=executor.simulated_count,
             iterations=self._k,
             elapsed_seconds=round(elapsed, 2),
         )
@@ -161,29 +176,46 @@ class SynthesisOrchestrator:
         batch_size: int,
         seed: int | None = None,
         seed_category: str | None = None,
+        writer: DatasetWriter | None = None,
     ) -> list[SynthesisResult]:
-        """Run a batch of synthesis cycles.
+        """Run a batch of synthesis cycles with on-the-fly sampling.
+
+        Each cycle samples a fresh random config from the pools instead of
+        pre-generating all configs upfront. If a ``writer`` is provided,
+        results are appended to disk after every cycle so intermediate
+        data is never lost.
 
         Args:
             batch_size: Number of cycles to run.
             seed: Random seed for reproducibility.
             seed_category: Optional filter for seed category.
+            writer: Optional DatasetWriter for incremental saves.
 
         Returns:
             List of SynthesisResult objects.
         """
-        configs = self._sampler.sample_batch(
-            batch_size=batch_size,
-            seed=seed,
-            seed_category=seed_category,
-        )
+        import random as _random
+        rng = _random.Random(seed) if seed is not None else _random.Random()
 
         results = []
-        for i, config in enumerate(configs):
+        for i in range(batch_size):
             logger.info("=== Batch item %d/%d ===", i + 1, batch_size)
             try:
+                # Sample a fresh config on each iteration
+                config = self._sampler.sample_config(
+                    seed_category=seed_category,
+                    rng=rng,
+                )
                 result = self.run_single(config=config)
                 results.append(result)
+
+                # Incremental save — data is persisted immediately
+                if writer is not None:
+                    writer.append_result(result)
+                    logger.info(
+                        "Intermediate save: %d/%d cycles written to disk",
+                        len(results), batch_size,
+                    )
             except Exception as e:
                 logger.error("Synthesis cycle %d failed: %s", i + 1, e)
                 continue
@@ -196,45 +228,88 @@ class SynthesisOrchestrator:
 # =====================================================================
 
 class DatasetWriter:
-    """Writes synthesis results to JSONL dataset files."""
+    """Writes synthesis results to JSONL dataset files.
+
+    Supports both batch writes and incremental appends so that
+    intermediate results are persisted as each cycle completes.
+    """
 
     def __init__(self, output_dir: Path):
         self.output_dir = output_dir
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self._dataset_count = 0
+        self._full_count = 0
+
+    # ------ incremental (append) methods ------
+
+    def append_result(
+        self,
+        result: SynthesisResult,
+        dataset_filename: str = "dataset.jsonl",
+        full_filename: str = "full_results.jsonl",
+    ) -> int:
+        """Append a single cycle's results to dataset files incrementally.
+
+        Returns the number of task records appended.
+        """
+        count = 0
+
+        # Append task records
+        dataset_path = self.output_dir / dataset_filename
+        with open(dataset_path, "a", encoding="utf-8") as f:
+            for task in result.tasks:
+                record = self._task_record(result, task)
+                f.write(json.dumps(record, ensure_ascii=False) + "\n")
+                count += 1
+
+        # Append full result
+        full_path = self.output_dir / full_filename
+        with open(full_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(result.to_dict(), ensure_ascii=False) + "\n")
+
+        self._dataset_count += count
+        self._full_count += 1
+        logger.info(
+            "Appended %d tasks (total: %d) to %s", count, self._dataset_count, dataset_path,
+        )
+        return count
+
+    @staticmethod
+    def _task_record(result: SynthesisResult, task: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "config_id": result.config_id,
+            "seed_id": result.seed.get("id", ""),
+            "seed_name": result.seed.get("name", ""),
+            "seed_category": result.seed.get("category", ""),
+            "iteration": task["iteration"],
+            "question": task["question"],
+            "answer": task["answer"],
+            "sub_questions": task["sub_questions"],
+            "complexity": task["complexity"],
+            "family": task["family"],
+            "reasoning_trace": task["reasoning_trace"],
+            "cited_evidence_ids": task.get("cited_evidence_ids", []),
+            "evidence_trajectory": task.get("evidence_trajectory", []),
+            "grounding_score": task.get("grounding_score", 0.0),
+            "evidence_count": len(result.evidence),
+            "tool_call_count": result.tool_call_count,
+        }
+
+    # ------ batch (overwrite) methods — kept for compatibility ------
 
     def write_results(
         self,
         results: list[SynthesisResult],
         filename: str = "dataset.jsonl",
     ) -> Path:
-        """Write synthesis results as JSONL (one line per task).
-
-        Each line contains: question, answer, evidence, metadata.
-        """
+        """Write synthesis results as JSONL (one line per task)."""
         path = self.output_dir / filename
         count = 0
 
         with open(path, "w", encoding="utf-8") as f:
             for result in results:
                 for task in result.tasks:
-                    record = {
-                        "config_id": result.config_id,
-                        "seed_id": result.seed.get("id", ""),
-                        "seed_name": result.seed.get("name", ""),
-                        "seed_category": result.seed.get("category", ""),
-                        "iteration": task["iteration"],
-                        "question": task["question"],
-                        "answer": task["answer"],
-                        "sub_questions": task["sub_questions"],
-                        "complexity": task["complexity"],
-                        "family": task["family"],
-                        "reasoning_trace": task["reasoning_trace"],
-                        "cited_evidence_ids": task.get("cited_evidence_ids", []),
-                        "evidence_trajectory": task.get("evidence_trajectory", []),
-                        "grounding_score": task.get("grounding_score", 0.0),
-                        "evidence_count": len(result.evidence),
-                        "tool_call_count": result.tool_call_count,
-                    }
+                    record = self._task_record(result, task)
                     f.write(json.dumps(record, ensure_ascii=False) + "\n")
                     count += 1
 
@@ -246,10 +321,7 @@ class DatasetWriter:
         results: list[SynthesisResult],
         filename: str = "full_results.jsonl",
     ) -> Path:
-        """Write full synthesis results including all evidence.
-
-        Each line is one complete synthesis cycle with all evidence + tasks.
-        """
+        """Write full synthesis results including all evidence."""
         path = self.output_dir / filename
 
         with open(path, "w", encoding="utf-8") as f:
@@ -270,6 +342,8 @@ class DatasetWriter:
         total_tasks = sum(len(r.tasks) for r in results)
         total_evidence = sum(len(r.evidence) for r in results)
         total_tool_calls = sum(r.tool_call_count for r in results)
+        total_live = sum(r.live_tool_count for r in results)
+        total_simulated = sum(r.simulated_tool_count for r in results)
         total_time = sum(r.elapsed_seconds for r in results)
 
         categories = {}
@@ -294,6 +368,9 @@ class DatasetWriter:
             "total_tasks": total_tasks,
             "total_evidence_items": total_evidence,
             "total_tool_calls": total_tool_calls,
+            "total_live_tool_calls": total_live,
+            "total_simulated_tool_calls": total_simulated,
+            "live_tool_rate": round(total_live / max(total_tool_calls, 1), 3),
             "total_elapsed_seconds": round(total_time, 2),
             "avg_seconds_per_cycle": round(total_time / max(len(results), 1), 2),
             "grounding": {
