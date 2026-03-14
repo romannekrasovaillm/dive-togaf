@@ -64,7 +64,7 @@ class SynthesisOrchestrator:
         kimi_client: KimiClient,
         sampler: PoolSampler,
         k_iterations: int = 3,
-        max_tool_rounds_per_iter: int = 8,
+        max_tool_rounds_per_iter: int = 4,
     ):
         self._kimi = kimi_client
         self._sampler = sampler

@@ -27,6 +27,10 @@ _FIXED_TEMP_MODELS = {"kimi-k2.5"}
 # Thinking models require max_tokens >= 16000 (reasoning_content + content)
 _THINKING_MIN_TOKENS = 32768
 
+# Max chars for tool result in API messages (context management).
+# Full results are preserved in tool_call_log for evidence.
+_MAX_TOOL_RESULT_CHARS = 1500
+
 
 def _get_api_key() -> str:
     key = os.environ.get("KIMI_API_KEY") or os.environ.get("MOONSHOT_API_KEY")
@@ -294,16 +298,21 @@ class KimiClient:
                     result = tool_executor(fn_name, fn_args)
                     result_str = json.dumps(result, ensure_ascii=False) if isinstance(result, (dict, list)) else str(result)
 
+                    # Full result → tool_call_log (evidence, never truncated)
                     tool_call_log.append({
                         "tool_name": fn_name,
                         "arguments": fn_args,
                         "result": result,
                     })
 
+                    # Truncated result → API messages (context management)
+                    api_content = result_str
+                    if len(api_content) > _MAX_TOOL_RESULT_CHARS:
+                        api_content = api_content[:_MAX_TOOL_RESULT_CHARS] + "..."
                     msgs.append({
                         "role": "tool",
                         "tool_call_id": tc.id,
-                        "content": result_str,
+                        "content": api_content,
                     })
 
                 logger.info(

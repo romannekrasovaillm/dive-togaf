@@ -41,8 +41,8 @@ def parse_args() -> argparse.Namespace:
                         help="Number of synthesis cycles (default: 3)")
     parser.add_argument("--k-iterations", type=int, default=3,
                         help="Deepening iterations per cycle (default: 3)")
-    parser.add_argument("--max-tool-rounds", type=int, default=8,
-                        help="Max tool-call rounds per iteration (default: 8)")
+    parser.add_argument("--max-tool-rounds", type=int, default=4,
+                        help="Max tool-call rounds per iteration (default: 4)")
     parser.add_argument("--seed-category", type=str, default=None,
                         help="Filter seeds by category")
     parser.add_argument("--random-seed", type=int, default=None,
