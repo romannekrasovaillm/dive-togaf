@@ -48,17 +48,28 @@ class EvidenceSet:
     def for_iteration(self, k: int) -> list[EvidenceItem]:
         return [e for e in self.items if e.iteration == k]
 
-    def summary(self, max_items: int = 20) -> str:
-        """Produce a text summary of collected evidence for use in prompts."""
+    def summary(self, max_items: int = 15, max_result_chars: int = 300) -> str:
+        """Produce a text summary of collected evidence for use in prompts.
+
+        Limits total size to avoid large API payloads on K=2+ iterations.
+        """
         lines = []
+        total_chars = 0
+        max_total_chars = 4000  # Cap total summary to ~4KB
+
         for item in self.items[-max_items:]:
             result_str = json.dumps(item.result, ensure_ascii=False) if isinstance(item.result, (dict, list)) else str(item.result)
-            if len(result_str) > 500:
-                result_str = result_str[:500] + "..."
-            lines.append(
-                f"[K={item.iteration}] {item.tool_name}({json.dumps(item.arguments, ensure_ascii=False)[:150]})\n"
+            if len(result_str) > max_result_chars:
+                result_str = result_str[:max_result_chars] + "..."
+            entry = (
+                f"[K={item.iteration}] {item.tool_name}({json.dumps(item.arguments, ensure_ascii=False)[:100]})\n"
                 f"  → {result_str}"
             )
+            total_chars += len(entry)
+            if total_chars > max_total_chars:
+                lines.append(f"... ({len(self.items) - len(lines)} more evidence items omitted)")
+                break
+            lines.append(entry)
         return "\n\n".join(lines)
 
     def to_list(self) -> list[dict[str, Any]]:

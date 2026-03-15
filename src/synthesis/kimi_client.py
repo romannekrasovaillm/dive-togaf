@@ -94,7 +94,8 @@ class KimiClient:
         self._client = OpenAI(
             api_key=_get_api_key(),
             base_url=base_url,
-            timeout=120.0,
+            timeout=300.0,
+            max_retries=3,
         )
         # Session-level cache key for prompt caching (per Moonshot docs)
         self._cache_key = f"dive-togaf-{uuid.uuid4().hex[:12]}"
@@ -198,12 +199,21 @@ class KimiClient:
         self._call_seq += 1
         payload_json = json.dumps(messages, ensure_ascii=False, default=str)
         payload_bytes = len(payload_json.encode("utf-8"))
-        token_est = payload_bytes // 4
+        tools_json = json.dumps(tools, ensure_ascii=False, default=str) if tools else ""
+        tools_bytes = len(tools_json.encode("utf-8"))
+        total_bytes = payload_bytes + tools_bytes
+        token_est = total_bytes // 4
         logger.info(
-            "API call #%d: %d messages, %d bytes (~%dk tokens est.), tools: %d",
-            self._call_seq, len(messages), payload_bytes, token_est // 1000,
-            len(tools) if tools else 0,
+            "API call #%d: %d messages, %d bytes (msgs=%d + tools=%d), ~%dk tokens, tools: %d",
+            self._call_seq, len(messages), total_bytes, payload_bytes, tools_bytes,
+            token_est // 1000, len(tools) if tools else 0,
         )
+        if total_bytes > 20_000:
+            logger.warning(
+                "Large payload (%d bytes). Risk of server disconnect. "
+                "Consider reducing tool count or evidence summary size.",
+                total_bytes,
+            )
 
         # --- Detailed prompt content logging (always, with truncation) ---
         for idx, m in enumerate(messages):
@@ -296,10 +306,10 @@ class KimiClient:
                     logger.error("Kimi API fatal error: %s", json.dumps(error_info, ensure_ascii=False, default=str))
                     raise
                 if attempt < self.max_retries:
-                    wait = 2 ** attempt
+                    wait = min(2 ** attempt, 30)
                     logger.warning(
-                        "Kimi API attempt %d/%d failed: %s. Retry in %ds",
-                        attempt, self.max_retries,
+                        "Kimi API attempt %d/%d failed (%s): %s. Retry in %ds",
+                        attempt, self.max_retries, type(e).__qualname__,
                         json.dumps(error_info, ensure_ascii=False, default=str),
                         wait,
                     )
