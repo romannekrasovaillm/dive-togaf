@@ -22,7 +22,7 @@ from src.pools.sampler import PoolSampler, SynthesisConfig
 from .collector import CollectorAgent, EvidenceSet
 from .generator import TaskGenerator, SynthesizedTask
 from .kimi_client import KimiClient
-from .teacher import TeacherAgent, TeacherResult
+from .teacher import TeacherAgent, RolloutResult
 from .tool_executor import ToolExecutor
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,6 @@ class SynthesisResult:
     simulated_tool_count: int = 0
     iterations: int = 0
     elapsed_seconds: float = 0.0
-    teacher_verifications: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -55,7 +54,6 @@ class SynthesisResult:
             "elapsed_seconds": self.elapsed_seconds,
             "evidence": self.evidence,
             "tasks": self.tasks,
-            "teacher_verifications": self.teacher_verifications,
         }
 
 
@@ -68,7 +66,6 @@ class SynthesisOrchestrator:
         sampler: PoolSampler,
         k_iterations: int = 3,
         max_tool_rounds_per_iter: int = 4,
-        enable_teacher: bool = False,
     ):
         self._kimi = kimi_client
         self._sampler = sampler
@@ -228,55 +225,67 @@ class SynthesisOrchestrator:
 
 
 # =====================================================================
-# Teacher Verifier — separate post-synthesis stage
+# SFT Trajectory Generator — separate post-synthesis stage (DIVE §3.4)
 # =====================================================================
 
-class TeacherVerifier:
-    """Runs teacher verification as a separate post-synthesis stage.
+class SFTTrajectoryGenerator:
+    """Generates SFT training data via teacher rollout + rejection sampling.
 
-    Reads completed dataset, runs teacher rollouts for each task,
-    and writes verification results to a separate file. This decouples
-    verification cost from synthesis and avoids pipeline failures
-    from teacher timeouts.
+    Per DIVE §3.4:
+        for (Q, A, T) in D_task:
+            τ = teacher.rollout(Q, T)
+            if verify(τ.final_answer, A):
+                D_sft.append((Q, A, T, τ))
+
+    Runs as a separate stage after synthesis. Reads D_task (dataset.jsonl),
+    produces sft_dataset.jsonl with chat-format trajectories.
     """
 
     def __init__(
         self,
         kimi_client: KimiClient,
         sampler: PoolSampler,
-        max_tool_rounds: int = 6,
+        max_tool_rounds: int = 10,
     ):
         self._kimi = kimi_client
         self._sampler = sampler
         self._teacher = TeacherAgent(kimi_client, max_tool_rounds=max_tool_rounds)
 
-    def verify_results(
+    def generate_sft(
         self,
         results: list[SynthesisResult],
         output_dir: Path,
-    ) -> list[dict[str, Any]]:
-        """Run teacher verification on completed synthesis results.
+    ) -> dict[str, Any]:
+        """Run teacher rollouts on D_task, filter by rejection sampling.
+
+        For each (Q, A, T) in results:
+            τ = teacher.rollout(Q, T)
+            if verify(τ.final_answer, A):
+                write τ to sft_dataset.jsonl
 
         Args:
-            results: Completed synthesis results.
-            output_dir: Directory to write verification results.
+            results: Completed synthesis results containing D_task.
+            output_dir: Directory for sft_dataset.jsonl output.
 
         Returns:
-            List of verification dicts.
+            Summary dict with pass/fail counts.
         """
         output_dir.mkdir(parents=True, exist_ok=True)
-        verifications: list[dict[str, Any]] = []
-        verify_path = output_dir / "teacher_verifications.jsonl"
+        sft_path = output_dir / "sft_dataset.jsonl"
+
+        total = 0
+        accepted = 0
+        rejected = 0
+        failed = 0
 
         for r_idx, result in enumerate(results):
             logger.info(
-                "=== Teacher verification %d/%d: %s ===",
+                "=== Teacher rollout %d/%d: %s ===",
                 r_idx + 1, len(results), result.config_id,
             )
 
-            # Build tool executor for this result's seed context
+            # Build tool executor with the same tools
             seed_context = f"{result.seed.get('name', '')}: {result.seed.get('description', '')}"
-            # Re-sample config to get the same tools
             config = self._sampler.sample_config(seed_category=result.seed.get("category"))
             executor = ToolExecutor(
                 tool_pool=config.tools,
@@ -287,70 +296,79 @@ class TeacherVerifier:
 
             for t_idx, task in enumerate(result.tasks):
                 question = task.get("question", "")
-                answer = task.get("answer", "")
+                reference_answer = task.get("answer", "")
                 grounding = task.get("grounding_score", 0.0)
 
-                if not question or grounding < 0.5:
-                    logger.info("  Skipping task %d (grounding=%.2f)", t_idx, grounding)
+                if not question or not reference_answer or grounding < 0.5:
+                    logger.info(
+                        "  Skip task %d: grounding=%.2f, q_len=%d, a_len=%d",
+                        t_idx, grounding, len(question), len(reference_answer),
+                    )
                     continue
 
+                total += 1
                 logger.info(
-                    "  Teacher rollout for task %d: Q='%s'",
-                    t_idx, question[:80],
+                    "  Rollout task %d/%d: Q='%s'",
+                    t_idx + 1, len(result.tasks), question[:80],
                 )
 
                 try:
-                    teacher_result = self._teacher.rollout(
+                    rollout_result = self._teacher.rollout(
                         question=question,
+                        reference_answer=reference_answer,
                         tool_executor=executor,
                         tool_schemas=tool_schemas,
-                        student_answer=answer,
                     )
-                    verification = {
-                        "config_id": result.config_id,
-                        "task_index": t_idx,
-                        "iteration": task.get("iteration", 0),
-                        **teacher_result.to_dict(),
-                    }
-                    verifications.append(verification)
 
-                    # Incremental save
-                    with open(verify_path, "a", encoding="utf-8") as f:
-                        f.write(json.dumps(verification, ensure_ascii=False) + "\n")
+                    if rollout_result.verified:
+                        # Rejection sampling passed — save SFT trajectory
+                        sft_example = rollout_result.trajectory.to_sft_example()
+                        sft_example["config_id"] = result.config_id
+                        sft_example["task_index"] = t_idx
+                        sft_example["reference_answer"] = reference_answer
 
-                    logger.info(
-                        "  Verified: %s (agreement=%.2f, matched=%d/%d)",
-                        teacher_result.verified,
-                        teacher_result.agreement_score,
-                        teacher_result.matched_facts,
-                        teacher_result.total_facts,
-                    )
+                        with open(sft_path, "a", encoding="utf-8") as f:
+                            f.write(json.dumps(sft_example, ensure_ascii=False) + "\n")
+
+                        accepted += 1
+                        logger.info(
+                            "  ACCEPTED: %d tool calls, final_answer matches reference",
+                            rollout_result.trajectory.tool_call_count,
+                        )
+                    else:
+                        rejected += 1
+                        logger.info(
+                            "  REJECTED: final_answer does not match reference "
+                            "(final='%s', ref='%s')",
+                            rollout_result.trajectory.final_answer[:100],
+                            reference_answer[:100],
+                        )
                 except Exception as e:
-                    logger.warning("  Teacher rollout failed for task %d: %s", t_idx, e)
+                    failed += 1
+                    logger.warning("  FAILED: task %d: %s", t_idx, e)
 
                 # Rate limit pacing
-                time.sleep(3)
+                time.sleep(2)
 
         # Write summary
-        if verifications:
-            verified_count = sum(1 for v in verifications if v.get("verified"))
-            scores = [v.get("agreement_score", 0) for v in verifications]
-            avg_score = sum(scores) / len(scores)
-            summary = {
-                "total_rollouts": len(verifications),
-                "verified_count": verified_count,
-                "verification_rate": round(verified_count / len(verifications), 3),
-                "avg_agreement_score": round(avg_score, 3),
-            }
-            summary_path = output_dir / "teacher_summary.json"
-            with open(summary_path, "w", encoding="utf-8") as f:
-                json.dump(summary, f, indent=2, ensure_ascii=False)
-            logger.info(
-                "Teacher verification complete: %d/%d verified (%.1f%% agreement)",
-                verified_count, len(verifications), avg_score * 100,
-            )
+        summary = {
+            "total_tasks": total,
+            "accepted": accepted,
+            "rejected": rejected,
+            "failed": failed,
+            "acceptance_rate": round(accepted / max(total, 1), 3),
+            "sft_path": str(sft_path),
+        }
+        summary_path = output_dir / "sft_summary.json"
+        with open(summary_path, "w", encoding="utf-8") as f:
+            json.dump(summary, f, indent=2, ensure_ascii=False)
 
-        return verifications
+        logger.info(
+            "SFT generation complete: %d/%d accepted (%.0f%%), %d rejected, %d failed",
+            accepted, total, accepted / max(total, 1) * 100, rejected, failed,
+        )
+
+        return summary
 
 
 # =====================================================================
@@ -406,15 +424,6 @@ class DatasetWriter:
 
     @staticmethod
     def _task_record(result: SynthesisResult, task: dict[str, Any]) -> dict[str, Any]:
-        # Find matching teacher verification for this task's iteration
-        iteration = task.get("iteration", 0)
-        teacher_data: dict[str, Any] = {}
-        if result.teacher_verifications:
-            for tv in result.teacher_verifications:
-                # Match by question text prefix
-                if tv.get("question", "")[:80] == task.get("question", "")[:80]:
-                    teacher_data = tv
-                    break
         return {
             "config_id": result.config_id,
             "seed_id": result.seed.get("id", ""),
@@ -432,8 +441,6 @@ class DatasetWriter:
             "grounding_score": task.get("grounding_score", 0.0),
             "evidence_count": len(result.evidence),
             "tool_call_count": result.tool_call_count,
-            "teacher_verified": teacher_data.get("verified", False),
-            "teacher_agreement_score": teacher_data.get("agreement_score", 0.0),
         }
 
     # ------ batch (overwrite) methods — kept for compatibility ------
@@ -491,9 +498,6 @@ class DatasetWriter:
         families = {}
         complexities = {}
         grounding_scores = []
-        teacher_scores = []
-        teacher_verified_count = 0
-        teacher_total = 0
         for r in results:
             cat = r.seed.get("category", "unknown")
             categories[cat] = categories.get(cat, 0) + 1
@@ -503,15 +507,9 @@ class DatasetWriter:
                 cx = t.get("complexity", 0)
                 complexities[cx] = complexities.get(cx, 0) + 1
                 grounding_scores.append(t.get("grounding_score", 0.0))
-            for tv in r.teacher_verifications:
-                teacher_total += 1
-                teacher_scores.append(tv.get("agreement_score", 0.0))
-                if tv.get("verified", False):
-                    teacher_verified_count += 1
 
         avg_grounding = round(sum(grounding_scores) / max(len(grounding_scores), 1), 3)
         fully_grounded = sum(1 for s in grounding_scores if s >= 0.9)
-        avg_teacher_agreement = round(sum(teacher_scores) / max(len(teacher_scores), 1), 3)
 
         summary = {
             "total_cycles": len(results),
@@ -528,12 +526,6 @@ class DatasetWriter:
                 "fully_grounded_tasks": fully_grounded,
                 "total_tasks": total_tasks,
                 "grounding_rate": round(fully_grounded / max(total_tasks, 1), 3),
-            },
-            "teacher_verification": {
-                "total_rollouts": teacher_total,
-                "verified_count": teacher_verified_count,
-                "verification_rate": round(teacher_verified_count / max(teacher_total, 1), 3),
-                "avg_agreement_score": avg_teacher_agreement,
             },
             "seed_categories": categories,
             "task_families": families,

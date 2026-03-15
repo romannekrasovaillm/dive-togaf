@@ -2,23 +2,21 @@
 """DIVE-TOGAF Phase 2: Evidence-Driven Synthesis — Main Entry Point.
 
 Usage:
-    python run_synthesis.py [options]
+    python run_synthesis.py [options]                # Stage 1: synthesize D_task
+    python run_synthesis.py --teacher [options]      # Stage 1 + Stage 2: D_task → D_sft
+    python run_synthesis.py --teacher-only [options] # Stage 2 only: existing D_task → D_sft
+
+Stage 1 (Synthesis):
+    Collector gathers evidence → Generator produces (Q, A) pairs → dataset.jsonl
+
+Stage 2 (Teacher rollout, DIVE §3.4):
+    For each (Q, A, T) in D_task:
+        τ = teacher.rollout(Q, T)    # agent trajectory with tool calls
+        if verify(τ.final_answer, A): # rejection sampling
+            D_sft.append(τ)          # sft_dataset.jsonl
 
 Environment:
     KIMI_API_KEY or MOONSHOT_API_KEY — Moonshot/Kimi API key (required)
-
-Options:
-    --batch-size N       Number of synthesis cycles to run (default: 3)
-    --k-iterations K     Deepening iterations per cycle (default: 3)
-    --max-tool-rounds M  Max tool-call rounds per iteration (default: 8)
-    --seed-category CAT  Filter seeds by category (e.g., bian_service_domain)
-    --random-seed S      Random seed for reproducibility
-    --output-dir DIR     Output directory (default: output/)
-    --model MODEL        Kimi model name (default: kimi-k2.5)
-    --temperature T      LLM temperature (default: 0.6)
-    --verbose            Enable debug logging
-    --teacher            Run teacher verification as a separate post-synthesis stage
-    --teacher-only       Run teacher verification on existing results (skip synthesis)
 """
 
 from __future__ import annotations
@@ -32,7 +30,12 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from src.pools.sampler import PoolSampler
 from src.synthesis.kimi_client import KimiClient
-from src.synthesis.orchestrator import DatasetWriter, SynthesisOrchestrator, TeacherVerifier
+from src.synthesis.orchestrator import (
+    DatasetWriter,
+    SFTTrajectoryGenerator,
+    SynthesisOrchestrator,
+    SynthesisResult,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -58,10 +61,31 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--verbose", action="store_true",
                         help="Enable debug logging")
     parser.add_argument("--teacher", action="store_true",
-                        help="Run teacher verification after synthesis (separate stage)")
+                        help="Run teacher rollout (Stage 2) after synthesis")
     parser.add_argument("--teacher-only", action="store_true",
-                        help="Run teacher verification on existing results (skip synthesis)")
+                        help="Run teacher rollout on existing D_task (skip synthesis)")
     return parser.parse_args()
+
+
+def _load_results_from_disk(full_path: Path) -> list[SynthesisResult]:
+    """Load SynthesisResults from full_results.jsonl."""
+    import json
+    results = []
+    with open(full_path, "r", encoding="utf-8") as f:
+        for line in f:
+            data = json.loads(line)
+            results.append(SynthesisResult(
+                config_id=data["config_id"],
+                seed=data["seed"],
+                evidence=data["evidence"],
+                tasks=data["tasks"],
+                tool_call_count=data["tool_call_count"],
+                live_tool_count=data.get("live_tool_count", 0),
+                simulated_tool_count=data.get("simulated_tool_count", 0),
+                iterations=data.get("iterations", 0),
+                elapsed_seconds=data.get("elapsed_seconds", 0),
+            ))
+    return results
 
 
 def main() -> None:
@@ -75,9 +99,12 @@ def main() -> None:
         datefmt="%H:%M:%S",
     )
 
+    mode = "teacher-only" if args.teacher_only else "synthesis+teacher" if args.teacher else "synthesis"
+
     print("=" * 70)
     print("DIVE-TOGAF Phase 2: Evidence-Driven Synthesis")
     print("=" * 70)
+    print(f"  Mode:            {mode}")
     print(f"  Model:           {args.model}")
     print(f"  Batch size:      {args.batch_size} cycles")
     print(f"  K iterations:    {args.k_iterations} per cycle")
@@ -85,7 +112,6 @@ def main() -> None:
     print(f"  Seed category:   {args.seed_category or 'any'}")
     print(f"  Random seed:     {args.random_seed or 'none'}")
     print(f"  Output:          {args.output_dir}/")
-    print(f"  Teacher:         {'post-synthesis' if args.teacher else 'only' if args.teacher_only else 'disabled'}")
     print("=" * 70)
 
     # Initialize components
@@ -111,7 +137,7 @@ def main() -> None:
     output_path = Path(args.output_dir)
     results = []
 
-    # ---- Stage 1: Synthesis ----
+    # ---- Stage 1: Synthesis (D_task) ----
     if not args.teacher_only:
         orchestrator = SynthesisOrchestrator(
             kimi_client=kimi,
@@ -121,10 +147,8 @@ def main() -> None:
         )
 
         writer = DatasetWriter(output_dir=output_path)
-        dataset_path = output_path / "dataset.jsonl"
-        full_path = output_path / "full_results.jsonl"
 
-        print("Starting synthesis (results saved incrementally)...")
+        print("Stage 1: Synthesis (results saved incrementally)...")
         results = orchestrator.run_batch(
             batch_size=args.batch_size,
             seed=args.random_seed,
@@ -138,7 +162,6 @@ def main() -> None:
 
         summary_path = writer.write_summary(results, "summary.json")
 
-        # Print synthesis summary
         total_tasks = sum(len(r.tasks) for r in results)
         total_evidence = sum(len(r.evidence) for r in results)
         total_calls = sum(r.tool_call_count for r in results)
@@ -149,63 +172,48 @@ def main() -> None:
 
         print()
         print("=" * 70)
-        print("Synthesis Complete")
+        print("Stage 1 Complete: D_task")
         print("=" * 70)
-        print(f"  Cycles completed: {len(results)}/{args.batch_size}")
-        print(f"  Tasks generated:  {total_tasks}")
-        print(f"  Evidence items:   {total_evidence}")
-        print(f"  Tool calls:       {total_calls} ({total_live} live, {total_simulated} simulated, {live_rate:.0%} live rate)")
-        print(f"  Total time:       {total_time:.1f}s")
-        print()
-        print(f"  Dataset:          {dataset_path}")
-        print(f"  Full results:     {full_path}")
-        print(f"  Summary:          {summary_path}")
+        print(f"  Cycles:     {len(results)}/{args.batch_size}")
+        print(f"  Tasks:      {total_tasks}")
+        print(f"  Evidence:   {total_evidence}")
+        print(f"  Tool calls: {total_calls} ({total_live} live, {total_simulated} sim, {live_rate:.0%} live)")
+        print(f"  Time:       {total_time:.1f}s")
+        print(f"  Output:     {output_path / 'dataset.jsonl'}")
         print("=" * 70)
 
-    # ---- Stage 2: Teacher Verification (separate) ----
+    # ---- Stage 2: Teacher rollout (D_sft) ----
     if args.teacher or args.teacher_only:
-        if not results and args.teacher_only:
-            # Load results from disk
-            import json
+        if not results:
             full_path = output_path / "full_results.jsonl"
             if not full_path.exists():
-                print(f"ERROR: No results found at {full_path}")
+                print(f"ERROR: No results at {full_path}. Run synthesis first.")
                 sys.exit(1)
-            from src.synthesis.orchestrator import SynthesisResult
-            results = []
-            with open(full_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    data = json.loads(line)
-                    results.append(SynthesisResult(
-                        config_id=data["config_id"],
-                        seed=data["seed"],
-                        evidence=data["evidence"],
-                        tasks=data["tasks"],
-                        tool_call_count=data["tool_call_count"],
-                        live_tool_count=data.get("live_tool_count", 0),
-                        simulated_tool_count=data.get("simulated_tool_count", 0),
-                        iterations=data.get("iterations", 0),
-                        elapsed_seconds=data.get("elapsed_seconds", 0),
-                    ))
+            results = _load_results_from_disk(full_path)
             print(f"Loaded {len(results)} results from {full_path}")
 
+        total_tasks = sum(len(r.tasks) for r in results)
         print()
         print("=" * 70)
-        print("Stage 2: Teacher Verification")
+        print(f"Stage 2: Teacher Rollout ({total_tasks} tasks)")
         print("=" * 70)
 
-        verifier = TeacherVerifier(
+        sft_gen = SFTTrajectoryGenerator(
             kimi_client=kimi,
             sampler=sampler,
         )
-        verifications = verifier.verify_results(results, output_path)
+        summary = sft_gen.generate_sft(results, output_path)
 
-        if verifications:
-            verified = sum(1 for v in verifications if v.get("verified"))
-            scores = [v.get("agreement_score", 0) for v in verifications]
-            print(f"  Verified:         {verified}/{len(verifications)}")
-            print(f"  Avg agreement:    {sum(scores)/len(scores):.2f}")
-            print(f"  Results:          {output_path / 'teacher_verifications.jsonl'}")
+        print()
+        print("=" * 70)
+        print("Stage 2 Complete: D_sft")
+        print("=" * 70)
+        print(f"  Total tasks:     {summary['total_tasks']}")
+        print(f"  Accepted (SFT):  {summary['accepted']}")
+        print(f"  Rejected:        {summary['rejected']}")
+        print(f"  Failed:          {summary['failed']}")
+        print(f"  Acceptance rate: {summary['acceptance_rate']:.0%}")
+        print(f"  Output:          {output_path / 'sft_dataset.jsonl'}")
         print("=" * 70)
 
 
