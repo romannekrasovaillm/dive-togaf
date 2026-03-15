@@ -72,13 +72,11 @@ class SynthesisOrchestrator:
         sampler: PoolSampler,
         k_iterations: int = 3,
         max_tool_rounds_per_iter: int = 4,
-        collector_thinking: bool = False,
     ):
         self._kimi = kimi_client
         self._sampler = sampler
         self._k = k_iterations
         self._max_tool_rounds = max_tool_rounds_per_iter
-        self._collector_thinking = collector_thinking
         self._generator = TaskGenerator(kimi_client)
 
     def run_single(
@@ -150,7 +148,6 @@ class SynthesisOrchestrator:
                 kimi_client=self._kimi,
                 tool_executor=executor,
                 tool_schemas=tool_schemas,
-                use_thinking=self._collector_thinking,
             )
 
             # Track evidence count before/after for dedup rate

@@ -174,17 +174,10 @@ class KimiClient:
         temperature: float | None = None,
         max_tokens: int = 32768,
         stream: bool = False,
-        thinking: bool = True,
     ) -> ChatCompletion:
-        """Send a chat completion request, with optional tool definitions.
-
-        Args:
-            thinking: Enable reasoning mode for thinking-capable models
-                (kimi-k2.5). Set to False to disable thinking and avoid
-                timeouts on large payloads. Default True.
-        """
+        """Send a chat completion request, with optional tool definitions."""
         # Thinking models need >= 16000 tokens for reasoning_content + content
-        if thinking and (self.model in _FIXED_TEMP_MODELS or "thinking" in self.model):
+        if self.model in _FIXED_TEMP_MODELS or "thinking" in self.model:
             max_tokens = max(max_tokens, _THINKING_MIN_TOKENS)
 
         kwargs: dict[str, Any] = {
@@ -193,10 +186,6 @@ class KimiClient:
             "max_completion_tokens": max_tokens,
             "prompt_cache_key": self._cache_key,
         }
-        # Disable thinking for thinking-capable models when requested
-        if not thinking and (self.model in _FIXED_TEMP_MODELS or "thinking" in self.model):
-            kwargs["extra_body"] = {"thinking": {"type": "disabled"}}
-            logger.info("Thinking disabled for model %s", self.model)
         # kimi-k2.5 does not allow temperature to be set
         if self.model not in _FIXED_TEMP_MODELS:
             kwargs["temperature"] = temperature if temperature is not None else self.temperature

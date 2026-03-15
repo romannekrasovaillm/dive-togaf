@@ -253,12 +253,10 @@ class CollectorAgent:
         kimi_client: KimiClient,
         tool_executor: ToolExecutor,
         tool_schemas: list[dict[str, Any]],
-        use_thinking: bool = False,
     ):
         self._kimi = kimi_client
         self._executor = tool_executor
         self._tool_schemas = tool_schemas
-        self._use_thinking = use_thinking
 
     def collect_iteration(
         self,
@@ -300,7 +298,6 @@ class CollectorAgent:
             tool_choice="auto",
             max_tokens=32768,
             stream=True,
-            thinking=self._use_thinking,
         )
         choice = resp.choices[0]
         msg = choice.message
