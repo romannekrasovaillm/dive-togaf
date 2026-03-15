@@ -19,7 +19,11 @@ from typing import Any
 
 import random as _random_mod
 
-from src.pools.sampler import PoolSampler, SynthesisConfig
+from src.pools.sampler import (
+    PoolSampler, SynthesisConfig,
+    count_affinity_tools, get_seed_affinity_domains, get_tool_domain_tags,
+    MIN_AFFINITY_TOOLS,
+)
 
 from .collector import CollectorAgent, EvidenceSet
 from .generator import TaskGenerator, SynthesizedTask
@@ -129,7 +133,8 @@ class SynthesisOrchestrator:
             logger.info("--- Iteration K=%d ---", k)
 
             # Resample tool subset per iteration for variability
-            iter_tools = self._resample_tools(config.tools, k, rng)
+            # Pass seed for affinity-aware resampling (Step 4)
+            iter_tools = self._resample_tools(config.tools, k, rng, seed=config.seed)
 
             # Build fresh executor + schemas for this iteration's toolset
             executor = ToolExecutor(
@@ -175,11 +180,22 @@ class SynthesisOrchestrator:
             tasks.append(task)
             prev_query = task.question
 
+            # Step 5: log affinity metrics alongside existing stats
+            n_affinity = count_affinity_tools(iter_tools, config.seed)
+            n_low_value = sum(
+                1 for e in evidence.for_iteration(k)
+                if isinstance(e.result, dict) and e.result.get("_low_value")
+            )
+            iter_tool_calls = max(executor.call_count, 1)
+            low_value_rate = n_low_value / iter_tool_calls
+
             logger.info(
-                "K=%d: evidence=%d (+%d new, %.0f%% dedup), tools=%d, "
+                "K=%d: evidence=%d (+%d new, %.0f%% dedup, %d low-value), "
+                "tools=%d (%d affinity, %d other), "
                 "complexity=%d, grounding=%.2f, Q='%s'",
-                k, len(evidence), evidence_added, dedup_rate * 100,
-                len(iter_tools), task.complexity, task.grounding_score,
+                k, len(evidence), evidence_added, dedup_rate * 100, n_low_value,
+                len(iter_tools), n_affinity, len(iter_tools) - n_affinity,
+                task.complexity, task.grounding_score,
                 task.question[:80],
             )
 
@@ -220,12 +236,17 @@ class SynthesisOrchestrator:
         base_tools: list[dict[str, Any]],
         iteration: int,
         rng: _random_mod.Random,
+        seed: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         """Resample tool subset for a given iteration.
 
         Iteration 1 uses the base config tools. Subsequent iterations
         swap out ~30% of tools for fresh ones from the full pool,
         keeping retrieval/processing balance.
+
+        Step 4: After swap, ensures at least MIN_AFFINITY_TOOLS affinity
+        tools remain. If the swap would drop below the threshold,
+        priority-fills from affinity candidates.
         """
         if iteration == 1:
             return base_tools
@@ -253,6 +274,45 @@ class SynthesisOrchestrator:
             proc_tools = [t for t in full_pool if t.get("tool_type") == "processing"]
             if proc_tools:
                 result[-1] = rng.choice(proc_tools)
+
+        # Step 4: Ensure minimum affinity tools after swap
+        if seed is not None:
+            affinity_domains = set(get_seed_affinity_domains(seed))
+            result_names = {t.get("name") for t in result}
+
+            # Count current affinity
+            n_affinity = sum(
+                1 for t in result
+                if set(get_tool_domain_tags(t)) & affinity_domains
+            )
+
+            if n_affinity < MIN_AFFINITY_TOOLS:
+                # Find affinity candidates not already in result
+                affinity_candidates = [
+                    t for t in full_pool
+                    if t.get("name") not in result_names
+                    and set(get_tool_domain_tags(t)) & affinity_domains
+                ]
+                needed = min(MIN_AFFINITY_TOOLS - n_affinity, len(affinity_candidates))
+                if needed > 0:
+                    # Replace last N non-affinity tools with affinity ones
+                    fillers = rng.sample(affinity_candidates, needed)
+                    non_affinity_indices = [
+                        i for i, t in enumerate(result)
+                        if not (set(get_tool_domain_tags(t)) & affinity_domains)
+                    ]
+                    for j, filler in enumerate(fillers):
+                        if j < len(non_affinity_indices):
+                            result[non_affinity_indices[-(j + 1)]] = filler
+
+                    n_affinity = sum(
+                        1 for t in result
+                        if set(get_tool_domain_tags(t)) & affinity_domains
+                    )
+                    logger.info(
+                        "K=%d: affinity repair — added %d affinity tools (now %d)",
+                        iteration, needed, n_affinity,
+                    )
 
         logger.info(
             "K=%d: resampled tools — kept %d, swapped %d (total %d)",

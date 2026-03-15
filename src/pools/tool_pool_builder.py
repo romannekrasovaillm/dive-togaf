@@ -1424,6 +1424,255 @@ def _analysis_tools() -> list[ToolDefinition]:
     return tools
 
 
+def _security_tools() -> list[ToolDefinition]:
+    """Security architecture tools."""
+    tools = []
+
+    tools.append(ToolDefinition(
+        id="security_threat_model",
+        name="security_threat_model",
+        description="Performs threat modeling on an architecture component using STRIDE or other frameworks. "
+                    "Identifies threats, risk scores, and priority mitigations for specified assets.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.SECURITY,
+        parameters=[
+            ToolParameter("system", "string", "Name of the system or component to analyze"),
+            ToolParameter("assets", "array", "Critical assets to assess (e.g. user data, API keys)"),
+            ToolParameter("threat_framework", "string", "Threat framework to use", required=False, default="STRIDE"),
+        ],
+        return_schema={"type": "object", "properties": {
+            "threats": {"type": "array"}, "overall_risk": {"type": "number"},
+            "priority_mitigations": {"type": "array"}}},
+        examples=[], tags=["security", "threat_modeling", "risk"],
+    ))
+
+    tools.append(ToolDefinition(
+        id="security_control_assessment",
+        name="security_control_assessment",
+        description="Assesses the effectiveness of security controls against a compliance framework "
+                    "(ISO27001, NIST, CIS). Evaluates implementation status, effectiveness scores, and gaps.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.SECURITY,
+        parameters=[
+            ToolParameter("controls", "array", "Security controls to assess"),
+            ToolParameter("compliance_framework", "string", "Compliance framework", required=False, default="ISO27001"),
+            ToolParameter("scope", "string", "Assessment scope", required=False),
+        ],
+        return_schema={"type": "object", "properties": {
+            "results": {"type": "array"}, "compliance_rate": {"type": "number"},
+            "critical_gaps": {"type": "array"}}},
+        examples=[], tags=["security", "compliance", "controls"],
+    ))
+
+    return tools
+
+
+def _data_architecture_tools() -> list[ToolDefinition]:
+    """Data architecture tools."""
+    tools = []
+
+    tools.append(ToolDefinition(
+        id="data_quality_assessment",
+        name="data_quality_assessment",
+        description="Assesses data quality across multiple dimensions (completeness, accuracy, timeliness, "
+                    "consistency) for specified datasets. Returns per-dataset and overall quality scores.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.DATA_ARCHITECTURE,
+        parameters=[
+            ToolParameter("datasets", "array", "Datasets to assess"),
+            ToolParameter("dimensions", "array", "Quality dimensions to evaluate", required=False),
+        ],
+        return_schema={"type": "object", "properties": {
+            "assessments": {"type": "array"}, "overall_quality": {"type": "number"},
+            "priority_issues": {"type": "array"}}},
+        examples=[], tags=["data", "quality", "assessment"],
+    ))
+
+    tools.append(ToolDefinition(
+        id="data_lineage_trace",
+        name="data_lineage_trace",
+        description="Traces data lineage upstream and downstream for a data entity. "
+                    "Shows source systems, transformations, consumers, and quality impact.",
+        tool_type=ToolType.RETRIEVAL,
+        domain=ToolDomain.DATA_ARCHITECTURE,
+        parameters=[
+            ToolParameter("entity", "string", "Data entity to trace"),
+            ToolParameter("direction", "string", "Trace direction: upstream, downstream, or both", required=False, default="both"),
+            ToolParameter("max_depth", "integer", "Maximum trace depth", required=False, default=5),
+        ],
+        return_schema={"type": "object", "properties": {
+            "upstream": {"type": "array"}, "downstream": {"type": "array"},
+            "transformations": {"type": "array"}}},
+        examples=[], tags=["data", "lineage", "traceability"],
+    ))
+
+    tools.append(ToolDefinition(
+        id="data_classification_scan",
+        name="data_classification_scan",
+        description="Classifies data stores by sensitivity level, regulatory requirements, "
+                    "and retention policies. Identifies high-sensitivity stores and regulatory applicability.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.DATA_ARCHITECTURE,
+        parameters=[
+            ToolParameter("data_stores", "array", "Data stores to classify"),
+            ToolParameter("classification_scheme", "string", "Classification scheme", required=False, default="sensitivity"),
+        ],
+        return_schema={"type": "object", "properties": {
+            "results": {"type": "array"}, "high_sensitivity_count": {"type": "integer"},
+            "regulatory_summary": {"type": "array"}}},
+        examples=[], tags=["data", "classification", "security", "regulation"],
+    ))
+
+    return tools
+
+
+def _integration_tools() -> list[ToolDefinition]:
+    """Integration and API architecture tools."""
+    tools = []
+
+    tools.append(ToolDefinition(
+        id="integration_pattern_analyze",
+        name="integration_pattern_analyze",
+        description="Recommends integration patterns based on system characteristics, data volume, "
+                    "and latency requirements. Evaluates REST, event-driven, gRPC, and other patterns.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.INTEGRATION,
+        parameters=[
+            ToolParameter("source_system", "string", "Source system name"),
+            ToolParameter("target_system", "string", "Target system name"),
+            ToolParameter("data_volume", "string", "Expected data volume: low, medium, high", required=False, default="medium"),
+            ToolParameter("latency_requirement", "string", "Latency requirement: real-time, seconds, minutes, hours", required=False, default="seconds"),
+        ],
+        return_schema={"type": "object", "properties": {
+            "recommended_pattern": {"type": "string"}, "alternatives": {"type": "array"},
+            "evaluation": {"type": "object"}}},
+        examples=[], tags=["integration", "patterns", "api"],
+    ))
+
+    tools.append(ToolDefinition(
+        id="api_maturity_assess",
+        name="api_maturity_assess",
+        description="Assesses API maturity level using Richardson model or custom framework. "
+                    "Evaluates versioning, documentation, deprecation policies.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.INTEGRATION,
+        parameters=[
+            ToolParameter("apis", "array", "API names to assess"),
+            ToolParameter("model", "string", "Maturity model to use", required=False, default="Richardson"),
+        ],
+        return_schema={"type": "object", "properties": {
+            "results": {"type": "array"}, "average_maturity": {"type": "number"},
+            "recommendations": {"type": "array"}}},
+        examples=[], tags=["api", "maturity", "assessment"],
+    ))
+
+    return tools
+
+
+def _cloud_infrastructure_tools() -> list[ToolDefinition]:
+    """Cloud and infrastructure architecture tools."""
+    tools = []
+
+    tools.append(ToolDefinition(
+        id="cloud_readiness_assess",
+        name="cloud_readiness_assess",
+        description="Assesses workload readiness for cloud migration using the 6R framework "
+                    "(Rehost, Replatform, Refactor, Repurchase, Retire, Retain). "
+                    "Evaluates readiness scores, effort estimates, and blockers.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.CLOUD_INFRASTRUCTURE,
+        parameters=[
+            ToolParameter("workloads", "array", "Workloads to assess for cloud readiness"),
+            ToolParameter("target_cloud", "string", "Target cloud model: public, private, hybrid", required=False, default="hybrid"),
+            ToolParameter("strategy", "string", "Migration strategy framework", required=False, default="6R"),
+        ],
+        return_schema={"type": "object", "properties": {
+            "results": {"type": "array"}, "overall_readiness": {"type": "number"},
+            "total_effort_months": {"type": "integer"}}},
+        examples=[], tags=["cloud", "migration", "readiness"],
+    ))
+
+    tools.append(ToolDefinition(
+        id="infrastructure_cost_model",
+        name="infrastructure_cost_model",
+        description="Models infrastructure costs across services with growth projections. "
+                    "Calculates monthly/annual costs, projected growth, and optimization opportunities.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.CLOUD_INFRASTRUCTURE,
+        parameters=[
+            ToolParameter("services", "array", "Infrastructure services to model"),
+            ToolParameter("period_months", "integer", "Projection period in months", required=False, default=12),
+            ToolParameter("growth_rate", "number", "Expected monthly growth rate", required=False, default=0.1),
+        ],
+        return_schema={"type": "object", "properties": {
+            "cost_items": {"type": "array"}, "total_monthly": {"type": "number"},
+            "savings_opportunity": {"type": "number"}}},
+        examples=[], tags=["infrastructure", "cost", "planning"],
+    ))
+
+    return tools
+
+
+def _organization_governance_tools() -> list[ToolDefinition]:
+    """Organization and governance tools."""
+    tools = []
+
+    tools.append(ToolDefinition(
+        id="raci_matrix_generate",
+        name="raci_matrix_generate",
+        description="Generates a RACI (Responsible, Accountable, Consulted, Informed) responsibility matrix "
+                    "for activities and roles. Validates that each activity has exactly one accountable role.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.GOVERNANCE,
+        parameters=[
+            ToolParameter("activities", "array", "Activities or decisions to assign"),
+            ToolParameter("roles", "array", "Roles to assign responsibilities to"),
+        ],
+        return_schema={"type": "object", "properties": {
+            "matrix": {"type": "array"}, "validation_issues": {"type": "array"},
+            "coverage": {"type": "number"}}},
+        examples=[], tags=["governance", "raci", "organizational"],
+    ))
+
+    tools.append(ToolDefinition(
+        id="architecture_decision_record",
+        name="architecture_decision_record",
+        description="Generates and evaluates an Architecture Decision Record (ADR). "
+                    "Scores alternatives against criteria (cost, complexity, scalability, time_to_market) "
+                    "and recommends the best option.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.GOVERNANCE,
+        parameters=[
+            ToolParameter("decision", "string", "Decision to be made"),
+            ToolParameter("options", "array", "Options to evaluate"),
+            ToolParameter("context", "string", "Context and constraints", required=False),
+        ],
+        return_schema={"type": "object", "properties": {
+            "evaluations": {"type": "object"}, "recommended": {"type": "string"},
+            "consequences": {"type": "array"}}},
+        examples=[], tags=["governance", "adr", "decision"],
+    ))
+
+    tools.append(ToolDefinition(
+        id="compliance_regulation_check",
+        name="compliance_regulation_check",
+        description="Checks architecture elements against regulatory requirements (GDPR, PCI-DSS, SOC2). "
+                    "Reports compliance status per element per regulation with remediation recommendations.",
+        tool_type=ToolType.PROCESSING,
+        domain=ToolDomain.GOVERNANCE,
+        parameters=[
+            ToolParameter("regulations", "array", "Regulations to check against"),
+            ToolParameter("architecture_elements", "array", "Architecture elements to verify"),
+        ],
+        return_schema={"type": "object", "properties": {
+            "checks": {"type": "array"}, "compliance_rate": {"type": "number"},
+            "remediations": {"type": "array"}}},
+        examples=[], tags=["governance", "compliance", "regulation"],
+    ))
+
+    return tools
+
+
 def build_tool_pool() -> list[ToolDefinition]:
     """Builds the complete tool pool."""
     tools = []
@@ -1434,6 +1683,12 @@ def build_tool_pool() -> list[ToolDefinition]:
     tools.extend(_retrieval_tools_general())
     tools.extend(_processing_tools())
     tools.extend(_analysis_tools())
+    # Extended domain tools
+    tools.extend(_security_tools())
+    tools.extend(_data_architecture_tools())
+    tools.extend(_integration_tools())
+    tools.extend(_cloud_infrastructure_tools())
+    tools.extend(_organization_governance_tools())
     return tools
 
 

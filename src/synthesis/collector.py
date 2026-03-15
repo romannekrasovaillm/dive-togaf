@@ -2,7 +2,10 @@
 
 The collector explores a seed concept using available tools, building
 an increasingly rich evidence set across K iterations. Each iteration
-uses previous evidence as context for deeper exploration.
+uses a **single API rollout** (one prompt → one model response) with
+up to ``MAX_TOOL_CALLS_PER_ITER`` tool calls executed from that
+response. This keeps payload size bounded across K iterations and
+avoids ``RemoteProtocolError`` from accumulated multi-round context.
 """
 
 from __future__ import annotations
@@ -16,6 +19,10 @@ from .kimi_client import KimiClient
 from .tool_executor import ToolExecutor
 
 logger = logging.getLogger(__name__)
+
+# Phase 1: hard cap on tool calls executed per single-rollout iteration.
+# If the model returns more, the extras are logged and discarded.
+MAX_TOOL_CALLS_PER_ITER = 6
 
 
 @dataclass
@@ -59,6 +66,38 @@ def _is_low_value_result(result: Any) -> bool:
     if isinstance(result, list) and len(result) == 0:
         return True
     return False
+
+
+def _extract_key_facts(result: Any, max_len: int = 120) -> str:
+    """Extract top-level scalar fields from a tool result into a compact string.
+
+    Examples:
+        {"maturity_level": 2, "issues": ["debt", "scale"]}  →  "maturity_level=2, issues=[debt, scale]"
+        {"components": [{"name": "A"}, {"name": "B"}]}       →  "components: 2 items"
+    """
+    if not isinstance(result, dict):
+        s = str(result)
+        return s[:max_len] + "..." if len(s) > max_len else s
+
+    parts: list[str] = []
+    for k, v in result.items():
+        if k.startswith("_"):  # skip internal flags
+            continue
+        if isinstance(v, (int, float)):
+            parts.append(f"{k}={v}")
+        elif isinstance(v, str) and len(v) <= 60:
+            parts.append(f"{k}={v}")
+        elif isinstance(v, str):
+            parts.append(f"{k}={v[:40]}...")
+        elif isinstance(v, list):
+            if len(v) <= 4 and all(isinstance(x, str) for x in v):
+                parts.append(f"{k}=[{', '.join(v)}]")
+            else:
+                parts.append(f"{k}: {len(v)} items")
+        elif isinstance(v, dict):
+            parts.append(f"{k}: {{...}}")
+    summary = ", ".join(parts)
+    return summary[:max_len] + "..." if len(summary) > max_len else summary
 
 
 @dataclass
@@ -117,6 +156,32 @@ class EvidenceSet:
             lines.append(entry)
         return "\n\n".join(lines)
 
+    def compressed_summary(self) -> str:
+        """Produce a compact one-line-per-item summary for collector prompts.
+
+        Extracts top-level scalar fields from each evidence result
+        programmatically (no LLM call). Used in ``_build_iteration_prompt``
+        to keep K=2+ collector payloads small while preserving key facts.
+
+        Full evidence (``summary()``) is still used by the generator.
+        """
+        raw_bytes = 0
+        lines: list[str] = []
+        for i, item in enumerate(self.items):
+            raw_bytes += len(json.dumps(item.result, ensure_ascii=False)) if isinstance(item.result, (dict, list)) else len(str(item.result))
+            facts = _extract_key_facts(item.result)
+            lines.append(f"- [E{i}] {item.tool_name}: {facts}")
+        compressed = (
+            f"Prior findings (K=1-{self.items[-1].iteration if self.items else 1}, "
+            f"{len(self.items)} evidence items):\n" + "\n".join(lines)
+        )
+        compressed_bytes = len(compressed.encode("utf-8"))
+        logger.info(
+            "Compressed %d evidence items from %dB to %dB for collector prompt",
+            len(self.items), raw_bytes, compressed_bytes,
+        )
+        return compressed
+
     def to_list(self) -> list[dict[str, Any]]:
         return [e.to_dict() for e in self.items]
 
@@ -163,14 +228,15 @@ maturity, risks, dependencies.
 
 Call several tools to build a broad evidence base."""
 
-    evidence_summary = evidence_so_far.summary()
+    # Phase 2: use compressed one-line-per-item summary to keep payload small.
+    # Full evidence (summary()) is still available to the generator via EvidenceSet.
+    evidence_summary = evidence_so_far.compressed_summary()
     prev_context = f"\nPrevious query for context: {prev_query}" if prev_query else ""
 
     return f"""INVESTIGATION TARGET:
 {seed_desc}
 
-This is iteration K={iteration} (deepening). You have gathered the following evidence so far:
-
+This is iteration K={iteration} (deepening).
 {evidence_summary}
 {prev_context}
 
@@ -198,16 +264,22 @@ class CollectorAgent:
         iteration: int,
         evidence: EvidenceSet,
         prev_query: str | None = None,
-        max_tool_rounds: int = 8,
+        max_tool_rounds: int = 8,  # kept for signature compat; ignored
     ) -> tuple[EvidenceSet, str]:
-        """Run one iteration of evidence collection.
+        """Run one iteration of evidence collection (single-rollout).
+
+        Phase 1 stabilization: sends one prompt to the model, receives one
+        response with tool calls, executes up to ``MAX_TOOL_CALLS_PER_ITER``
+        of them, and returns. **No multi-round loop** — the tool results are
+        NOT sent back to the model for continuation, keeping the message
+        count bounded (≤ system + user + 1 assistant + N tool = ≤ 10).
 
         Args:
             seed: The seed concept dict.
             iteration: Current iteration number (1-indexed).
             evidence: Accumulated evidence from prior iterations.
-            prev_query: The query generated in the previous iteration, for context.
-            max_tool_rounds: Max tool-call rounds in this iteration.
+            prev_query: The query generated in the previous iteration.
+            max_tool_rounds: Ignored (kept for API compatibility).
 
         Returns:
             (updated_evidence, collector_reasoning)
@@ -219,15 +291,44 @@ class CollectorAgent:
             {"role": "user", "content": prompt},
         ]
 
-        reasoning, tool_log = self._kimi.chat_with_tools(
+        # Single API call — no multi-round loop
+        resp = self._kimi.chat(
             messages=messages,
             tools=self._tool_schemas,
-            tool_executor=self._executor,
-            max_rounds=max_tool_rounds,
+            tool_choice="auto",
             max_tokens=32768,
+            stream=True,
         )
+        choice = resp.choices[0]
+        msg = choice.message
+        reasoning = getattr(msg, "reasoning_content", None) or msg.content or ""
 
-        # Record evidence items
+        # Execute tool calls from single response, capped at MAX_TOOL_CALLS_PER_ITER
+        tool_calls = msg.tool_calls or []
+        if len(tool_calls) > MAX_TOOL_CALLS_PER_ITER:
+            logger.warning(
+                "Truncated %d tool calls to max_steps=%d",
+                len(tool_calls), MAX_TOOL_CALLS_PER_ITER,
+            )
+            tool_calls = tool_calls[:MAX_TOOL_CALLS_PER_ITER]
+
+        tool_log: list[dict[str, Any]] = []
+        for tc in tool_calls:
+            fn_name = tc.function.name
+            try:
+                fn_args = json.loads(tc.function.arguments)
+            except json.JSONDecodeError:
+                fn_args = {"raw": tc.function.arguments}
+
+            logger.info("Tool call: %s(%s)", fn_name, json.dumps(fn_args, ensure_ascii=False)[:200])
+            result = self._executor(fn_name, fn_args)
+            tool_log.append({
+                "tool_name": fn_name,
+                "arguments": fn_args,
+                "result": result,
+            })
+
+        # Record evidence items (no second model call — collect directly)
         for call in tool_log:
             evidence.add(EvidenceItem(
                 iteration=iteration,
@@ -238,7 +339,7 @@ class CollectorAgent:
             ))
 
         logger.info(
-            "Iteration K=%d: %d tool calls, total evidence: %d items",
+            "Iteration K=%d: %d tool calls (single-rollout), total evidence: %d items",
             iteration, len(tool_log), len(evidence),
         )
 

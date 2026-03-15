@@ -1200,6 +1200,283 @@ def compare_technology_stacks(*, stacks: list | None = None, criteria: list | No
 
 
 # =====================================================================
+# Security Architecture Tools
+# =====================================================================
+
+def security_threat_model(*, system: str = "", assets: list | None = None, threat_framework: str = "STRIDE", **kwargs: Any) -> dict[str, Any]:
+    """Analyze security threats for an architecture component."""
+    sys_name = system or "Target System"
+    asset_list = [str(a) for a in (assets or ["User Data", "API Keys", "Session Tokens"])]
+    stride = ["Spoofing", "Tampering", "Repudiation", "Information Disclosure", "Denial of Service", "Elevation of Privilege"]
+    threats = []
+    for a in asset_list:
+        for t in stride:
+            h = int(hashlib.md5(f"threat:{sys_name}:{a}:{t}".encode()).hexdigest()[:4], 16)
+            if h % 3 == 0:
+                risk = _deterministic_score(f"risk:{sys_name}:{a}:{t}", 2.0, 9.0)
+                threats.append({"asset": a, "threat_type": t, "risk_score": risk,
+                                "likelihood": "High" if risk > 7 else ("Medium" if risk > 4 else "Low"),
+                                "mitigation": f"Apply {t.lower()} controls for {a}"})
+    return {
+        "system": sys_name, "framework": threat_framework,
+        "assets_analyzed": len(asset_list), "threats": threats,
+        "overall_risk": round(sum(t["risk_score"] for t in threats) / max(len(threats), 1), 2),
+        "priority_mitigations": [t["mitigation"] for t in sorted(threats, key=lambda x: x["risk_score"], reverse=True)[:3]],
+    }
+
+
+def security_control_assessment(*, controls: list | None = None, compliance_framework: str = "ISO27001", scope: str = "", **kwargs: Any) -> dict[str, Any]:
+    """Assess effectiveness of security controls against a compliance framework."""
+    ctrl_list = [str(c) for c in (controls or ["Access Control", "Encryption", "Monitoring", "Backup"])]
+    statuses = ["Implemented", "Partial", "Planned", "Not Implemented"]
+    results = []
+    for c in ctrl_list:
+        h = int(hashlib.md5(f"ctrl:{compliance_framework}:{c}".encode()).hexdigest()[:4], 16)
+        eff = _deterministic_score(f"ctrl:eff:{c}", 0.3, 1.0)
+        results.append({"control": c, "status": statuses[h % len(statuses)],
+                        "effectiveness": eff, "gaps": [] if eff > 0.7 else [f"{c}: coverage gap identified"]})
+    compliance_rate = round(sum(1 for r in results if r["status"] == "Implemented") / max(len(results), 1), 2)
+    return {
+        "framework": compliance_framework, "scope": scope or "Full",
+        "controls_assessed": len(ctrl_list), "results": results,
+        "compliance_rate": compliance_rate,
+        "critical_gaps": [r["gaps"][0] for r in results if r["gaps"]],
+    }
+
+
+# =====================================================================
+# Data Architecture Tools
+# =====================================================================
+
+def data_quality_assessment(*, datasets: list | None = None, dimensions: list | None = None, **kwargs: Any) -> dict[str, Any]:
+    """Assess data quality across multiple dimensions for given datasets."""
+    ds_list = [str(d) for d in (datasets or ["Customer Master", "Transaction Log", "Product Catalog"])]
+    dim_list = [str(d) for d in (dimensions or ["completeness", "accuracy", "timeliness", "consistency"])]
+    assessments = []
+    for ds in ds_list:
+        dim_scores = {}
+        for dim in dim_list:
+            dim_scores[dim] = _deterministic_score(f"dq:{ds}:{dim}", 0.4, 0.99)
+        overall = round(sum(dim_scores.values()) / max(len(dim_scores), 1), 2)
+        assessments.append({"dataset": ds, "dimension_scores": dim_scores, "overall_quality": overall,
+                            "issues": [f"{dim}: below threshold" for dim, s in dim_scores.items() if s < 0.7]})
+    return {
+        "datasets_analyzed": len(ds_list), "dimensions": dim_list,
+        "assessments": assessments,
+        "overall_quality": round(sum(a["overall_quality"] for a in assessments) / max(len(assessments), 1), 2),
+        "priority_issues": [i for a in assessments for i in a["issues"]][:5],
+    }
+
+
+def data_lineage_trace(*, entity: str = "", direction: str = "both", max_depth: int = 5, **kwargs: Any) -> dict[str, Any]:
+    """Trace data lineage upstream/downstream for a data entity."""
+    ent = entity or "CustomerRecord"
+    upstream = [f"Source_{i}_{ent[:4]}" for i in range(int(_deterministic_score(f"lineage:up:{ent}", 1.0, 5.0)))]
+    downstream = [f"Consumer_{i}_{ent[:4]}" for i in range(int(_deterministic_score(f"lineage:down:{ent}", 1.0, 6.0)))]
+    transformations = []
+    for i, src in enumerate(upstream):
+        h = int(hashlib.md5(f"transform:{src}:{ent}".encode()).hexdigest()[:4], 16)
+        transformations.append({"from": src, "to": ent, "type": ["ETL", "CDC", "API", "Batch"][h % 4],
+                                "quality_impact": ["None", "Minor", "Significant"][h % 3]})
+    return {
+        "entity": ent, "direction": direction,
+        "upstream": upstream, "downstream": downstream,
+        "transformations": transformations,
+        "lineage_depth": max(len(upstream), len(downstream)),
+        "data_quality_risks": [t for t in transformations if t["quality_impact"] == "Significant"],
+    }
+
+
+def data_classification_scan(*, data_stores: list | None = None, classification_scheme: str = "sensitivity", **kwargs: Any) -> dict[str, Any]:
+    """Classify data stores by sensitivity, regulatory requirements, and retention."""
+    stores = [str(s) for s in (data_stores or ["UserDB", "LogStore", "AnalyticsWarehouse"])]
+    levels = ["Public", "Internal", "Confidential", "Restricted"]
+    regulations = ["GDPR", "PCI-DSS", "HIPAA", "SOX", "None"]
+    results = []
+    for s in stores:
+        h = int(hashlib.md5(f"classify:{s}".encode()).hexdigest()[:6], 16)
+        lvl = levels[h % len(levels)]
+        reg = [regulations[h % len(regulations)]]
+        if lvl in ("Confidential", "Restricted"):
+            reg.append(regulations[(h >> 4) % (len(regulations) - 1)])
+        retention_months = int(_deterministic_score(f"retain:{s}", 6.0, 120.0))
+        results.append({"data_store": s, "classification": lvl, "regulations": list(set(reg)),
+                        "retention_months": retention_months, "encryption_required": lvl in ("Confidential", "Restricted")})
+    return {
+        "scheme": classification_scheme, "stores_scanned": len(stores),
+        "results": results,
+        "high_sensitivity_count": sum(1 for r in results if r["classification"] in ("Confidential", "Restricted")),
+        "regulatory_summary": list({reg for r in results for reg in r["regulations"] if reg != "None"}),
+    }
+
+
+# =====================================================================
+# Integration & API Architecture Tools
+# =====================================================================
+
+def integration_pattern_analyze(*, source_system: str = "", target_system: str = "", data_volume: str = "medium", latency_requirement: str = "seconds", **kwargs: Any) -> dict[str, Any]:
+    """Recommend integration patterns based on system characteristics."""
+    src = source_system or "System A"
+    tgt = target_system or "System B"
+    patterns = ["REST API", "Event-Driven (Kafka)", "GraphQL", "gRPC", "File Transfer", "ESB", "CDC"]
+    h = int(hashlib.md5(f"intpat:{src}:{tgt}:{data_volume}:{latency_requirement}".encode()).hexdigest()[:8], 16)
+    recommended = patterns[h % len(patterns)]
+    alternatives = [patterns[(h >> 4) % len(patterns)], patterns[(h >> 8) % len(patterns)]]
+    return {
+        "source": src, "target": tgt, "data_volume": data_volume, "latency_requirement": latency_requirement,
+        "recommended_pattern": recommended,
+        "alternatives": [a for a in alternatives if a != recommended],
+        "evaluation": {
+            recommended: {"fit_score": _deterministic_score(f"intfit:{src}:{tgt}:{recommended}", 0.7, 0.98),
+                          "complexity": "Low" if h % 3 == 0 else ("Medium" if h % 3 == 1 else "High")},
+        },
+        "anti_patterns": [f"Avoid point-to-point between {src} and {tgt} at {data_volume} volume"],
+    }
+
+
+def api_maturity_assess(*, apis: list | None = None, model: str = "Richardson", **kwargs: Any) -> dict[str, Any]:
+    """Assess API maturity level for a set of APIs."""
+    api_list = [str(a) for a in (apis or ["Customer API", "Payment API", "Notification API"])]
+    levels = {"Richardson": ["Level 0: Swamp of POX", "Level 1: Resources", "Level 2: HTTP Verbs", "Level 3: Hypermedia"],
+              "custom": ["Basic", "Managed", "Defined", "Optimized"]}
+    maturity_levels = levels.get(model, levels["Richardson"])
+    results = []
+    for api in api_list:
+        h = int(hashlib.md5(f"apimat:{api}".encode()).hexdigest()[:4], 16)
+        lvl = h % len(maturity_levels)
+        results.append({"api": api, "maturity_level": lvl, "maturity_label": maturity_levels[lvl],
+                        "versioning": h % 2 == 0, "documentation": _deterministic_score(f"apidoc:{api}", 0.3, 1.0),
+                        "deprecation_policy": h % 3 != 0})
+    avg_level = round(sum(r["maturity_level"] for r in results) / max(len(results), 1), 1)
+    return {
+        "model": model, "apis_assessed": len(api_list), "results": results,
+        "average_maturity": avg_level,
+        "recommendations": [f"Upgrade {r['api']} to {maturity_levels[min(r['maturity_level']+1, len(maturity_levels)-1)]}"
+                            for r in results if r["maturity_level"] < len(maturity_levels) - 1][:3],
+    }
+
+
+# =====================================================================
+# Cloud & Infrastructure Architecture Tools
+# =====================================================================
+
+def cloud_readiness_assess(*, workloads: list | None = None, target_cloud: str = "hybrid", strategy: str = "6R", **kwargs: Any) -> dict[str, Any]:
+    """Assess workload readiness for cloud migration using 6R framework."""
+    wl_list = [str(w) for w in (workloads or ["ERP", "CRM", "Email", "Analytics Platform"])]
+    strategies_6r = ["Rehost", "Replatform", "Refactor", "Repurchase", "Retire", "Retain"]
+    results = []
+    for w in wl_list:
+        h = int(hashlib.md5(f"cloud:{w}:{target_cloud}".encode()).hexdigest()[:6], 16)
+        rec_strategy = strategies_6r[h % len(strategies_6r)]
+        readiness = _deterministic_score(f"cloudready:{w}", 0.2, 0.95)
+        effort = int(_deterministic_score(f"cloudeffort:{w}", 1.0, 12.0))
+        results.append({"workload": w, "recommended_strategy": rec_strategy,
+                        "readiness_score": readiness, "migration_effort_months": effort,
+                        "blockers": [f"{w}: {['licensing', 'latency', 'compliance', 'data gravity'][h % 4]} concern"]
+                        if readiness < 0.5 else []})
+    return {
+        "target_cloud": target_cloud, "strategy_framework": strategy,
+        "workloads_assessed": len(wl_list), "results": results,
+        "overall_readiness": round(sum(r["readiness_score"] for r in results) / max(len(results), 1), 2),
+        "total_effort_months": sum(r["migration_effort_months"] for r in results),
+        "blockers": [b for r in results for b in r["blockers"]],
+    }
+
+
+def infrastructure_cost_model(*, services: list | None = None, period_months: int = 12, growth_rate: float = 0.1, **kwargs: Any) -> dict[str, Any]:
+    """Model infrastructure costs across services with growth projections."""
+    svc_list = [str(s) for s in (services or ["Compute", "Storage", "Database", "Network", "Monitoring"])]
+    items = []
+    total_current = 0.0
+    total_projected = 0.0
+    for s in svc_list:
+        monthly = _deterministic_score(f"cost:monthly:{s}", 500.0, 15000.0)
+        projected = round(monthly * ((1 + growth_rate) ** (period_months / 12)), 2)
+        total_current += monthly
+        total_projected += projected
+        items.append({"service": s, "monthly_cost": monthly, "projected_monthly": projected,
+                      "annual_cost": round(monthly * 12, 2),
+                      "optimization_potential": _deterministic_score(f"costopt:{s}", 0.05, 0.35)})
+    return {
+        "period_months": period_months, "growth_rate": growth_rate,
+        "cost_items": items,
+        "total_monthly": round(total_current, 2), "total_annual": round(total_current * 12, 2),
+        "projected_monthly": round(total_projected, 2),
+        "savings_opportunity": round(sum(i["monthly_cost"] * i["optimization_potential"] for i in items), 2),
+    }
+
+
+# =====================================================================
+# Organization & Governance Tools
+# =====================================================================
+
+def raci_matrix_generate(*, activities: list | None = None, roles: list | None = None, **kwargs: Any) -> dict[str, Any]:
+    """Generate a RACI responsibility matrix for activities and roles."""
+    acts = [str(a) for a in (activities or ["Design", "Review", "Approve", "Implement", "Test"])]
+    role_list = [str(r) for r in (roles or ["Architect", "Developer", "Manager", "QA", "Stakeholder"])]
+    raci_vals = ["R", "A", "C", "I"]
+    matrix = []
+    for act in acts:
+        row = {"activity": act}
+        for role in role_list:
+            h = int(hashlib.md5(f"raci:{act}:{role}".encode()).hexdigest()[:4], 16)
+            row[role] = raci_vals[h % len(raci_vals)]
+        matrix.append(row)
+    # Validate: each activity should have exactly one A
+    issues = []
+    for row in matrix:
+        a_count = sum(1 for r in role_list if row[r] == "A")
+        if a_count != 1:
+            issues.append(f"{row['activity']}: {a_count} accountable roles (should be 1)")
+    return {
+        "activities": acts, "roles": role_list, "matrix": matrix,
+        "validation_issues": issues,
+        "coverage": round(1.0 - len(issues) / max(len(matrix), 1), 2),
+    }
+
+
+def architecture_decision_record(*, decision: str = "", options: list | None = None, context: str = "", **kwargs: Any) -> dict[str, Any]:
+    """Generate and evaluate an Architecture Decision Record (ADR)."""
+    dec = decision or "Select integration pattern"
+    opts = [str(o) for o in (options or ["Option A", "Option B", "Option C"])]
+    criteria = ["cost", "complexity", "scalability", "time_to_market"]
+    evaluations = {}
+    for o in opts:
+        evaluations[o] = {c: _deterministic_score(f"adr:{dec}:{o}:{c}", 30.0, 95.0) for c in criteria}
+    scores = {o: round(sum(evaluations[o].values()) / len(criteria), 2) for o in opts}
+    recommended = max(scores, key=scores.get)
+    return {
+        "decision": dec, "context": context, "status": "Proposed",
+        "options_evaluated": opts, "criteria": criteria,
+        "evaluations": evaluations, "scores": scores,
+        "recommended": recommended,
+        "consequences": [f"Adopting {recommended} requires {criteria[int(hashlib.md5(recommended.encode()).hexdigest()[:2], 16) % len(criteria)]} investment"],
+    }
+
+
+def compliance_regulation_check(*, regulations: list | None = None, architecture_elements: list | None = None, **kwargs: Any) -> dict[str, Any]:
+    """Check architecture elements against regulatory requirements."""
+    regs = [str(r) for r in (regulations or ["GDPR", "PCI-DSS", "SOC2"])]
+    elements = [str(e) for e in (architecture_elements or ["Database", "API Gateway", "Auth Service"])]
+    checks = []
+    for reg in regs:
+        for elem in elements:
+            h = int(hashlib.md5(f"regcheck:{reg}:{elem}".encode()).hexdigest()[:4], 16)
+            compliant = h % 4 != 0  # ~75% compliant
+            checks.append({"regulation": reg, "element": elem, "compliant": compliant,
+                           "finding": f"{elem}: {'compliant' if compliant else 'non-compliant'} with {reg}",
+                           "remediation": None if compliant else f"Apply {reg} controls to {elem}"})
+    non_compliant = [c for c in checks if not c["compliant"]]
+    return {
+        "regulations_checked": regs, "elements_checked": elements,
+        "total_checks": len(checks), "checks": checks,
+        "compliance_rate": round(1.0 - len(non_compliant) / max(len(checks), 1), 2),
+        "critical_findings": [c["finding"] for c in non_compliant],
+        "remediations": [c["remediation"] for c in non_compliant if c["remediation"]],
+    }
+
+
+# =====================================================================
 # TOOL_REGISTRY — maps pool tool IDs to callables
 # =====================================================================
 
@@ -1273,3 +1550,25 @@ TOOL_REGISTRY["map_team_topology"] = map_team_topology
 TOOL_REGISTRY["capability_gap_heatmap"] = capability_gap_heatmap
 TOOL_REGISTRY["assess_technology_fitness"] = assess_technology_fitness
 TOOL_REGISTRY["compare_technology_stacks"] = compare_technology_stacks
+
+# --- Security Architecture tools ---
+TOOL_REGISTRY["security_threat_model"] = security_threat_model
+TOOL_REGISTRY["security_control_assessment"] = security_control_assessment
+
+# --- Data Architecture tools ---
+TOOL_REGISTRY["data_quality_assessment"] = data_quality_assessment
+TOOL_REGISTRY["data_lineage_trace"] = data_lineage_trace
+TOOL_REGISTRY["data_classification_scan"] = data_classification_scan
+
+# --- Integration & API tools ---
+TOOL_REGISTRY["integration_pattern_analyze"] = integration_pattern_analyze
+TOOL_REGISTRY["api_maturity_assess"] = api_maturity_assess
+
+# --- Cloud & Infrastructure tools ---
+TOOL_REGISTRY["cloud_readiness_assess"] = cloud_readiness_assess
+TOOL_REGISTRY["infrastructure_cost_model"] = infrastructure_cost_model
+
+# --- Organization & Governance tools ---
+TOOL_REGISTRY["raci_matrix_generate"] = raci_matrix_generate
+TOOL_REGISTRY["architecture_decision_record"] = architecture_decision_record
+TOOL_REGISTRY["compliance_regulation_check"] = compliance_regulation_check
