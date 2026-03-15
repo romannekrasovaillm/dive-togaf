@@ -257,7 +257,7 @@ class PoolSampler:
 
     def sample_config(
         self,
-        tool_count_range: tuple[int, int] = (12, 20),
+        tool_count_range: tuple[int, int] = (8, 15),
         exemplar_count_range: tuple[int, int] = (3, 5),
         seed_category: str | None = None,
         ensure_processing: bool = True,

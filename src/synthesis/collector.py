@@ -296,7 +296,7 @@ class CollectorAgent:
             messages=messages,
             tools=self._tool_schemas,
             tool_choice="auto",
-            max_tokens=32768,
+            max_tokens=4096,
             stream=True,
         )
         choice = resp.choices[0]
