@@ -591,99 +591,162 @@ def cost_benefit_analyze(*, initiative: str = "", costs: Any = None, benefits: A
 
 
 def roadmap_generate(*, work_packages: list | None = None, constraints: list | None = None, strategy: str = "incremental", **kwargs: Any) -> dict[str, Any]:
+    wps = [str(w) for w in (work_packages or ["Infrastructure Assessment", "Architecture Standards", "API Gateway Setup", "Service Decomposition"])]
+    cons = [str(c) for c in (constraints or ["budget", "resource_availability"])]
+    phase_names = ["Foundation", "Core Migration", "Advanced", "Optimization"]
+    n_phases = min(max(2, (len(wps) + 1) // 2), 4)
+    phases = []
+    quarters = ["Q1", "Q2", "Q2-Q3", "Q3-Q4", "Q4"]
+    for i in range(n_phases):
+        chunk = wps[i * len(wps) // n_phases:(i + 1) * len(wps) // n_phases]
+        deps = [phase_names[i - 1]] if i > 0 else []
+        phases.append({"phase": phase_names[i], "quarter": quarters[min(i, len(quarters) - 1)], "work_packages": chunk, "dependencies": deps})
     return {
         "strategy": strategy,
-        "phases": [
-            {"phase": "Foundation", "quarter": "Q1", "work_packages": ["Infrastructure Assessment", "Architecture Standards"], "dependencies": []},
-            {"phase": "Core Migration", "quarter": "Q2-Q3", "work_packages": ["API Gateway Setup", "Service Decomposition"], "dependencies": ["Foundation"]},
-            {"phase": "Advanced", "quarter": "Q4", "work_packages": ["Event-Driven Integration", "Advanced Analytics"], "dependencies": ["Core Migration"]},
-        ],
-        "total_duration_months": 12,
-        "critical_path": ["Infrastructure Assessment", "API Gateway Setup", "Service Decomposition"],
-        "constraints_applied": constraints or ["budget", "resource_availability"],
+        "phases": phases,
+        "total_duration_months": n_phases * 3,
+        "critical_path": wps[:min(3, len(wps))],
+        "constraints_applied": cons,
     }
 
 
 def stakeholder_impact_analyze(*, stakeholders: list | None = None, changes: list | None = None, include_communication_plan: bool = True, **kwargs: Any) -> dict[str, Any]:
+    shs = [str(s) for s in (stakeholders or ["Business Users", "IT Operations", "Management"])]
+    chs = [str(c) for c in (changes or [])]
+    impacts = ["High", "Medium", "Low"]
+    sentiments = ["Positive", "Cautious", "Resistant"]
+    readiness_levels = ["High", "Medium", "Low"]
+    matrix = []
+    for s in shs:
+        h = int(hashlib.md5(f"stakeholder:{s}".encode()).hexdigest()[:6], 16)
+        matrix.append({
+            "stakeholder": s,
+            "impact": impacts[h % 3],
+            "sentiment": sentiments[(h >> 4) % 3],
+            "readiness": readiness_levels[(h >> 8) % 3],
+        })
+    high_count = sum(1 for m in matrix if m["impact"] == "High")
+    overall = "High" if high_count > len(matrix) // 2 else ("Medium-High" if high_count > 0 else "Medium")
     return {
-        "stakeholders_analyzed": len(stakeholders or []),
-        "changes_assessed": len(changes or []),
-        "impact_matrix": [
-            {"stakeholder": "Business Users", "impact": "High", "sentiment": "Positive", "readiness": "Medium"},
-            {"stakeholder": "IT Operations", "impact": "High", "sentiment": "Cautious", "readiness": "High"},
-            {"stakeholder": "Management", "impact": "Medium", "sentiment": "Positive", "readiness": "High"},
-        ],
-        "overall_impact": "Medium-High",
+        "stakeholders_analyzed": len(shs),
+        "changes_assessed": len(chs),
+        "impact_matrix": matrix,
+        "overall_impact": overall,
         "communication_plan": {"channels": ["Town Hall", "Email", "Training Sessions"], "frequency": "Bi-weekly"} if include_communication_plan else None,
     }
 
 
 def dependency_analysis_compute(*, elements: list | None = None, analysis_type: str = "full", **kwargs: Any) -> dict[str, Any]:
+    elems = [str(e) for e in (elements or ["Payment Service", "Core Banking", "Customer Portal"])]
+    dep_types = ["Runtime", "Build", "Data", "API"]
+    criticalities = ["High", "Medium", "Low"]
+    critical_deps = []
+    for i in range(min(len(elems) - 1, 4)):
+        h = int(hashlib.md5(f"dep:{elems[i]}:{elems[(i+1) % len(elems)]}".encode()).hexdigest()[:4], 16)
+        critical_deps.append({
+            "from": elems[i], "to": elems[(i + 1) % len(elems)],
+            "type": dep_types[h % len(dep_types)],
+            "criticality": criticalities[h % len(criticalities)],
+        })
+    n = len(elems)
+    dep_count = int(_deterministic_score(f"depcount:{n}", float(n), float(n * 3)))
+    circular = 1 if n >= 3 and int(hashlib.md5(":".join(elems).encode()).hexdigest()[:4], 16) % 3 == 0 else 0
     return {
-        "elements_analyzed": len(elements or []),
+        "elements_analyzed": n,
         "analysis_type": analysis_type,
-        "dependency_count": 12,
-        "circular_dependencies": 1,
-        "critical_dependencies": [
-            {"from": "Payment Service", "to": "Core Banking", "type": "Runtime", "criticality": "High"},
-            {"from": "Customer Portal", "to": "Authentication Service", "type": "Runtime", "criticality": "High"},
-        ],
-        "dependency_metrics": {"afferent_coupling_avg": 3.2, "efferent_coupling_avg": 2.8, "instability_avg": 0.47},
+        "dependency_count": dep_count,
+        "circular_dependencies": circular,
+        "critical_dependencies": critical_deps,
+        "dependency_metrics": {
+            "afferent_coupling_avg": _deterministic_score(f"dep:ca:{n}", 1.5, 6.0),
+            "efferent_coupling_avg": _deterministic_score(f"dep:ce:{n}", 1.5, 6.0),
+            "instability_avg": _deterministic_score(f"dep:inst:{n}", 0.2, 0.8),
+        },
     }
 
 
 def architecture_score_compute(*, architecture: str = "", dimensions: list | None = None, weights: dict | None = None, **kwargs: Any) -> dict[str, Any]:
-    dims = dimensions or ["modularity", "scalability", "security", "maintainability"]
+    dims = [str(d) for d in (dimensions or ["modularity", "scalability", "security", "maintainability"])]
+    arch = architecture or "Target Architecture"
+    dim_scores = {d: _deterministic_score(f"{arch}:{d}", 50.0, 95.0) for d in dims}
+    overall = round(sum(dim_scores.values()) / max(len(dim_scores), 1), 2)
+    grades = ["A", "A-", "B+", "B", "B-", "C+", "C"]
+    grade = grades[min(int((95 - overall) / 7), len(grades) - 1)]
+    sorted_dims = sorted(dim_scores.items(), key=lambda x: x[1], reverse=True)
     return {
-        "architecture": architecture or "Target Architecture",
-        "overall_score": _deterministic_score(str(architecture), 55.0, 90.0),
-        "dimension_scores": {d: _deterministic_score(f"{architecture}:{d}", 50.0, 95.0) for d in dims},
-        "grade": "B+",
-        "strengths": ["Good separation of concerns", "Well-defined service boundaries"],
-        "weaknesses": ["Tight coupling in data layer", "Insufficient observability"],
+        "architecture": arch,
+        "overall_score": overall,
+        "dimension_scores": dim_scores,
+        "grade": grade,
+        "strengths": [f"Strong {d}" for d, s in sorted_dims[:2]],
+        "weaknesses": [f"Improve {d}" for d, s in sorted_dims[-2:]],
     }
 
 
 def reuse_analysis_compute(*, building_blocks: list | None = None, domains: list | None = None, threshold: float = 0.5, **kwargs: Any) -> dict[str, Any]:
+    bbs = [str(b) for b in (building_blocks or ["Authentication Module", "Logging Framework", "API Gateway"])]
+    doms = [str(d) for d in (domains or ["all"])]
+    reusable = []
+    for b in bbs:
+        score = _deterministic_score(f"reuse:{b}", 0.2, 0.98)
+        used_in = int(_deterministic_score(f"reuse:usage:{b}", 1.0, 15.0))
+        if score >= threshold:
+            reusable.append({"component": b, "reuse_score": score, "used_in": used_in})
+    overall = round(sum(r["reuse_score"] for r in reusable) / max(len(bbs), 1), 2)
+    low_reuse = [b for b in bbs if _deterministic_score(f"reuse:{b}", 0.2, 0.98) < threshold]
     return {
-        "building_blocks_analyzed": len(building_blocks or []),
-        "domains": domains or ["all"],
+        "building_blocks_analyzed": len(bbs),
+        "domains": doms,
         "reuse_threshold": threshold,
-        "reusable_components": [
-            {"component": "Authentication Module", "reuse_score": 0.92, "used_in": 8},
-            {"component": "Logging Framework", "reuse_score": 0.88, "used_in": 12},
-            {"component": "API Gateway", "reuse_score": 0.85, "used_in": 6},
-        ],
-        "overall_reuse_rate": 0.45,
-        "recommendation": "Increase reuse of notification and monitoring components",
+        "reusable_components": reusable,
+        "overall_reuse_rate": overall,
+        "recommendation": f"Increase reuse of {', '.join(low_reuse)}" if low_reuse else "All components meet reuse threshold",
     }
 
 
 def capability_heatmap_compute(*, capabilities: list | None = None, axes: list | None = None, **kwargs: Any) -> dict[str, Any]:
+    caps = [str(c) for c in (capabilities or ["Digital Channels", "Data Analytics", "Core Banking", "Risk Management", "Payment Processing"])]
+    ax = axes or ["maturity", "strategic_importance"]
+    heatmap = []
+    critical = []
+    for c in caps:
+        maturity = int(_deterministic_score(f"caphm:mat:{c}", 1.0, 5.0))
+        importance = int(_deterministic_score(f"caphm:imp:{c}", 2.0, 5.0))
+        gap = importance - maturity
+        priority = "Critical" if gap >= 2 else ("High" if gap == 1 and importance >= 4 else ("Maintain" if gap <= 0 else "Medium"))
+        heatmap.append({"capability": c, "maturity": maturity, "strategic_importance": importance, "investment_priority": priority})
+        if priority == "Critical":
+            critical.append(f"{c} maturity significantly below strategic importance")
     return {
-        "axes": axes or ["maturity", "strategic_importance"],
-        "heatmap": [
-            {"capability": "Digital Channels", "maturity": 3, "strategic_importance": 5, "investment_priority": "High"},
-            {"capability": "Data Analytics", "maturity": 2, "strategic_importance": 5, "investment_priority": "Critical"},
-            {"capability": "Core Banking", "maturity": 4, "strategic_importance": 4, "investment_priority": "Maintain"},
-            {"capability": "Risk Management", "maturity": 4, "strategic_importance": 5, "investment_priority": "Maintain"},
-            {"capability": "Payment Processing", "maturity": 3, "strategic_importance": 4, "investment_priority": "Medium"},
-        ],
-        "critical_gaps": ["Data Analytics maturity significantly below strategic importance"],
+        "axes": ax,
+        "heatmap": heatmap,
+        "critical_gaps": critical,
     }
 
 
 def migration_complexity_compute(*, source_system: str = "", target_system: str = "", data_volume_gb: float = 0, **kwargs: Any) -> dict[str, Any]:
-    seed = f"{source_system}:{target_system}:{data_volume_gb}"
+    src = source_system or "Legacy System"
+    tgt = target_system or "Target Platform"
+    vol = data_volume_gb or 500
+    seed = f"{src}:{tgt}:{vol}"
+    score = _deterministic_score(seed, 2.0, 8.0)
+    level = "Low" if score < 4.0 else ("Medium" if score < 6.0 else "High")
+    complexity_levels = ["Low", "Medium", "High"]
+    h = int(hashlib.md5(seed.encode()).hexdigest()[:8], 16)
     return {
-        "source_system": source_system or "Legacy System",
-        "target_system": target_system or "Target Platform",
-        "data_volume_gb": data_volume_gb or 500,
-        "complexity_score": _deterministic_score(seed, 2.0, 8.0),
-        "complexity_level": "High",
-        "factors": {"data_complexity": "High", "integration_points": 15, "custom_logic": "Medium", "regulatory_constraints": "High"},
+        "source_system": src,
+        "target_system": tgt,
+        "data_volume_gb": vol,
+        "complexity_score": score,
+        "complexity_level": level,
+        "factors": {
+            "data_complexity": complexity_levels[h % 3],
+            "integration_points": int(_deterministic_score(f"{seed}:intpts", 3.0, 25.0)),
+            "custom_logic": complexity_levels[(h >> 4) % 3],
+            "regulatory_constraints": complexity_levels[(h >> 8) % 3],
+        },
         "estimated_effort_person_months": int(_deterministic_score(seed, 6.0, 36.0)),
-        "risk_factors": ["Data mapping complexity", "Downtime requirements", "Regulatory validation needed"],
+        "risk_factors": [f"Data mapping complexity ({src} → {tgt})", "Downtime requirements", "Regulatory validation needed"],
     }
 
 
@@ -700,16 +763,30 @@ def transformation_readiness_assess(*, organization: str = "", proposed_changes:
 
 
 def interoperability_matrix_compute(*, systems: list | None = None, interop_dimensions: list | None = None, **kwargs: Any) -> dict[str, Any]:
+    syss = [str(s) for s in (systems or ["CRM", "ERP", "Payment Gateway"])]
+    dims = [str(d) for d in (interop_dimensions or ["technical", "semantic", "organizational"])]
+    matrix = []
+    all_scores = []
+    bottlenecks = []
+    for i in range(len(syss)):
+        for j in range(i + 1, len(syss)):
+            row = {"system_a": syss[i], "system_b": syss[j]}
+            dim_scores = []
+            for d in dims:
+                s = _deterministic_score(f"interop:{syss[i]}:{syss[j]}:{d}", 0.3, 0.95)
+                row[d] = s
+                dim_scores.append(s)
+                if s < 0.5:
+                    bottlenecks.append(f"{d.capitalize()} interoperability between {syss[i]} and {syss[j]}")
+            row["overall"] = round(sum(dim_scores) / max(len(dim_scores), 1), 2)
+            all_scores.append(row["overall"])
+            matrix.append(row)
     return {
-        "systems_analyzed": len(systems or []),
-        "dimensions": interop_dimensions or ["technical", "semantic", "organizational"],
-        "matrix": [
-            {"system_a": "CRM", "system_b": "ERP", "technical": 0.8, "semantic": 0.6, "organizational": 0.7, "overall": 0.7},
-            {"system_a": "CRM", "system_b": "Payment Gateway", "technical": 0.9, "semantic": 0.5, "organizational": 0.6, "overall": 0.67},
-            {"system_a": "ERP", "system_b": "Payment Gateway", "technical": 0.7, "semantic": 0.7, "organizational": 0.8, "overall": 0.73},
-        ],
-        "overall_interoperability": 0.7,
-        "bottlenecks": ["Semantic interoperability between CRM and Payment Gateway"],
+        "systems_analyzed": len(syss),
+        "dimensions": dims,
+        "matrix": matrix,
+        "overall_interoperability": round(sum(all_scores) / max(len(all_scores), 1), 2) if all_scores else 0.0,
+        "bottlenecks": bottlenecks[:3],
     }
 
 
@@ -728,95 +805,170 @@ def decision_evaluation_compute(*, alternatives: list | None = None, criteria: l
 
 
 def sla_validation_compute(*, architecture: str = "", sla_requirements: list | None = None, **kwargs: Any) -> dict[str, Any]:
+    arch = architecture or "Target Architecture"
+    slas = [str(s) for s in (sla_requirements or ["Availability 99.9%", "Response Time < 200ms", "RPO < 1 hour", "RTO < 4 hours"])]
+    risks = ["Low", "Medium", "High"]
+    results = []
+    at_risk = []
+    for s in slas:
+        h = int(hashlib.md5(f"sla:{arch}:{s}".encode()).hexdigest()[:6], 16)
+        achievable = h % 4 != 0  # ~75% achievable
+        risk = risks[h % 3]
+        results.append({"sla": s, "achievable": achievable, "risk": risk})
+        if not achievable or risk == "High":
+            at_risk.append(s)
+    compliance = round(sum(1 for r in results if r["achievable"]) / max(len(results), 1), 2)
     return {
-        "architecture": architecture or "Target Architecture",
-        "sla_requirements_checked": len(sla_requirements or []),
-        "results": [
-            {"sla": "Availability 99.9%", "achievable": True, "current_estimate": "99.95%", "risk": "Low"},
-            {"sla": "Response Time < 200ms", "achievable": True, "current_estimate": "150ms P95", "risk": "Medium"},
-            {"sla": "RPO < 1 hour", "achievable": True, "current_estimate": "30 min", "risk": "Low"},
-            {"sla": "RTO < 4 hours", "achievable": False, "current_estimate": "6 hours", "risk": "High"},
-        ],
-        "overall_compliance": 0.75,
-        "at_risk_slas": ["RTO < 4 hours"],
+        "architecture": arch,
+        "sla_requirements_checked": len(slas),
+        "results": results,
+        "overall_compliance": compliance,
+        "at_risk_slas": at_risk,
     }
 
 
 def data_flow_analysis_compute(*, data_flows: list | None = None, analysis_focus: str = "security", **kwargs: Any) -> dict[str, Any]:
+    flows = [str(f) for f in (data_flows or ["Customer Data → Analytics", "Payment → Settlement", "Logs → SIEM"])]
+    classifications = ["PII", "Financial", "Operational", "Confidential"]
+    encryptions = ["End-to-end", "In-transit only", "At-rest only", "None"]
+    risk_levels = ["Low", "Medium", "High"]
+    findings = []
+    compliance_issues = []
+    for f in flows:
+        h = int(hashlib.md5(f"dataflow:{analysis_focus}:{f}".encode()).hexdigest()[:6], 16)
+        cls = classifications[h % len(classifications)]
+        enc = encryptions[(h >> 4) % len(encryptions)]
+        risk = risk_levels[(h >> 8) % len(risk_levels)]
+        findings.append({"flow": f, "classification": cls, "encryption": enc, "risk": risk})
+        if cls in ("PII", "Financial") and enc in ("None", "In-transit only"):
+            compliance_issues.append(f"{cls} data flow '{f}' lacks encryption at rest")
     return {
         "analysis_focus": analysis_focus,
-        "flows_analyzed": len(data_flows or []),
-        "findings": [
-            {"flow": "Customer Data → Analytics", "classification": "PII", "encryption": "In-transit only", "risk": "Medium"},
-            {"flow": "Payment → Settlement", "classification": "Financial", "encryption": "End-to-end", "risk": "Low"},
-            {"flow": "Logs → SIEM", "classification": "Operational", "encryption": "None", "risk": "Low"},
-        ],
-        "compliance_issues": ["PII data flow lacks encryption at rest"],
-        "data_lineage_completeness": 0.78,
+        "flows_analyzed": len(flows),
+        "findings": findings,
+        "compliance_issues": compliance_issues,
+        "data_lineage_completeness": _deterministic_score(f"lineage:{analysis_focus}:{len(flows)}", 0.5, 0.95),
     }
 
 
 def technical_debt_compute(*, systems: list | None = None, factors: list | None = None, **kwargs: Any) -> dict[str, Any]:
+    syss = [str(s) for s in (systems or ["Legacy System"])]
+    facts = [str(f) for f in (factors or ["Code Quality", "Architecture", "Infrastructure", "Documentation"])]
+    severities = ["Low", "Medium", "High"]
+    debt_items = []
+    total_days = 0
+    for s in syss:
+        for f in facts:
+            h = int(hashlib.md5(f"debt:{s}:{f}".encode()).hexdigest()[:6], 16)
+            severity = severities[h % 3]
+            days = int(_deterministic_score(f"debt:days:{s}:{f}", 5.0, 60.0))
+            total_days += days
+            debt_items.append({
+                "system": s, "category": f, "severity": severity,
+                "estimated_remediation_days": days,
+                "description": f"{s}: {f.lower()} improvement needed",
+            })
+    total_score = round(_deterministic_score(f"debtscore:{len(syss)}:{len(facts)}", 2.0, 9.0), 1)
     return {
-        "systems_analyzed": len(systems or []),
-        "total_debt_score": 6.2,
-        "debt_items": [
-            {"category": "Code Quality", "severity": "Medium", "estimated_remediation_days": 30, "description": "Legacy monolith lacks test coverage"},
-            {"category": "Architecture", "severity": "High", "estimated_remediation_days": 60, "description": "Point-to-point integrations need refactoring"},
-            {"category": "Infrastructure", "severity": "Medium", "estimated_remediation_days": 20, "description": "End-of-life operating systems on 3 servers"},
-            {"category": "Documentation", "severity": "Low", "estimated_remediation_days": 10, "description": "Architecture documentation outdated"},
-        ],
-        "total_remediation_effort_days": 120,
+        "systems_analyzed": len(syss),
+        "total_debt_score": total_score,
+        "debt_items": debt_items,
+        "total_remediation_effort_days": total_days,
         "interest_rate": "Growing — technical debt compounds at ~15% annually",
     }
 
 
 def capacity_planning_compute(*, resources: list | None = None, growth_rate: float = 0.1, threshold: float = 0.8, **kwargs: Any) -> dict[str, Any]:
+    res = [str(r) for r in (resources or ["Compute", "Storage", "Network Bandwidth", "Database Connections"])]
+    items = []
+    at_risk_names = []
+    for r in res:
+        current = _deterministic_score(f"cap:cur:{r}", 0.3, 0.9)
+        projected = round(min(current * (1 + growth_rate) ** 1, 1.0), 2)  # 12-month projection
+        risk = projected >= threshold
+        items.append({"resource": r, "current_usage": current, "projected_12m": projected, "at_risk": risk})
+        if risk:
+            at_risk_names.append(r)
     return {
         "growth_rate": growth_rate,
         "threshold": threshold,
-        "capacity_items": [
-            {"resource": "Compute", "current_usage": 0.65, "projected_12m": 0.78, "at_risk": False},
-            {"resource": "Storage", "current_usage": 0.72, "projected_12m": 0.88, "at_risk": True},
-            {"resource": "Network Bandwidth", "current_usage": 0.45, "projected_12m": 0.54, "at_risk": False},
-            {"resource": "Database Connections", "current_usage": 0.80, "projected_12m": 0.96, "at_risk": True},
-        ],
-        "at_risk_count": 2,
-        "recommendation": "Expand storage and database connection pools within 6 months",
+        "capacity_items": items,
+        "at_risk_count": len(at_risk_names),
+        "recommendation": f"Expand {' and '.join(at_risk_names)} within 6 months" if at_risk_names else "All resources within capacity limits",
     }
 
 
 def architecture_comparison_compute(*, architecture_a: str = "", architecture_b: str = "", criteria: list | None = None, **kwargs: Any) -> dict[str, Any]:
-    crit = criteria or ["scalability", "cost", "complexity", "maintainability"]
+    a = architecture_a or "Architecture A"
+    b = architecture_b or "Architecture B"
+    crit = [str(c) for c in (criteria or ["scalability", "cost", "complexity", "maintainability"])]
+    comparison = {}
+    a_total, b_total = 0.0, 0.0
+    for c in crit:
+        sa = _deterministic_score(f"{a}:{c}", 40.0, 95.0)
+        sb = _deterministic_score(f"{b}:{c}", 40.0, 95.0)
+        comparison[c] = {"a": sa, "b": sb}
+        a_total += sa
+        b_total += sb
+    winner = a if a_total >= b_total else b
+    a_strengths = [c for c in crit if comparison[c]["a"] > comparison[c]["b"]]
+    b_strengths = [c for c in crit if comparison[c]["b"] > comparison[c]["a"]]
+    trade_offs = []
+    if a_strengths:
+        trade_offs.append(f"{a} stronger in {', '.join(a_strengths)}")
+    if b_strengths:
+        trade_offs.append(f"{b} stronger in {', '.join(b_strengths)}")
     return {
-        "architecture_a": architecture_a or "Architecture A",
-        "architecture_b": architecture_b or "Architecture B",
-        "criteria": [str(c) for c in crit],
-        "comparison": {str(c): {"a": _deterministic_score(f"a:{c}", 40.0, 95.0), "b": _deterministic_score(f"b:{c}", 40.0, 95.0)} for c in crit},
-        "winner": architecture_a or "Architecture A",
-        "trade_offs": ["Architecture A better for scalability; Architecture B lower initial cost"],
+        "architecture_a": a,
+        "architecture_b": b,
+        "criteria": crit,
+        "comparison": comparison,
+        "winner": winner,
+        "trade_offs": trade_offs or ["Both architectures score similarly across criteria"],
     }
 
 
 def compute_coupling_metrics(*, components: list | None = None, scope: str = "full", **kwargs: Any) -> dict[str, Any]:
+    comps = [str(c) for c in (components or ["ComponentA", "ComponentB", "ComponentC"])]
+    metrics = []
+    for c in comps:
+        ca = _deterministic_score(f"coupling:ca:{c}", 1.0, 10.0)
+        ce = _deterministic_score(f"coupling:ce:{c}", 1.0, 10.0)
+        inst = round(ce / (ca + ce) if (ca + ce) > 0 else 0.5, 2)
+        abst = _deterministic_score(f"coupling:abst:{c}", 0.1, 0.9)
+        metrics.append({"component": c, "afferent_coupling": ca, "efferent_coupling": ce, "instability": inst, "abstractness": abst})
+    avg_ca = round(sum(m["afferent_coupling"] for m in metrics) / max(len(metrics), 1), 2)
+    avg_ce = round(sum(m["efferent_coupling"] for m in metrics) / max(len(metrics), 1), 2)
+    avg_inst = round(sum(m["instability"] for m in metrics) / max(len(metrics), 1), 2)
+    highest_ce = max(metrics, key=lambda m: m["efferent_coupling"])
     return {
         "scope": scope,
-        "components_analyzed": len(components or []),
-        "metrics": {"afferent_coupling": 4.2, "efferent_coupling": 3.1, "instability": 0.42, "abstractness": 0.35},
-        "high_coupling_components": ["PaymentService (Ce=8)", "OrderService (Ca=7)"],
-        "recommendation": "Reduce efferent coupling of PaymentService through interface abstraction",
+        "components_analyzed": len(comps),
+        "component_metrics": metrics,
+        "averages": {"afferent_coupling": avg_ca, "efferent_coupling": avg_ce, "instability": avg_inst},
+        "high_coupling_components": [f"{m['component']} (Ce={m['efferent_coupling']})" for m in metrics if m["efferent_coupling"] > 6],
+        "recommendation": f"Reduce efferent coupling of {highest_ce['component']} through interface abstraction",
     }
 
 
 def compute_instability_abstractness(*, components: list | None = None, threshold_d: float = 0.5, **kwargs: Any) -> dict[str, Any]:
+    comps = [str(c) for c in (components or ["ComponentA", "ComponentB", "ComponentC"])]
+    results = []
+    violations = []
+    for c in comps:
+        inst = _deterministic_score(f"ia:inst:{c}", 0.1, 0.95)
+        abst = _deterministic_score(f"ia:abst:{c}", 0.05, 0.9)
+        dist = round(abs(inst + abst - 1.0), 2)
+        zone = "Zone of Pain" if inst < 0.3 and abst < 0.3 else (
+            "Zone of Uselessness" if inst > 0.7 and abst > 0.7 else "Main Sequence"
+        )
+        results.append({"name": c, "instability": inst, "abstractness": abst, "distance": dist, "zone": zone})
+        if dist > threshold_d:
+            violations.append(f"{c} exceeds distance threshold (d={dist} > {threshold_d})")
     return {
         "threshold_d": threshold_d,
-        "components": [
-            {"name": "CoreBanking", "instability": 0.3, "abstractness": 0.6, "distance": 0.1, "zone": "Main Sequence"},
-            {"name": "PaymentGateway", "instability": 0.8, "abstractness": 0.1, "distance": 0.1, "zone": "Main Sequence"},
-            {"name": "ReportingEngine", "instability": 0.9, "abstractness": 0.8, "distance": 0.7, "zone": "Zone of Uselessness"},
-        ],
-        "violations": ["ReportingEngine exceeds distance threshold (d=0.7 > 0.5)"],
+        "components": results,
+        "violations": violations,
     }
 
 
@@ -852,93 +1004,170 @@ def build_dependency_structure_matrix(*, elements: list | None = None, relations
 
 
 def detect_architecture_cycles(*, elements: list | None = None, relationships: list | None = None, max_cycle_length: int = 5, **kwargs: Any) -> dict[str, Any]:
+    elems = [str(e) for e in (elements or ["ServiceA", "ServiceB", "ServiceC"])]
+    # Deterministically pick a subset to form a cycle based on input
+    cycles = []
+    if len(elems) >= 3:
+        seed_val = int(hashlib.md5(":".join(elems).encode()).hexdigest()[:4], 16)
+        cycle_len = min(3 + seed_val % 2, len(elems), max_cycle_length)
+        cycle_path = elems[:cycle_len] + [elems[0]]
+        severity = "High" if cycle_len >= 4 else "Medium"
+        cycles.append({"path": cycle_path, "length": cycle_len, "severity": severity})
     return {
         "max_cycle_length": max_cycle_length,
-        "cycles_found": 1,
-        "cycles": [{"path": ["ServiceA", "ServiceB", "ServiceC", "ServiceA"], "length": 3, "severity": "Medium"}],
-        "recommendation": "Break cycle by introducing an event bus between ServiceB and ServiceC",
+        "elements_analyzed": len(elems),
+        "cycles_found": len(cycles),
+        "cycles": cycles,
+        "recommendation": f"Break cycle by introducing an event bus between {elems[1]} and {elems[-1]}" if cycles else "No cycles detected",
     }
 
 
 def detect_architecture_smells(*, elements: list | None = None, relationships: list | None = None, thresholds: dict | None = None, **kwargs: Any) -> dict[str, Any]:
+    elems = [str(e) for e in (elements or ["CoreService", "SharedDB", "ServiceX"])]
+    smell_types = ["God Component", "Cyclic Dependency", "Hub-like Dependency", "Shotgun Surgery", "Feature Envy"]
+    smells = []
+    for i, e in enumerate(elems):
+        seed_val = int(hashlib.md5(f"smell:{e}".encode()).hexdigest()[:4], 16)
+        if seed_val % 3 == 0:  # ~1/3 of elements have a smell
+            smell = smell_types[seed_val % len(smell_types)]
+            severity = "High" if seed_val % 5 < 2 else "Medium"
+            smells.append({"smell": smell, "component": e, "severity": severity, "description": f"{e} — detected {smell.lower()}"})
+    if not smells and elems:
+        smells.append({"smell": "Hub-like Dependency", "component": elems[0], "severity": "Medium", "description": f"{elems[0]} has high fan-in"})
+    health = round(max(0.3, 1.0 - len(smells) * 0.12), 2)
     return {
-        "smells_detected": [
-            {"smell": "God Component", "component": "CoreService", "severity": "High", "description": "Component has 25+ responsibilities"},
-            {"smell": "Cyclic Dependency", "components": ["A", "B", "C"], "severity": "Medium", "description": "Circular dependency chain"},
-            {"smell": "Hub-like Dependency", "component": "SharedDB", "severity": "High", "description": "15+ components depend on shared database"},
-        ],
-        "total_smells": 3,
-        "health_score": 0.62,
+        "elements_analyzed": len(elems),
+        "smells_detected": smells,
+        "total_smells": len(smells),
+        "health_score": health,
     }
 
 
 def compute_modularity_score(*, elements: list | None = None, relationships: list | None = None, module_field: str = "module", **kwargs: Any) -> dict[str, Any]:
+    elems = [str(e) for e in (elements or ["Frontend", "Backend", "Data"])]
+    rels = relationships or []
+    modules = []
+    for e in elems:
+        n_elem = int(_deterministic_score(f"mod:elem:{e}", 3.0, 20.0))
+        internal = int(_deterministic_score(f"mod:int:{e}", 5.0, 30.0))
+        external = int(_deterministic_score(f"mod:ext:{e}", 2.0, 15.0))
+        cohesion = round(internal / max(internal + external, 1), 2)
+        modules.append({"name": e, "elements": n_elem, "internal_relations": internal, "external_relations": external, "cohesion": cohesion})
+    avg_cohesion = round(sum(m["cohesion"] for m in modules) / max(len(modules), 1), 2)
+    lowest = min(modules, key=lambda m: m["cohesion"])
     return {
         "module_field": module_field,
-        "modularity_score": 0.68,
-        "modules": [
-            {"name": "Frontend", "elements": 8, "internal_relations": 12, "external_relations": 4, "cohesion": 0.75},
-            {"name": "Backend", "elements": 15, "internal_relations": 28, "external_relations": 7, "cohesion": 0.80},
-            {"name": "Data", "elements": 6, "internal_relations": 8, "external_relations": 9, "cohesion": 0.47},
-        ],
-        "recommendation": "Data module has high external coupling — consider encapsulating with service layer",
+        "elements_analyzed": len(elems),
+        "relationships_analyzed": len(rels),
+        "modularity_score": avg_cohesion,
+        "modules": modules,
+        "recommendation": f"{lowest['name']} has high external coupling — consider encapsulating with service layer"
+        if lowest["cohesion"] < 0.6 else "All modules show acceptable cohesion",
     }
 
 
 def compute_architecture_complexity(*, elements: list | None = None, relationships: list | None = None, include_distribution: bool = True, **kwargs: Any) -> dict[str, Any]:
+    elems = [str(e) for e in (elements or [])]
+    rels = relationships or []
+    n_e, n_r = len(elems), len(rels)
+    # Complexity scales with element count and relationship density
+    base = _deterministic_score(f"complexity:{n_e}:{n_r}", 2.0, 9.5)
+    density_factor = min(n_r / max(n_e, 1), 3.0) / 3.0  # normalize
+    score = round(base * (0.7 + 0.3 * density_factor), 1)
+    level = "Low" if score < 4.0 else ("Medium" if score < 6.5 else "High")
+    dist = None
+    if include_distribution:
+        structural = round(score * _deterministic_score(f"cx:s:{n_e}", 0.3, 0.5), 1)
+        behavioral = round(score * _deterministic_score(f"cx:b:{n_e}", 0.2, 0.4), 1)
+        cross_cutting = round(score - structural - behavioral, 1)
+        dist = {"structural": structural, "behavioral": behavioral, "cross_cutting": max(cross_cutting, 0.1)}
+    # Hotspots from actual elements
+    hotspots = []
+    for e in elems:
+        h = int(hashlib.md5(f"hotspot:{e}".encode()).hexdigest()[:4], 16)
+        if h % 4 == 0:
+            hotspots.append(f"{e} (high fan-out)" if h % 2 == 0 else f"{e} (high fan-in)")
     return {
-        "total_elements": len(elements or []),
-        "total_relationships": len(relationships or []),
-        "complexity_score": 7.3,
-        "complexity_level": "High",
-        "distribution": {"structural": 3.2, "behavioral": 2.1, "cross_cutting": 2.0} if include_distribution else None,
-        "hotspots": ["Integration Layer (high fan-out)", "Security Module (high fan-in)"],
+        "total_elements": n_e,
+        "total_relationships": n_r,
+        "complexity_score": score,
+        "complexity_level": level,
+        "distribution": dist,
+        "hotspots": hotspots or ([f"{elems[0]} (high connectivity)"] if elems else []),
     }
 
 
 def evaluate_fitness_functions(*, fitness_functions: list | None = None, measurements: list | None = None, trend_window: int = 6, **kwargs: Any) -> dict[str, Any]:
+    ffs = [str(f) for f in (fitness_functions or ["Deployment Frequency", "Mean Time to Recovery", "Test Coverage", "API Response Time P95"])]
+    trends = ["Improving", "Stable", "Degrading"]
+    evaluations = []
+    degrading = []
+    for ff in ffs:
+        score = _deterministic_score(f"ff:{ff}", 0.4, 1.0)
+        trend_idx = int(hashlib.md5(f"fftrend:{ff}".encode()).hexdigest()[:4], 16) % 3
+        trend = trends[trend_idx]
+        status = "Met" if score >= 0.8 else "At Risk"
+        evaluations.append({"function": ff, "score": score, "trend": trend, "status": status})
+        if trend == "Degrading":
+            degrading.append(ff)
+    overall = round(sum(e["score"] for e in evaluations) / max(len(evaluations), 1), 2)
     return {
         "trend_window_months": trend_window,
-        "evaluations": [
-            {"function": "Deployment Frequency", "target": "Weekly", "current": "Bi-weekly", "trend": "Improving", "status": "At Risk"},
-            {"function": "Mean Time to Recovery", "target": "< 1 hour", "current": "45 minutes", "trend": "Stable", "status": "Met"},
-            {"function": "Test Coverage", "target": "> 80%", "current": "76%", "trend": "Improving", "status": "At Risk"},
-            {"function": "API Response Time P95", "target": "< 200ms", "current": "180ms", "trend": "Stable", "status": "Met"},
-        ],
-        "overall_fitness": 0.72,
-        "degrading_functions": [],
+        "evaluations": evaluations,
+        "overall_fitness": overall,
+        "degrading_functions": degrading,
     }
 
 
 def map_team_topology(*, components: list | None = None, current_teams: list | None = None, max_cognitive_load: int = 5, **kwargs: Any) -> dict[str, Any]:
+    comps = [str(c) for c in (components or ["ServiceA", "ServiceB", "ServiceC"])]
+    teams_input = [str(t) for t in (current_teams or [])]
+    team_types_list = ["Stream-aligned", "Platform", "Enabling", "Complicated-subsystem"]
+    interaction_modes = ["Collaboration", "X-as-a-Service", "Facilitating"]
+    # Distribute components across teams
+    n_teams = max(len(teams_input), max(2, len(comps) // 2))
+    team_names = teams_input + [f"Team-{i+1}" for i in range(len(teams_input), n_teams)]
+    teams = []
+    overloaded = []
+    for i, t in enumerate(team_names):
+        t_type = team_types_list[int(hashlib.md5(f"ttype:{t}".encode()).hexdigest()[:4], 16) % len(team_types_list)]
+        assigned = [c for j, c in enumerate(comps) if j % n_teams == i]
+        cog_load = int(_deterministic_score(f"cogload:{t}", 1.0, float(max_cognitive_load + 2)))
+        teams.append({"team": f"{t_type}: {t}", "type": t_type, "components": assigned, "cognitive_load": cog_load})
+        if cog_load > max_cognitive_load:
+            overloaded.append(t)
+    interactions = []
+    for i in range(min(len(team_names) - 1, 3)):
+        mode = interaction_modes[i % len(interaction_modes)]
+        interactions.append({"team_a": team_names[i], "team_b": team_names[i + 1], "mode": mode})
     return {
         "max_cognitive_load": max_cognitive_load,
-        "team_types": [
-            {"team": "Stream-aligned: Payments", "type": "Stream-aligned", "components": ["PaymentService", "PaymentGateway"], "cognitive_load": 3},
-            {"team": "Stream-aligned: Lending", "type": "Stream-aligned", "components": ["LoanService", "CreditAssessment"], "cognitive_load": 4},
-            {"team": "Platform: Infrastructure", "type": "Platform", "components": ["Kubernetes", "Monitoring", "CI/CD"], "cognitive_load": 4},
-            {"team": "Enabling: Architecture", "type": "Enabling", "components": [], "cognitive_load": 2},
-        ],
-        "interaction_modes": [
-            {"team_a": "Payments", "team_b": "Platform", "mode": "X-as-a-Service"},
-            {"team_a": "Lending", "team_b": "Architecture", "mode": "Facilitating"},
-        ],
-        "overloaded_teams": [],
+        "team_types": teams,
+        "interaction_modes": interactions,
+        "overloaded_teams": overloaded,
     }
 
 
 def capability_gap_heatmap(*, capabilities: list | None = None, dimensions: list | None = None, weighting: dict | None = None, **kwargs: Any) -> dict[str, Any]:
+    caps = [str(c) for c in (capabilities or ["Data Analytics", "API Management", "DevOps", "Core Banking", "Compliance"])]
+    dims = dimensions or ["current_maturity", "target_maturity"]
+    heatmap = []
+    total_gap = 0
+    critical = []
+    for c in caps:
+        current = int(_deterministic_score(f"capheat:cur:{c}", 1.0, 5.0))
+        target = int(_deterministic_score(f"capheat:tgt:{c}", max(float(current), 3.0), 5.0))
+        gap = target - current
+        total_gap += gap
+        priority = "Critical" if gap >= 2 else ("High" if gap == 1 and target >= 4 else ("Medium" if gap == 1 else "Low"))
+        heatmap.append({"capability": c, "current": current, "target": target, "gap": gap, "priority": priority})
+        if priority == "Critical":
+            critical.append(c)
     return {
-        "dimensions": dimensions or ["current_maturity", "target_maturity"],
-        "heatmap": [
-            {"capability": "Data Analytics", "current": 2, "target": 4, "gap": 2, "priority": "Critical"},
-            {"capability": "API Management", "current": 2, "target": 4, "gap": 2, "priority": "High"},
-            {"capability": "DevOps", "current": 3, "target": 4, "gap": 1, "priority": "Medium"},
-            {"capability": "Core Banking", "current": 4, "target": 4, "gap": 0, "priority": "Low"},
-            {"capability": "Compliance", "current": 4, "target": 5, "gap": 1, "priority": "Medium"},
-        ],
-        "total_gap_score": 6,
-        "critical_gaps": ["Data Analytics", "API Management"],
+        "dimensions": dims,
+        "heatmap": heatmap,
+        "total_gap_score": total_gap,
+        "critical_gaps": critical,
     }
 
 
