@@ -821,16 +821,22 @@ def compute_instability_abstractness(*, components: list | None = None, threshol
 
 
 def compute_cohesion_metrics(*, components: list | None = None, method: str = "LCOM", **kwargs: Any) -> dict[str, Any]:
+    comps = [str(c) for c in (components or ["AuthModule", "UserService", "UtilityPackage"])]
+    metrics = []
+    for c in comps:
+        score = _deterministic_score(f"cohesion:{method}:{c}", 0.2, 0.95)
+        level = "High" if score >= 0.7 else ("Medium" if score >= 0.5 else "Low")
+        metrics.append({"component": c, "cohesion": score, "level": level})
+    scores = [m["cohesion"] for m in metrics]
+    avg = round(sum(scores) / max(len(scores), 1), 2)
+    lowest = min(metrics, key=lambda m: m["cohesion"])
     return {
         "method": method,
-        "components_analyzed": len(components or []),
-        "metrics": [
-            {"component": "AuthModule", "cohesion": 0.89, "level": "High"},
-            {"component": "UserService", "cohesion": 0.72, "level": "Medium"},
-            {"component": "UtilityPackage", "cohesion": 0.31, "level": "Low"},
-        ],
-        "average_cohesion": 0.64,
-        "recommendation": "Refactor UtilityPackage — low cohesion indicates mixed responsibilities",
+        "components_analyzed": len(comps),
+        "metrics": metrics,
+        "average_cohesion": avg,
+        "recommendation": f"Refactor {lowest['component']} — low cohesion indicates mixed responsibilities"
+        if lowest["cohesion"] < 0.5 else "All components show acceptable cohesion levels",
     }
 
 
@@ -938,11 +944,14 @@ def capability_gap_heatmap(*, capabilities: list | None = None, dimensions: list
 
 def assess_technology_fitness(*, technology: str = "", quality_attributes: list | None = None, context: str = "", **kwargs: Any) -> dict[str, Any]:
     attrs = quality_attributes or ["scalability", "reliability", "security"]
+    fitness_scores = {str(a): _deterministic_score(f"{technology}:{a}", 40.0, 95.0) for a in attrs}
+    # Overall = weighted average of component scores (not independent hash)
+    overall = round(sum(fitness_scores.values()) / max(len(fitness_scores), 1), 2)
     return {
         "technology": technology or "Target Technology",
         "context": context,
-        "fitness_scores": {str(a): _deterministic_score(f"{technology}:{a}", 40.0, 95.0) for a in attrs},
-        "overall_fitness": _deterministic_score(f"{technology}:overall", 50.0, 90.0),
+        "fitness_scores": fitness_scores,
+        "overall_fitness": overall,
         "strengths": ["Mature ecosystem", "Active community support"],
         "weaknesses": ["Limited horizontal scaling", "Complex configuration"],
         "recommendation": "Suitable for current scale; monitor scaling requirements",
