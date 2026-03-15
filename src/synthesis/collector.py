@@ -37,12 +37,57 @@ class EvidenceItem:
         }
 
 
+def _canonical_key(tool_name: str, arguments: dict[str, Any]) -> tuple[str, str]:
+    """Create a canonical dedup key from tool name and arguments."""
+    return (tool_name, json.dumps(arguments, sort_keys=True, ensure_ascii=False))
+
+
+def _is_low_value_result(result: Any) -> bool:
+    """Check if a tool result is empty/low-value and should be flagged."""
+    if result is None:
+        return True
+    if isinstance(result, dict):
+        # Check for empty list values (e.g. {"requirements": [], "items": []})
+        list_vals = [v for v in result.values() if isinstance(v, list)]
+        if list_vals and all(len(v) == 0 for v in list_vals):
+            return True
+        # Check for mostly-empty dicts (all values are None, empty, or zero)
+        substantive = [v for v in result.values()
+                       if v is not None and v != "" and v != 0 and v != [] and v != {}]
+        if len(substantive) <= 1:  # only tool name or method echoed back
+            return True
+    if isinstance(result, list) and len(result) == 0:
+        return True
+    return False
+
+
 @dataclass
 class EvidenceSet:
     """Accumulated evidence across iterations."""
     items: list[EvidenceItem] = field(default_factory=list)
+    _seen_keys: set[tuple[str, str]] = field(default_factory=set, repr=False)
+    _last_dedup_count: int = field(default=0, repr=False)
 
     def add(self, item: EvidenceItem) -> None:
+        key = _canonical_key(item.tool_name, item.arguments)
+        if key in self._seen_keys:
+            logger.debug(
+                "Dedup: skipping duplicate evidence %s(%s)",
+                item.tool_name, json.dumps(item.arguments, ensure_ascii=False)[:120],
+            )
+            self._last_dedup_count += 1
+            return
+        self._seen_keys.add(key)
+        self._last_dedup_count = 0
+
+        # Flag low-value results so generator can deprioritize them
+        if _is_low_value_result(item.result):
+            if isinstance(item.result, dict):
+                item.result["_low_value"] = True
+            else:
+                item.result = {"_original": item.result, "_low_value": True}
+            logger.debug("Low-value evidence flagged: %s", item.tool_name)
+
         self.items.append(item)
 
     def for_iteration(self, k: int) -> list[EvidenceItem]:

@@ -17,6 +17,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+import random as _random_mod
+
 from src.pools.sampler import PoolSampler, SynthesisConfig
 
 from .collector import CollectorAgent, EvidenceSet
@@ -77,19 +79,31 @@ class SynthesisOrchestrator:
         self,
         config: SynthesisConfig | None = None,
         seed_category: str | None = None,
+        dedup_early_stop_threshold: float = 0.6,
     ) -> SynthesisResult:
         """Run one complete synthesis cycle.
+
+        Per-iteration toolset resampling: each iteration gets a fresh tool
+        subset from the full pool, creating variability across K rounds
+        (matching DIVE paper §3.2 — "each cycle samples a subset of 15-50
+        tools from the full tool pool").
+
+        If the dedup rate exceeds ``dedup_early_stop_threshold`` in an
+        iteration (most tool calls duplicate prior evidence), remaining
+        iterations are skipped — the exploration space is exhausted.
 
         Args:
             config: Pre-sampled config. If None, samples a new one.
             seed_category: Optional filter for seed category when sampling.
+            dedup_early_stop_threshold: Skip remaining iterations if the
+                fraction of duplicate tool calls exceeds this value.
 
         Returns:
             SynthesisResult with all evidence and generated tasks.
         """
         start = time.time()
 
-        # Sample configuration
+        # Sample configuration (seed + initial tools + exemplars)
         if config is None:
             config = self._sampler.sample_config(seed_category=seed_category)
 
@@ -99,33 +113,41 @@ class SynthesisOrchestrator:
             len(config.tools), len(config.exemplars),
         )
 
-        # Build tool executor
         seed_context = f"{config.seed.get('name', '')}: {config.seed.get('description', '')}"
-        executor = ToolExecutor(
-            tool_pool=config.tools,
-            kimi_client=self._kimi,
-            seed_context=seed_context,
-        )
-
-        # Build OpenAI-format tool schemas
-        tool_schemas = executor.get_openai_tool_schemas(config.tools)
-
-        # Create collector
-        collector = CollectorAgent(
-            kimi_client=self._kimi,
-            tool_executor=executor,
-            tool_schemas=tool_schemas,
-        )
+        rng = _random_mod.Random(hash(config.config_id))
 
         # Iterative evidence collection + task generation
         evidence = EvidenceSet()
         tasks: list[SynthesizedTask] = []
         prev_query: str | None = None
+        total_calls = 0
+        total_live = 0
+        total_simulated = 0
+        actual_iterations = 0
 
         for k in range(1, self._k + 1):
             logger.info("--- Iteration K=%d ---", k)
 
-            # Collect evidence
+            # Resample tool subset per iteration for variability
+            iter_tools = self._resample_tools(config.tools, k, rng)
+
+            # Build fresh executor + schemas for this iteration's toolset
+            executor = ToolExecutor(
+                tool_pool=iter_tools,
+                kimi_client=self._kimi,
+                seed_context=seed_context,
+            )
+            tool_schemas = executor.get_openai_tool_schemas(iter_tools)
+
+            collector = CollectorAgent(
+                kimi_client=self._kimi,
+                tool_executor=executor,
+                tool_schemas=tool_schemas,
+            )
+
+            # Track evidence count before/after for dedup rate
+            evidence_before = len(evidence)
+
             evidence, reasoning = collector.collect_iteration(
                 seed=config.seed,
                 iteration=k,
@@ -133,6 +155,15 @@ class SynthesisOrchestrator:
                 prev_query=prev_query,
                 max_tool_rounds=self._max_tool_rounds,
             )
+
+            total_calls += executor.call_count
+            total_live += executor.live_count
+            total_simulated += executor.simulated_count
+            actual_iterations = k
+
+            # Compute dedup rate for this iteration
+            evidence_added = len(evidence) - evidence_before
+            dedup_rate = 1.0 - (evidence_added / max(executor.call_count, 1))
 
             # Generate task from accumulated evidence
             task = self._generator.generate(
@@ -145,9 +176,21 @@ class SynthesisOrchestrator:
             prev_query = task.question
 
             logger.info(
-                "K=%d: evidence=%d items, task complexity=%d, grounding=%.2f, Q='%s'",
-                k, len(evidence), task.complexity, task.grounding_score, task.question[:100],
+                "K=%d: evidence=%d (+%d new, %.0f%% dedup), tools=%d, "
+                "complexity=%d, grounding=%.2f, Q='%s'",
+                k, len(evidence), evidence_added, dedup_rate * 100,
+                len(iter_tools), task.complexity, task.grounding_score,
+                task.question[:80],
             )
+
+            # Early stop: exploration space exhausted
+            if k < self._k and dedup_rate > dedup_early_stop_threshold:
+                logger.warning(
+                    "Early stop at K=%d: dedup rate %.0f%% > %.0f%% threshold. "
+                    "Exploration space exhausted with current tool pool.",
+                    k, dedup_rate * 100, dedup_early_stop_threshold * 100,
+                )
+                break
 
             # Rate limit pacing between iterations
             if k < self._k:
@@ -156,8 +199,8 @@ class SynthesisOrchestrator:
         elapsed = time.time() - start
 
         logger.info(
-            "Cycle done: %d tool calls (%d live, %d simulated) in %.1fs",
-            executor.call_count, executor.live_count, executor.simulated_count, elapsed,
+            "Cycle done: %d tool calls (%d live, %d simulated) in %d/%d iterations, %.1fs",
+            total_calls, total_live, total_simulated, actual_iterations, self._k, elapsed,
         )
 
         return SynthesisResult(
@@ -165,12 +208,57 @@ class SynthesisOrchestrator:
             seed=config.seed,
             evidence=evidence.to_list(),
             tasks=[t.to_dict() for t in tasks],
-            tool_call_count=executor.call_count,
-            live_tool_count=executor.live_count,
-            simulated_tool_count=executor.simulated_count,
-            iterations=self._k,
+            tool_call_count=total_calls,
+            live_tool_count=total_live,
+            simulated_tool_count=total_simulated,
+            iterations=actual_iterations,
             elapsed_seconds=round(elapsed, 2),
         )
+
+    def _resample_tools(
+        self,
+        base_tools: list[dict[str, Any]],
+        iteration: int,
+        rng: _random_mod.Random,
+    ) -> list[dict[str, Any]]:
+        """Resample tool subset for a given iteration.
+
+        Iteration 1 uses the base config tools. Subsequent iterations
+        swap out ~30% of tools for fresh ones from the full pool,
+        keeping retrieval/processing balance.
+        """
+        if iteration == 1:
+            return base_tools
+
+        full_pool = self._sampler.tool_pool
+        if len(full_pool) <= len(base_tools):
+            # Pool too small for meaningful resampling
+            return base_tools
+
+        # Keep ~70% of current tools, replace rest from pool
+        keep_count = max(int(len(base_tools) * 0.7), 1)
+        kept = rng.sample(base_tools, keep_count)
+        kept_names = {t.get("name") for t in kept}
+
+        # Candidates: tools from full pool not already kept
+        candidates = [t for t in full_pool if t.get("name") not in kept_names]
+        swap_count = min(len(base_tools) - keep_count, len(candidates))
+        swapped = rng.sample(candidates, swap_count) if swap_count > 0 else []
+
+        result = kept + swapped
+
+        # Ensure at least one processing tool
+        has_processing = any(t.get("tool_type") == "processing" for t in result)
+        if not has_processing:
+            proc_tools = [t for t in full_pool if t.get("tool_type") == "processing"]
+            if proc_tools:
+                result[-1] = rng.choice(proc_tools)
+
+        logger.info(
+            "K=%d: resampled tools — kept %d, swapped %d (total %d)",
+            iteration, len(kept), len(swapped), len(result),
+        )
+        return result
 
     def run_batch(
         self,
@@ -179,12 +267,15 @@ class SynthesisOrchestrator:
         seed_category: str | None = None,
         writer: DatasetWriter | None = None,
     ) -> list[SynthesisResult]:
-        """Run a batch of synthesis cycles with on-the-fly sampling.
+        """Run a batch of synthesis cycles with seed diversity enforcement.
 
-        Each cycle samples a fresh random config from the pools instead of
-        pre-generating all configs upfront. If a ``writer`` is provided,
-        results are appended to disk after every cycle so intermediate
-        data is never lost.
+        Each cycle samples a fresh random config from the pools. Seeds are
+        deduplicated within the batch — a seed will not be reused until all
+        available seeds in the category have been exhausted, ensuring maximum
+        diversity in the generated dataset.
+
+        If a ``writer`` is provided, results are appended to disk after
+        every cycle so intermediate data is never lost.
 
         Args:
             batch_size: Number of cycles to run.
@@ -195,18 +286,47 @@ class SynthesisOrchestrator:
         Returns:
             List of SynthesisResult objects.
         """
-        import random as _random
-        rng = _random.Random(seed) if seed is not None else _random.Random()
+        rng = _random_mod.Random(seed) if seed is not None else _random_mod.Random()
+
+        # Build a pool of unique seeds, shuffled for randomness
+        seed_candidates = self._sampler.seed_pool
+        if seed_category:
+            filtered = [s for s in seed_candidates if s.get("category") == seed_category]
+            if filtered:
+                seed_candidates = filtered
+
+        # Create a rotating seed queue — exhausts all seeds before repeating
+        seed_queue: list[dict[str, Any]] = []
+        used_seed_ids: set[str] = set()
+
+        def _next_seed() -> dict[str, Any]:
+            nonlocal seed_queue
+            if not seed_queue:
+                # Refill and reshuffle
+                seed_queue = list(seed_candidates)
+                rng.shuffle(seed_queue)
+                if used_seed_ids and len(seed_candidates) > 1:
+                    logger.info(
+                        "Seed pool exhausted (%d unique seeds used), recycling",
+                        len(used_seed_ids),
+                    )
+            s = seed_queue.pop()
+            used_seed_ids.add(s.get("id", ""))
+            return s
 
         results = []
         for i in range(batch_size):
             logger.info("=== Batch item %d/%d ===", i + 1, batch_size)
             try:
-                # Sample a fresh config on each iteration
+                chosen_seed = _next_seed()
                 config = self._sampler.sample_config(
                     seed_category=seed_category,
                     rng=rng,
                 )
+                # Override seed with our diversity-enforced choice
+                config.seed = chosen_seed
+                config.config_id = f"cfg_{chosen_seed['id']}_{rng.randint(10000, 99999)}"
+
                 result = self.run_single(config=config)
                 results.append(result)
 
@@ -221,6 +341,10 @@ class SynthesisOrchestrator:
                 logger.error("Synthesis cycle %d failed: %s", i + 1, e)
                 continue
 
+        logger.info(
+            "Batch complete: %d/%d cycles, %d unique seeds used",
+            len(results), batch_size, len(used_seed_ids),
+        )
         return results
 
 
