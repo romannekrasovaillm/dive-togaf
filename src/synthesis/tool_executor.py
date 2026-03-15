@@ -160,6 +160,26 @@ def _register_live_tools() -> None:
     except ImportError as e:
         logger.warning("GitHub tools unavailable: %s", e)
 
+    # --- Open Library tools ---
+    try:
+        from src.pools.live_tools.wikidata_tools import (
+            openlibrary_search_books,
+            openlibrary_get_work,
+            openlibrary_search_by_subject,
+            openlibrary_get_author,
+            openlibrary_search_authors,
+        )
+        _LIVE_TOOLS.update({
+            "openlibrary_search_books": openlibrary_search_books,
+            "openlibrary_get_work": openlibrary_get_work,
+            "openlibrary_search_by_subject": openlibrary_search_by_subject,
+            "openlibrary_get_author": openlibrary_get_author,
+            "openlibrary_search_authors": openlibrary_search_authors,
+        })
+        logger.info("Registered %d Open Library live tools", 5)
+    except ImportError as e:
+        logger.warning("Open Library tools unavailable: %s", e)
+
 
 def _build_tool_index(tool_pool: list[dict]) -> dict[str, dict]:
     """Build a lookup from tool id to tool definition."""
@@ -244,9 +264,21 @@ class ToolExecutor:
                 result = _LIVE_TOOLS[tool_name](**arguments)
                 self._live_count += 1
                 logger.info("Live tool '%s' executed successfully", tool_name)
+                result_preview = json.dumps(result, ensure_ascii=False, default=str) if isinstance(result, (dict, list)) else str(result)
+                if len(result_preview) > 300:
+                    result_preview = result_preview[:300] + "..."
+                logger.debug("  live result [%s]: %s", tool_name, result_preview)
                 return result
             except Exception as e:
-                logger.warning("Live tool '%s' failed: %s, falling back to simulation", tool_name, e)
+                logger.warning(
+                    "Live tool '%s' failed: %s (args=%s), falling back to simulation",
+                    tool_name, e, json.dumps(arguments, ensure_ascii=False, default=str)[:200],
+                )
+        else:
+            logger.warning(
+                "No live implementation for tool '%s', falling back to simulation",
+                tool_name,
+            )
 
         # LLM-simulated execution
         self._simulated_count += 1

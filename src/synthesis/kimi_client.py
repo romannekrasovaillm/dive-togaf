@@ -34,6 +34,37 @@ _THINKING_MIN_TOKENS = 32768
 # Full results are preserved in tool_call_log for evidence.
 _MAX_TOOL_RESULT_CHARS = 800
 
+# Max chars for prompt/response debug logging (truncation limit).
+_LOG_TRUNCATE_CHARS = 500
+
+
+def _truncate_for_log(text: str, max_chars: int = _LOG_TRUNCATE_CHARS) -> str:
+    """Truncate text for logging, preserving start and end."""
+    if not text or len(text) <= max_chars:
+        return text or ""
+    half = max_chars // 2
+    return f"{text[:half]}...({len(text)} chars total)...{text[-half:]}"
+
+
+def _format_message_for_log(msg: dict | Any) -> str:
+    """Format a single message for debug logging."""
+    if isinstance(msg, dict):
+        role = msg.get("role", "?")
+        content = msg.get("content", "")
+        tool_calls = msg.get("tool_calls")
+    else:
+        role = getattr(msg, "role", "?")
+        content = getattr(msg, "content", "") or ""
+        tool_calls = getattr(msg, "tool_calls", None)
+
+    parts = [f"  [{role}]"]
+    if content:
+        parts.append(f" {_truncate_for_log(str(content))}")
+    if tool_calls:
+        tc_count = len(tool_calls) if isinstance(tool_calls, list) else 1
+        parts.append(f" (tool_calls={tc_count})")
+    return "".join(parts)
+
 
 def _get_api_key() -> str:
     key = os.environ.get("KIMI_API_KEY") or os.environ.get("MOONSHOT_API_KEY")
@@ -63,7 +94,8 @@ class KimiClient:
         self._client = OpenAI(
             api_key=_get_api_key(),
             base_url=base_url,
-            timeout=120.0,
+            timeout=300.0,
+            max_retries=3,
         )
         # Session-level cache key for prompt caching (per Moonshot docs)
         self._cache_key = f"dive-togaf-{uuid.uuid4().hex[:12]}"
@@ -167,18 +199,33 @@ class KimiClient:
         self._call_seq += 1
         payload_json = json.dumps(messages, ensure_ascii=False, default=str)
         payload_bytes = len(payload_json.encode("utf-8"))
-        token_est = payload_bytes // 4
+        tools_json = json.dumps(tools, ensure_ascii=False, default=str) if tools else ""
+        tools_bytes = len(tools_json.encode("utf-8"))
+        total_bytes = payload_bytes + tools_bytes
+        token_est = total_bytes // 4
         logger.info(
-            "API call #%d: %d messages, %d bytes (~%dk tokens est.), tools: %d",
-            self._call_seq, len(messages), payload_bytes, token_est // 1000,
-            len(tools) if tools else 0,
+            "API call #%d: %d messages, %d bytes (msgs=%d + tools=%d), ~%dk tokens, tools: %d",
+            self._call_seq, len(messages), total_bytes, payload_bytes, tools_bytes,
+            token_est // 1000, len(tools) if tools else 0,
         )
+        if total_bytes > 20_000:
+            logger.warning(
+                "Large payload (%d bytes). Risk of server disconnect. "
+                "Consider reducing tool count or evidence summary size.",
+                total_bytes,
+            )
+
+        # --- Detailed prompt content logging (always, with truncation) ---
+        for idx, m in enumerate(messages):
+            logger.debug("  prompt[%d]: %s", idx, _format_message_for_log(m))
 
         # --- Prompt dump (verbose only) ---
         call_id = f"call{self._call_seq}"
         self._dump_prompt(messages, tools, call_id)
 
         last_err = None
+        consecutive_same_type = 0
+        last_error_type = ""
         for attempt in range(1, self.max_retries + 1):
             try:
                 start = time.monotonic()
@@ -205,14 +252,39 @@ class KimiClient:
                         "API response #%d: %.1fs, finish=%s (no usage data)",
                         self._call_seq, elapsed, finish,
                     )
+
+                # --- Detailed response content logging ---
+                if result.choices:
+                    resp_msg = result.choices[0].message
+                    resp_content = getattr(resp_msg, "content", None) or ""
+                    resp_tc = getattr(resp_msg, "tool_calls", None)
+                    resp_reasoning = getattr(resp_msg, "reasoning_content", None)
+                    logger.debug(
+                        "  response content: %s", _truncate_for_log(resp_content),
+                    )
+                    if resp_tc:
+                        for tc_idx, tc in enumerate(resp_tc):
+                            fn = getattr(tc, "function", None) or tc.get("function", {}) if isinstance(tc, dict) else getattr(tc, "function", None)
+                            fn_name = getattr(fn, "name", "?") if fn else "?"
+                            fn_args = getattr(fn, "arguments", "") if fn else ""
+                            logger.debug(
+                                "  response tool_call[%d]: %s(%s)",
+                                tc_idx, fn_name, _truncate_for_log(fn_args, 200),
+                            )
+                    if resp_reasoning:
+                        logger.debug(
+                            "  response reasoning: %s",
+                            _truncate_for_log(resp_reasoning),
+                        )
                 return result
             except Exception as e:
                 last_err = e
                 elapsed = time.monotonic() - start
+                err_type = type(e).__qualname__
 
                 # --- Enhanced error logging ---
                 error_info: dict[str, Any] = {
-                    "type": type(e).__name__,
+                    "type": err_type,
                     "message": str(e)[:300],
                     "elapsed": f"{elapsed:.1f}s",
                     "payload_bytes": payload_bytes,
@@ -236,11 +308,32 @@ class KimiClient:
                 if status and 400 <= status < 500 and status != 429:
                     logger.error("Kimi API fatal error: %s", json.dumps(error_info, ensure_ascii=False, default=str))
                     raise
+
+                # Early exit: 3 consecutive errors of the same type means
+                # the problem is persistent (e.g. payload too large),
+                # retrying won't help — just wastes time
+                if err_type == last_error_type:
+                    consecutive_same_type += 1
+                else:
+                    consecutive_same_type = 1
+                    last_error_type = err_type
+
+                if consecutive_same_type >= 3:
+                    logger.error(
+                        "Kimi API early exit: %d consecutive %s errors. "
+                        "Likely persistent issue (payload size? rate limit?). %s",
+                        consecutive_same_type, err_type,
+                        json.dumps(error_info, ensure_ascii=False, default=str),
+                    )
+                    raise RuntimeError(
+                        f"Kimi API: {consecutive_same_type} consecutive {err_type} errors"
+                    ) from e
+
                 if attempt < self.max_retries:
-                    wait = 2 ** attempt
+                    wait = min(2 ** attempt, 30)
                     logger.warning(
-                        "Kimi API attempt %d/%d failed: %s. Retry in %ds",
-                        attempt, self.max_retries,
+                        "Kimi API attempt %d/%d failed (%s): %s. Retry in %ds",
+                        attempt, self.max_retries, err_type,
                         json.dumps(error_info, ensure_ascii=False, default=str),
                         wait,
                     )
@@ -349,8 +442,16 @@ class KimiClient:
         temperature: float | None = None,
         max_tokens: int = 32768,
     ) -> str:
-        """Simple text-only chat completion. Returns assistant content string."""
-        resp = self.chat(messages, temperature=temperature, max_tokens=max_tokens)
+        """Simple text-only chat completion. Returns assistant content string.
+
+        Uses streaming for thinking models (kimi-k2.5) to avoid
+        connection timeouts on long reasoning responses.
+        """
+        use_stream = self.model in _FIXED_TEMP_MODELS or "thinking" in self.model
+        resp = self.chat(
+            messages, temperature=temperature,
+            max_tokens=max_tokens, stream=use_stream,
+        )
         return resp.choices[0].message.content or ""
 
     def chat_with_tools(
@@ -428,6 +529,12 @@ class KimiClient:
                     logger.info("Tool call: %s(%s)", fn_name, json.dumps(fn_args, ensure_ascii=False)[:200])
                     result = tool_executor(fn_name, fn_args)
                     result_str = json.dumps(result, ensure_ascii=False) if isinstance(result, (dict, list)) else str(result)
+
+                    # Log tool result with truncation
+                    logger.debug(
+                        "  tool result [%s]: %s",
+                        fn_name, _truncate_for_log(result_str, 300),
+                    )
 
                     # Full result → tool_call_log (evidence, never truncated)
                     tool_call_log.append({

@@ -22,6 +22,7 @@ from src.pools.sampler import PoolSampler, SynthesisConfig
 from .collector import CollectorAgent, EvidenceSet
 from .generator import TaskGenerator, SynthesizedTask
 from .kimi_client import KimiClient
+from .teacher import TeacherAgent, RolloutResult
 from .tool_executor import ToolExecutor
 
 logger = logging.getLogger(__name__)
@@ -221,6 +222,153 @@ class SynthesisOrchestrator:
                 continue
 
         return results
+
+
+# =====================================================================
+# SFT Trajectory Generator — separate post-synthesis stage (DIVE §3.4)
+# =====================================================================
+
+class SFTTrajectoryGenerator:
+    """Generates SFT training data via teacher rollout + rejection sampling.
+
+    Per DIVE §3.4:
+        for (Q, A, T) in D_task:
+            τ = teacher.rollout(Q, T)
+            if verify(τ.final_answer, A):
+                D_sft.append((Q, A, T, τ))
+
+    Runs as a separate stage after synthesis. Reads D_task (dataset.jsonl),
+    produces sft_dataset.jsonl with chat-format trajectories.
+    """
+
+    def __init__(
+        self,
+        kimi_client: KimiClient,
+        sampler: PoolSampler,
+        max_tool_rounds: int = 10,
+    ):
+        self._kimi = kimi_client
+        self._sampler = sampler
+        self._teacher = TeacherAgent(kimi_client, max_tool_rounds=max_tool_rounds)
+
+    def generate_sft(
+        self,
+        results: list[SynthesisResult],
+        output_dir: Path,
+    ) -> dict[str, Any]:
+        """Run teacher rollouts on D_task, filter by rejection sampling.
+
+        For each (Q, A, T) in results:
+            τ = teacher.rollout(Q, T)
+            if verify(τ.final_answer, A):
+                write τ to sft_dataset.jsonl
+
+        Args:
+            results: Completed synthesis results containing D_task.
+            output_dir: Directory for sft_dataset.jsonl output.
+
+        Returns:
+            Summary dict with pass/fail counts.
+        """
+        output_dir.mkdir(parents=True, exist_ok=True)
+        sft_path = output_dir / "sft_dataset.jsonl"
+
+        total = 0
+        accepted = 0
+        rejected = 0
+        failed = 0
+
+        for r_idx, result in enumerate(results):
+            logger.info(
+                "=== Teacher rollout %d/%d: %s ===",
+                r_idx + 1, len(results), result.config_id,
+            )
+
+            # Build tool executor with the same tools
+            seed_context = f"{result.seed.get('name', '')}: {result.seed.get('description', '')}"
+            config = self._sampler.sample_config(seed_category=result.seed.get("category"))
+            executor = ToolExecutor(
+                tool_pool=config.tools,
+                kimi_client=self._kimi,
+                seed_context=seed_context,
+            )
+            tool_schemas = executor.get_openai_tool_schemas(config.tools)
+
+            for t_idx, task in enumerate(result.tasks):
+                question = task.get("question", "")
+                reference_answer = task.get("answer", "")
+                grounding = task.get("grounding_score", 0.0)
+
+                if not question or not reference_answer or grounding < 0.5:
+                    logger.info(
+                        "  Skip task %d: grounding=%.2f, q_len=%d, a_len=%d",
+                        t_idx, grounding, len(question), len(reference_answer),
+                    )
+                    continue
+
+                total += 1
+                logger.info(
+                    "  Rollout task %d/%d: Q='%s'",
+                    t_idx + 1, len(result.tasks), question[:80],
+                )
+
+                try:
+                    rollout_result = self._teacher.rollout(
+                        question=question,
+                        reference_answer=reference_answer,
+                        tool_executor=executor,
+                        tool_schemas=tool_schemas,
+                    )
+
+                    if rollout_result.verified:
+                        # Rejection sampling passed — save SFT trajectory
+                        sft_example = rollout_result.trajectory.to_sft_example()
+                        sft_example["config_id"] = result.config_id
+                        sft_example["task_index"] = t_idx
+                        sft_example["reference_answer"] = reference_answer
+
+                        with open(sft_path, "a", encoding="utf-8") as f:
+                            f.write(json.dumps(sft_example, ensure_ascii=False) + "\n")
+
+                        accepted += 1
+                        logger.info(
+                            "  ACCEPTED: %d tool calls, final_answer matches reference",
+                            rollout_result.trajectory.tool_call_count,
+                        )
+                    else:
+                        rejected += 1
+                        logger.info(
+                            "  REJECTED: final_answer does not match reference "
+                            "(final='%s', ref='%s')",
+                            rollout_result.trajectory.final_answer[:100],
+                            reference_answer[:100],
+                        )
+                except Exception as e:
+                    failed += 1
+                    logger.warning("  FAILED: task %d: %s", t_idx, e)
+
+                # Rate limit pacing
+                time.sleep(2)
+
+        # Write summary
+        summary = {
+            "total_tasks": total,
+            "accepted": accepted,
+            "rejected": rejected,
+            "failed": failed,
+            "acceptance_rate": round(accepted / max(total, 1), 3),
+            "sft_path": str(sft_path),
+        }
+        summary_path = output_dir / "sft_summary.json"
+        with open(summary_path, "w", encoding="utf-8") as f:
+            json.dump(summary, f, indent=2, ensure_ascii=False)
+
+        logger.info(
+            "SFT generation complete: %d/%d accepted (%.0f%%), %d rejected, %d failed",
+            accepted, total, accepted / max(total, 1) * 100, rejected, failed,
+        )
+
+        return summary
 
 
 # =====================================================================
