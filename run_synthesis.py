@@ -55,6 +55,8 @@ def parse_args() -> argparse.Namespace:
                         help="LLM temperature (default: 0.6)")
     parser.add_argument("--verbose", action="store_true",
                         help="Enable debug logging")
+    parser.add_argument("--no-teacher", action="store_true",
+                        help="Disable teacher rollout verification")
     return parser.parse_args()
 
 
@@ -106,6 +108,7 @@ def main() -> None:
         sampler=sampler,
         k_iterations=args.k_iterations,
         max_tool_rounds_per_iter=args.max_tool_rounds,
+        enable_teacher=not args.no_teacher,
     )
 
     # Prepare writer for incremental saves
@@ -138,6 +141,12 @@ def main() -> None:
     total_time = sum(r.elapsed_seconds for r in results)
     live_rate = total_live / max(total_calls, 1)
 
+    # Teacher verification stats
+    total_teacher = sum(len(r.teacher_verifications) for r in results)
+    teacher_verified = sum(
+        1 for r in results for tv in r.teacher_verifications if tv.get("verified")
+    )
+
     print()
     print("=" * 70)
     print("Synthesis Complete")
@@ -146,6 +155,8 @@ def main() -> None:
     print(f"  Tasks generated:  {total_tasks}")
     print(f"  Evidence items:   {total_evidence}")
     print(f"  Tool calls:       {total_calls} ({total_live} live, {total_simulated} simulated, {live_rate:.0%} live rate)")
+    if total_teacher > 0:
+        print(f"  Teacher verified: {teacher_verified}/{total_teacher} ({teacher_verified/total_teacher:.0%})")
     print(f"  Total time:       {total_time:.1f}s")
     print()
     print(f"  Dataset:          {dataset_path}")

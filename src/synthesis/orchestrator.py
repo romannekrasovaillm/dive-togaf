@@ -22,6 +22,7 @@ from src.pools.sampler import PoolSampler, SynthesisConfig
 from .collector import CollectorAgent, EvidenceSet
 from .generator import TaskGenerator, SynthesizedTask
 from .kimi_client import KimiClient
+from .teacher import TeacherAgent, TeacherResult
 from .tool_executor import ToolExecutor
 
 logger = logging.getLogger(__name__)
@@ -39,6 +40,7 @@ class SynthesisResult:
     simulated_tool_count: int = 0
     iterations: int = 0
     elapsed_seconds: float = 0.0
+    teacher_verifications: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -53,6 +55,7 @@ class SynthesisResult:
             "elapsed_seconds": self.elapsed_seconds,
             "evidence": self.evidence,
             "tasks": self.tasks,
+            "teacher_verifications": self.teacher_verifications,
         }
 
 
@@ -65,12 +68,15 @@ class SynthesisOrchestrator:
         sampler: PoolSampler,
         k_iterations: int = 3,
         max_tool_rounds_per_iter: int = 4,
+        enable_teacher: bool = True,
     ):
         self._kimi = kimi_client
         self._sampler = sampler
         self._k = k_iterations
         self._max_tool_rounds = max_tool_rounds_per_iter
         self._generator = TaskGenerator(kimi_client)
+        self._enable_teacher = enable_teacher
+        self._teacher = TeacherAgent(kimi_client) if enable_teacher else None
 
     def run_single(
         self,
@@ -119,6 +125,7 @@ class SynthesisOrchestrator:
         # Iterative evidence collection + task generation
         evidence = EvidenceSet()
         tasks: list[SynthesizedTask] = []
+        teacher_verifications: list[dict[str, Any]] = []
         prev_query: str | None = None
 
         for k in range(1, self._k + 1):
@@ -148,6 +155,27 @@ class SynthesisOrchestrator:
                 k, len(evidence), task.complexity, task.grounding_score, task.question[:100],
             )
 
+            # Teacher rollout for RLVR verification
+            if self._teacher and task.question and task.grounding_score >= 0.5:
+                logger.info(
+                    "K=%d: running teacher rollout for Q='%s'",
+                    k, task.question[:80],
+                )
+                try:
+                    teacher_result = self._teacher.rollout(
+                        question=task.question,
+                        tool_executor=executor,
+                        tool_schemas=tool_schemas,
+                        student_answer=task.answer,
+                    )
+                    teacher_verifications.append(teacher_result.to_dict())
+                    logger.info(
+                        "K=%d: teacher verification=%s, agreement=%.2f",
+                        k, teacher_result.verified, teacher_result.agreement_score,
+                    )
+                except Exception as e:
+                    logger.warning("Teacher rollout failed for K=%d: %s", k, e)
+
             # Rate limit pacing between iterations
             if k < self._k:
                 time.sleep(3)
@@ -169,6 +197,7 @@ class SynthesisOrchestrator:
             simulated_tool_count=executor.simulated_count,
             iterations=self._k,
             elapsed_seconds=round(elapsed, 2),
+            teacher_verifications=teacher_verifications,
         )
 
     def run_batch(
@@ -276,6 +305,15 @@ class DatasetWriter:
 
     @staticmethod
     def _task_record(result: SynthesisResult, task: dict[str, Any]) -> dict[str, Any]:
+        # Find matching teacher verification for this task's iteration
+        iteration = task.get("iteration", 0)
+        teacher_data: dict[str, Any] = {}
+        if result.teacher_verifications:
+            for tv in result.teacher_verifications:
+                # Match by question text prefix
+                if tv.get("question", "")[:80] == task.get("question", "")[:80]:
+                    teacher_data = tv
+                    break
         return {
             "config_id": result.config_id,
             "seed_id": result.seed.get("id", ""),
@@ -293,6 +331,8 @@ class DatasetWriter:
             "grounding_score": task.get("grounding_score", 0.0),
             "evidence_count": len(result.evidence),
             "tool_call_count": result.tool_call_count,
+            "teacher_verified": teacher_data.get("verified", False),
+            "teacher_agreement_score": teacher_data.get("agreement_score", 0.0),
         }
 
     # ------ batch (overwrite) methods — kept for compatibility ------
@@ -350,6 +390,9 @@ class DatasetWriter:
         families = {}
         complexities = {}
         grounding_scores = []
+        teacher_scores = []
+        teacher_verified_count = 0
+        teacher_total = 0
         for r in results:
             cat = r.seed.get("category", "unknown")
             categories[cat] = categories.get(cat, 0) + 1
@@ -359,9 +402,15 @@ class DatasetWriter:
                 cx = t.get("complexity", 0)
                 complexities[cx] = complexities.get(cx, 0) + 1
                 grounding_scores.append(t.get("grounding_score", 0.0))
+            for tv in r.teacher_verifications:
+                teacher_total += 1
+                teacher_scores.append(tv.get("agreement_score", 0.0))
+                if tv.get("verified", False):
+                    teacher_verified_count += 1
 
         avg_grounding = round(sum(grounding_scores) / max(len(grounding_scores), 1), 3)
         fully_grounded = sum(1 for s in grounding_scores if s >= 0.9)
+        avg_teacher_agreement = round(sum(teacher_scores) / max(len(teacher_scores), 1), 3)
 
         summary = {
             "total_cycles": len(results),
@@ -378,6 +427,12 @@ class DatasetWriter:
                 "fully_grounded_tasks": fully_grounded,
                 "total_tasks": total_tasks,
                 "grounding_rate": round(fully_grounded / max(total_tasks, 1), 3),
+            },
+            "teacher_verification": {
+                "total_rollouts": teacher_total,
+                "verified_count": teacher_verified_count,
+                "verification_rate": round(teacher_verified_count / max(teacher_total, 1), 3),
+                "avg_agreement_score": avg_teacher_agreement,
             },
             "seed_categories": categories,
             "task_families": families,

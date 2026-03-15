@@ -34,6 +34,37 @@ _THINKING_MIN_TOKENS = 32768
 # Full results are preserved in tool_call_log for evidence.
 _MAX_TOOL_RESULT_CHARS = 800
 
+# Max chars for prompt/response debug logging (truncation limit).
+_LOG_TRUNCATE_CHARS = 500
+
+
+def _truncate_for_log(text: str, max_chars: int = _LOG_TRUNCATE_CHARS) -> str:
+    """Truncate text for logging, preserving start and end."""
+    if not text or len(text) <= max_chars:
+        return text or ""
+    half = max_chars // 2
+    return f"{text[:half]}...({len(text)} chars total)...{text[-half:]}"
+
+
+def _format_message_for_log(msg: dict | Any) -> str:
+    """Format a single message for debug logging."""
+    if isinstance(msg, dict):
+        role = msg.get("role", "?")
+        content = msg.get("content", "")
+        tool_calls = msg.get("tool_calls")
+    else:
+        role = getattr(msg, "role", "?")
+        content = getattr(msg, "content", "") or ""
+        tool_calls = getattr(msg, "tool_calls", None)
+
+    parts = [f"  [{role}]"]
+    if content:
+        parts.append(f" {_truncate_for_log(str(content))}")
+    if tool_calls:
+        tc_count = len(tool_calls) if isinstance(tool_calls, list) else 1
+        parts.append(f" (tool_calls={tc_count})")
+    return "".join(parts)
+
 
 def _get_api_key() -> str:
     key = os.environ.get("KIMI_API_KEY") or os.environ.get("MOONSHOT_API_KEY")
@@ -174,6 +205,10 @@ class KimiClient:
             len(tools) if tools else 0,
         )
 
+        # --- Detailed prompt content logging (always, with truncation) ---
+        for idx, m in enumerate(messages):
+            logger.debug("  prompt[%d]: %s", idx, _format_message_for_log(m))
+
         # --- Prompt dump (verbose only) ---
         call_id = f"call{self._call_seq}"
         self._dump_prompt(messages, tools, call_id)
@@ -205,6 +240,30 @@ class KimiClient:
                         "API response #%d: %.1fs, finish=%s (no usage data)",
                         self._call_seq, elapsed, finish,
                     )
+
+                # --- Detailed response content logging ---
+                if result.choices:
+                    resp_msg = result.choices[0].message
+                    resp_content = getattr(resp_msg, "content", None) or ""
+                    resp_tc = getattr(resp_msg, "tool_calls", None)
+                    resp_reasoning = getattr(resp_msg, "reasoning_content", None)
+                    logger.debug(
+                        "  response content: %s", _truncate_for_log(resp_content),
+                    )
+                    if resp_tc:
+                        for tc_idx, tc in enumerate(resp_tc):
+                            fn = getattr(tc, "function", None) or tc.get("function", {}) if isinstance(tc, dict) else getattr(tc, "function", None)
+                            fn_name = getattr(fn, "name", "?") if fn else "?"
+                            fn_args = getattr(fn, "arguments", "") if fn else ""
+                            logger.debug(
+                                "  response tool_call[%d]: %s(%s)",
+                                tc_idx, fn_name, _truncate_for_log(fn_args, 200),
+                            )
+                    if resp_reasoning:
+                        logger.debug(
+                            "  response reasoning: %s",
+                            _truncate_for_log(resp_reasoning),
+                        )
                 return result
             except Exception as e:
                 last_err = e
@@ -428,6 +487,12 @@ class KimiClient:
                     logger.info("Tool call: %s(%s)", fn_name, json.dumps(fn_args, ensure_ascii=False)[:200])
                     result = tool_executor(fn_name, fn_args)
                     result_str = json.dumps(result, ensure_ascii=False) if isinstance(result, (dict, list)) else str(result)
+
+                    # Log tool result with truncation
+                    logger.debug(
+                        "  tool result [%s]: %s",
+                        fn_name, _truncate_for_log(result_str, 300),
+                    )
 
                     # Full result → tool_call_log (evidence, never truncated)
                     tool_call_log.append({
