@@ -8039,5 +8039,787 @@
       "pattern_type": "organizational_pattern",
       "reference": "Team Topologies (Skelton & Pais, 2019)"
     }
+  },
+  {
+    "id": "sec_zero_trust",
+    "name": "Zero Trust Architecture",
+    "category": "security_architecture",
+    "description": "Security model eliminating implicit trust — every access request is verified regardless of network location. Principles: verify explicitly, least-privilege access, assume breach.",
+    "domain": "security",
+    "related_tools": [],
+    "tags": [
+      "security",
+      "zero_trust",
+      "architecture"
+    ],
+    "metadata": {
+      "framework": "NIST SP 800-207",
+      "pattern": "zero_trust"
+    }
+  },
+  {
+    "id": "sec_identity_access_mgmt",
+    "name": "Identity & Access Management (IAM)",
+    "category": "security_architecture",
+    "description": "Centralized framework for managing digital identities, authentication, authorization, and access governance. Covers SSO, MFA, RBAC, ABAC, and privileged access management.",
+    "domain": "security",
+    "related_tools": [],
+    "tags": [
+      "security",
+      "iam",
+      "architecture"
+    ],
+    "metadata": {
+      "framework": "ISO 27001",
+      "pattern": "iam"
+    }
+  },
+  {
+    "id": "sec_security_by_design",
+    "name": "Security by Design",
+    "category": "security_architecture",
+    "description": "Architectural approach embedding security controls at every layer from inception — threat modeling, secure coding, defense in depth, and fail-safe defaults.",
+    "domain": "security",
+    "related_tools": [],
+    "tags": [
+      "security",
+      "secure_sdlc",
+      "architecture"
+    ],
+    "metadata": {
+      "framework": "OWASP",
+      "pattern": "secure_sdlc"
+    }
+  },
+  {
+    "id": "sec_data_protection_arch",
+    "name": "Data Protection Architecture",
+    "category": "security_architecture",
+    "description": "Encryption at rest and in transit, tokenization, data masking, key management, and DLP controls to protect sensitive data across the enterprise.",
+    "domain": "security",
+    "related_tools": [],
+    "tags": [
+      "security",
+      "data_protection",
+      "architecture"
+    ],
+    "metadata": {
+      "framework": "GDPR/PCI-DSS",
+      "pattern": "data_protection"
+    }
+  },
+  {
+    "id": "sec_soc_architecture",
+    "name": "Security Operations Center (SOC) Architecture",
+    "category": "security_architecture",
+    "description": "Architecture for centralized security monitoring — SIEM integration, incident response workflows, threat intelligence feeds, and automated playbook execution.",
+    "domain": "security",
+    "related_tools": [],
+    "tags": [
+      "security",
+      "soc",
+      "architecture"
+    ],
+    "metadata": {
+      "framework": "NIST CSF",
+      "pattern": "soc"
+    }
+  },
+  {
+    "id": "sec_api_security",
+    "name": "API Security Architecture",
+    "category": "security_architecture",
+    "description": "Security patterns for API ecosystems — OAuth 2.0/OIDC, API key management, rate limiting, input validation, and API gateway security policies.",
+    "domain": "security",
+    "related_tools": [],
+    "tags": [
+      "security",
+      "api_security",
+      "architecture"
+    ],
+    "metadata": {
+      "framework": "OWASP API Security Top 10",
+      "pattern": "api_security"
+    }
+  },
+  {
+    "id": "sec_network_segmentation",
+    "name": "Network Segmentation & Micro-segmentation",
+    "category": "security_architecture",
+    "description": "Architecture for isolating network zones — DMZ, internal segments, micro-segmentation with software-defined perimeters and east-west traffic controls.",
+    "domain": "security",
+    "related_tools": [],
+    "tags": [
+      "security",
+      "segmentation",
+      "architecture"
+    ],
+    "metadata": {
+      "framework": "CIS Controls",
+      "pattern": "segmentation"
+    }
+  },
+  {
+    "id": "sec_devsecops",
+    "name": "DevSecOps Pipeline Architecture",
+    "category": "security_architecture",
+    "description": "Integrating security testing into CI/CD — SAST, DAST, SCA, container scanning, secrets detection, and compliance-as-code in deployment pipelines.",
+    "domain": "security",
+    "related_tools": [],
+    "tags": [
+      "security",
+      "devsecops",
+      "architecture"
+    ],
+    "metadata": {
+      "framework": "OWASP DevSecOps",
+      "pattern": "devsecops"
+    }
+  },
+  {
+    "id": "sec_cloud_security_arch",
+    "name": "Cloud Security Posture Management",
+    "category": "security_architecture",
+    "description": "Architecture for securing cloud workloads — CSPM, CWPP, cloud-native firewalls, identity federation, and shared responsibility model implementation.",
+    "domain": "security",
+    "related_tools": [],
+    "tags": [
+      "security",
+      "cloud_security",
+      "architecture"
+    ],
+    "metadata": {
+      "framework": "CSA CCM",
+      "pattern": "cloud_security"
+    }
+  },
+  {
+    "id": "sec_privacy_arch",
+    "name": "Privacy-by-Design Architecture",
+    "category": "security_architecture",
+    "description": "Architecture patterns implementing privacy principles — data minimization, purpose limitation, consent management, right to erasure, and privacy impact assessments.",
+    "domain": "security",
+    "related_tools": [],
+    "tags": [
+      "security",
+      "privacy",
+      "architecture"
+    ],
+    "metadata": {
+      "framework": "GDPR Art. 25",
+      "pattern": "privacy"
+    }
+  },
+  {
+    "id": "sec_threat_intelligence",
+    "name": "Threat Intelligence Platform Architecture",
+    "category": "security_architecture",
+    "description": "Architecture for collecting, correlating, and operationalizing threat intelligence — STIX/TAXII feeds, IOC management, threat hunting workflows.",
+    "domain": "security",
+    "related_tools": [],
+    "tags": [
+      "security",
+      "threat_intel",
+      "architecture"
+    ],
+    "metadata": {
+      "framework": "MITRE ATT&CK",
+      "pattern": "threat_intel"
+    }
+  },
+  {
+    "id": "sec_cryptographic_arch",
+    "name": "Cryptographic Architecture",
+    "category": "security_architecture",
+    "description": "Enterprise-wide cryptographic standards — algorithm selection, key lifecycle management, PKI, certificate management, post-quantum readiness assessment.",
+    "domain": "security",
+    "related_tools": [],
+    "tags": [
+      "security",
+      "cryptography",
+      "architecture"
+    ],
+    "metadata": {
+      "framework": "NIST SP 800-57",
+      "pattern": "cryptography"
+    }
+  },
+  {
+    "id": "data_master_data_mgmt",
+    "name": "Master Data Management (MDM)",
+    "category": "data_architecture",
+    "description": "Strategy and architecture for creating a single authoritative source of master data — golden records, data stewardship, match/merge logic, and cross-domain consistency.",
+    "domain": "data",
+    "related_tools": [],
+    "tags": [
+      "data_architecture",
+      "mdm",
+      "enterprise"
+    ],
+    "metadata": {
+      "pattern": "mdm",
+      "scope": "enterprise"
+    }
+  },
+  {
+    "id": "data_data_mesh",
+    "name": "Data Mesh Architecture",
+    "category": "data_architecture",
+    "description": "Decentralized data architecture treating data as a product — domain ownership, self-serve data platform, federated computational governance, and data product thinking.",
+    "domain": "data",
+    "related_tools": [],
+    "tags": [
+      "data_architecture",
+      "data_mesh",
+      ""
+    ],
+    "metadata": {
+      "pattern": "data_mesh",
+      "reference": "Dehghani 2022"
+    }
+  },
+  {
+    "id": "data_data_lakehouse",
+    "name": "Data Lakehouse Architecture",
+    "category": "data_architecture",
+    "description": "Unified architecture combining data lake flexibility with warehouse reliability — ACID transactions on data lakes, schema enforcement, and unified batch/streaming.",
+    "domain": "data",
+    "related_tools": [],
+    "tags": [
+      "data_architecture",
+      "lakehouse",
+      "analytics"
+    ],
+    "metadata": {
+      "pattern": "lakehouse",
+      "scope": "analytics"
+    }
+  },
+  {
+    "id": "data_data_governance_framework",
+    "name": "Data Governance Framework",
+    "category": "data_architecture",
+    "description": "Enterprise data governance architecture — data catalog, lineage tracking, quality rules, stewardship roles, policy enforcement, and metadata management.",
+    "domain": "data",
+    "related_tools": [],
+    "tags": [
+      "data_architecture",
+      "governance",
+      "enterprise"
+    ],
+    "metadata": {
+      "pattern": "governance",
+      "scope": "enterprise"
+    }
+  },
+  {
+    "id": "data_event_sourcing_cqrs",
+    "name": "Event Sourcing & CQRS",
+    "category": "data_architecture",
+    "description": "Architectural pattern storing state changes as immutable events — event store, projections, command/query separation, and eventual consistency handling.",
+    "domain": "data",
+    "related_tools": [],
+    "tags": [
+      "data_architecture",
+      "event_sourcing",
+      "application"
+    ],
+    "metadata": {
+      "pattern": "event_sourcing",
+      "scope": "application"
+    }
+  },
+  {
+    "id": "data_data_quality_arch",
+    "name": "Data Quality Architecture",
+    "category": "data_architecture",
+    "description": "Architecture for continuous data quality management — profiling, cleansing, monitoring, DQ scorecards, anomaly detection, and remediation workflows.",
+    "domain": "data",
+    "related_tools": [],
+    "tags": [
+      "data_architecture",
+      "data_quality",
+      "enterprise"
+    ],
+    "metadata": {
+      "pattern": "data_quality",
+      "scope": "enterprise"
+    }
+  },
+  {
+    "id": "data_real_time_analytics",
+    "name": "Real-Time Analytics Architecture",
+    "category": "data_architecture",
+    "description": "Architecture for sub-second analytics — stream processing (Flink/Spark Streaming), materialized views, time-series databases, and dashboarding.",
+    "domain": "data",
+    "related_tools": [],
+    "tags": [
+      "data_architecture",
+      "streaming_analytics",
+      "analytics"
+    ],
+    "metadata": {
+      "pattern": "streaming_analytics",
+      "scope": "analytics"
+    }
+  },
+  {
+    "id": "data_data_catalog_arch",
+    "name": "Enterprise Data Catalog Architecture",
+    "category": "data_architecture",
+    "description": "Searchable inventory of enterprise data assets — automated discovery, business glossary, lineage visualization, and usage tracking.",
+    "domain": "data",
+    "related_tools": [],
+    "tags": [
+      "data_architecture",
+      "data_catalog",
+      "enterprise"
+    ],
+    "metadata": {
+      "pattern": "data_catalog",
+      "scope": "enterprise"
+    }
+  },
+  {
+    "id": "data_graph_data_arch",
+    "name": "Graph Data Architecture",
+    "category": "data_architecture",
+    "description": "Architecture using graph databases for relationship-rich data — knowledge graphs, graph analytics, ontology management, and semantic querying.",
+    "domain": "data",
+    "related_tools": [],
+    "tags": [
+      "data_architecture",
+      "graph_data",
+      "application"
+    ],
+    "metadata": {
+      "pattern": "graph_data",
+      "scope": "application"
+    }
+  },
+  {
+    "id": "data_data_privacy_arch",
+    "name": "Data Privacy & Compliance Architecture",
+    "category": "data_architecture",
+    "description": "Architecture implementing data privacy regulations — consent management, data subject access requests, anonymization, pseudonymization, and cross-border data transfer controls.",
+    "domain": "data",
+    "related_tools": [],
+    "tags": [
+      "data_architecture",
+      "data_privacy",
+      "compliance"
+    ],
+    "metadata": {
+      "pattern": "data_privacy",
+      "scope": "compliance"
+    }
+  },
+  {
+    "id": "integ_event_driven_arch",
+    "name": "Event-Driven Architecture (EDA)",
+    "category": "integration_architecture",
+    "description": "Architecture where components communicate through asynchronous events — event brokers, event schemas, choreography vs orchestration, and eventual consistency.",
+    "domain": "integration",
+    "related_tools": [],
+    "tags": [
+      "integration",
+      "eda",
+      "enterprise"
+    ],
+    "metadata": {
+      "pattern": "eda",
+      "scope": "enterprise"
+    }
+  },
+  {
+    "id": "integ_api_first_design",
+    "name": "API-First Design",
+    "category": "integration_architecture",
+    "description": "Architecture strategy where APIs are the primary interface — contract-first development, OpenAPI specifications, API versioning strategy, and developer experience.",
+    "domain": "integration",
+    "related_tools": [],
+    "tags": [
+      "integration",
+      "api_first",
+      "enterprise"
+    ],
+    "metadata": {
+      "pattern": "api_first",
+      "scope": "enterprise"
+    }
+  },
+  {
+    "id": "integ_saga_pattern",
+    "name": "Saga Pattern for Distributed Transactions",
+    "category": "integration_architecture",
+    "description": "Pattern for managing distributed transactions without 2PC — choreography sagas, orchestration sagas, compensating transactions, and failure handling.",
+    "domain": "integration",
+    "related_tools": [],
+    "tags": [
+      "integration",
+      "saga",
+      "microservices"
+    ],
+    "metadata": {
+      "pattern": "saga",
+      "scope": "microservices"
+    }
+  },
+  {
+    "id": "integ_api_gateway_pattern",
+    "name": "API Gateway & BFF Pattern",
+    "category": "integration_architecture",
+    "description": "Centralized API gateway for routing, composition, and cross-cutting concerns — Backend-for-Frontend (BFF), request aggregation, and protocol translation.",
+    "domain": "integration",
+    "related_tools": [],
+    "tags": [
+      "integration",
+      "api_gateway",
+      "microservices"
+    ],
+    "metadata": {
+      "pattern": "api_gateway",
+      "scope": "microservices"
+    }
+  },
+  {
+    "id": "integ_integration_hub",
+    "name": "Enterprise Integration Hub",
+    "category": "integration_architecture",
+    "description": "Centralized integration platform — ESB, iPaaS, canonical data model, message transformation, protocol mediation, and integration monitoring.",
+    "domain": "integration",
+    "related_tools": [],
+    "tags": [
+      "integration",
+      "integration_hub",
+      "enterprise"
+    ],
+    "metadata": {
+      "pattern": "integration_hub",
+      "scope": "enterprise"
+    }
+  },
+  {
+    "id": "integ_webhook_arch",
+    "name": "Webhook & Callback Architecture",
+    "category": "integration_architecture",
+    "description": "Asynchronous notification architecture — webhook registration, delivery guarantees, retry logic, signature verification, and dead letter handling.",
+    "domain": "integration",
+    "related_tools": [],
+    "tags": [
+      "integration",
+      "webhook",
+      "application"
+    ],
+    "metadata": {
+      "pattern": "webhook",
+      "scope": "application"
+    }
+  },
+  {
+    "id": "integ_graphql_federation",
+    "name": "GraphQL Federation Architecture",
+    "category": "integration_architecture",
+    "description": "Federated API architecture with GraphQL — schema composition, subgraph services, query planning, and unified graph API across domains.",
+    "domain": "integration",
+    "related_tools": [],
+    "tags": [
+      "integration",
+      "graphql",
+      "application"
+    ],
+    "metadata": {
+      "pattern": "graphql",
+      "scope": "application"
+    }
+  },
+  {
+    "id": "integ_cdc_arch",
+    "name": "Change Data Capture Architecture",
+    "category": "integration_architecture",
+    "description": "Real-time data synchronization via transaction log capture — Debezium, outbox pattern, event publishing from databases, and consistency guarantees.",
+    "domain": "integration",
+    "related_tools": [],
+    "tags": [
+      "integration",
+      "cdc",
+      "data_integration"
+    ],
+    "metadata": {
+      "pattern": "cdc",
+      "scope": "data_integration"
+    }
+  },
+  {
+    "id": "integ_service_mesh_arch",
+    "name": "Service Mesh Communication Architecture",
+    "category": "integration_architecture",
+    "description": "Infrastructure layer managing service-to-service communication — sidecar proxies, mTLS, traffic management, observability, and circuit breakers.",
+    "domain": "integration",
+    "related_tools": [],
+    "tags": [
+      "integration",
+      "service_mesh",
+      "microservices"
+    ],
+    "metadata": {
+      "pattern": "service_mesh",
+      "scope": "microservices"
+    }
+  },
+  {
+    "id": "integ_async_messaging",
+    "name": "Asynchronous Messaging Patterns",
+    "category": "integration_architecture",
+    "description": "Enterprise messaging patterns — request/reply, publish/subscribe, competing consumers, message deduplication, ordering guarantees, and dead letter queues.",
+    "domain": "integration",
+    "related_tools": [],
+    "tags": [
+      "integration",
+      "messaging",
+      "enterprise"
+    ],
+    "metadata": {
+      "pattern": "messaging",
+      "scope": "enterprise"
+    }
+  },
+  {
+    "id": "integ_etl_elt_arch",
+    "name": "ETL/ELT Pipeline Architecture",
+    "category": "integration_architecture",
+    "description": "Data integration pipeline architecture — batch ETL, ELT with in-warehouse transforms, incremental loading, data validation, and orchestration.",
+    "domain": "integration",
+    "related_tools": [],
+    "tags": [
+      "integration",
+      "etl",
+      "data_integration"
+    ],
+    "metadata": {
+      "pattern": "etl",
+      "scope": "data_integration"
+    }
+  },
+  {
+    "id": "integ_contract_testing",
+    "name": "Contract Testing Architecture",
+    "category": "integration_architecture",
+    "description": "Architecture for API contract verification — consumer-driven contracts, Pact testing, schema compatibility checks, and breaking change detection.",
+    "domain": "integration",
+    "related_tools": [],
+    "tags": [
+      "integration",
+      "contract_testing",
+      "testing"
+    ],
+    "metadata": {
+      "pattern": "contract_testing",
+      "scope": "testing"
+    }
+  },
+  {
+    "id": "cloud_cloud_native_arch",
+    "name": "Cloud-Native Architecture",
+    "category": "cloud_architecture",
+    "description": "Architecture designed for cloud from the ground up — 12-factor apps, containerization, microservices, CI/CD, infrastructure-as-code, and dynamic scaling.",
+    "domain": "cloud_infrastructure",
+    "related_tools": [],
+    "tags": [
+      "cloud",
+      "cloud_native",
+      "CNCF"
+    ],
+    "metadata": {
+      "pattern": "cloud_native",
+      "reference": "CNCF"
+    }
+  },
+  {
+    "id": "cloud_multi_cloud_strategy",
+    "name": "Multi-Cloud Architecture Strategy",
+    "category": "cloud_architecture",
+    "description": "Architecture spanning multiple cloud providers — workload placement, cloud abstraction layers, vendor lock-in mitigation, and cost optimization across providers.",
+    "domain": "cloud_infrastructure",
+    "related_tools": [],
+    "tags": [
+      "cloud",
+      "multi_cloud",
+      "strategy"
+    ],
+    "metadata": {
+      "pattern": "multi_cloud",
+      "scope": "strategy"
+    }
+  },
+  {
+    "id": "cloud_hybrid_cloud_arch",
+    "name": "Hybrid Cloud Architecture",
+    "category": "cloud_architecture",
+    "description": "Architecture bridging on-premises and cloud — workload distribution, network connectivity, data sovereignty, consistent operations, and identity federation.",
+    "domain": "cloud_infrastructure",
+    "related_tools": [],
+    "tags": [
+      "cloud",
+      "hybrid_cloud",
+      "infrastructure"
+    ],
+    "metadata": {
+      "pattern": "hybrid_cloud",
+      "scope": "infrastructure"
+    }
+  },
+  {
+    "id": "cloud_serverless_arch",
+    "name": "Serverless Architecture",
+    "category": "cloud_architecture",
+    "description": "Event-driven compute without server management — FaaS, BaaS, cold starts, execution limits, state management, and serverless anti-patterns.",
+    "domain": "cloud_infrastructure",
+    "related_tools": [],
+    "tags": [
+      "cloud",
+      "serverless",
+      "compute"
+    ],
+    "metadata": {
+      "pattern": "serverless",
+      "scope": "compute"
+    }
+  },
+  {
+    "id": "cloud_resilience_chaos",
+    "name": "Resilience & Chaos Engineering",
+    "category": "cloud_architecture",
+    "description": "Architecture for system resilience — circuit breakers, bulkheads, retry policies, chaos experiments, game days, and failure injection testing.",
+    "domain": "cloud_infrastructure",
+    "related_tools": [],
+    "tags": [
+      "cloud",
+      "resilience",
+      "Netflix"
+    ],
+    "metadata": {
+      "pattern": "resilience",
+      "reference": "Netflix"
+    }
+  },
+  {
+    "id": "cloud_iac_gitops",
+    "name": "Infrastructure-as-Code & GitOps",
+    "category": "cloud_architecture",
+    "description": "Architecture managing infrastructure through version-controlled code — Terraform, Pulumi, ArgoCD, declarative configuration, and drift detection.",
+    "domain": "cloud_infrastructure",
+    "related_tools": [],
+    "tags": [
+      "cloud",
+      "iac",
+      "operations"
+    ],
+    "metadata": {
+      "pattern": "iac",
+      "scope": "operations"
+    }
+  },
+  {
+    "id": "cloud_observability_arch",
+    "name": "Observability Architecture",
+    "category": "cloud_architecture",
+    "description": "Architecture for system observability — distributed tracing, metrics, logs, OpenTelemetry, SLO/SLI definitions, and alerting pipelines.",
+    "domain": "cloud_infrastructure",
+    "related_tools": [],
+    "tags": [
+      "cloud",
+      "observability",
+      "operations"
+    ],
+    "metadata": {
+      "pattern": "observability",
+      "scope": "operations"
+    }
+  },
+  {
+    "id": "cloud_edge_computing",
+    "name": "Edge Computing Architecture",
+    "category": "cloud_architecture",
+    "description": "Architecture distributing compute to network edge — edge nodes, content caching, IoT gateways, latency optimization, and edge-cloud synchronization.",
+    "domain": "cloud_infrastructure",
+    "related_tools": [],
+    "tags": [
+      "cloud",
+      "edge",
+      "infrastructure"
+    ],
+    "metadata": {
+      "pattern": "edge",
+      "scope": "infrastructure"
+    }
+  },
+  {
+    "id": "cloud_disaster_recovery",
+    "name": "Disaster Recovery Architecture",
+    "category": "cloud_architecture",
+    "description": "Architecture ensuring business continuity — RPO/RTO targets, active-active/active-passive, geo-redundancy, automated failover, and recovery testing.",
+    "domain": "cloud_infrastructure",
+    "related_tools": [],
+    "tags": [
+      "cloud",
+      "dr",
+      "infrastructure"
+    ],
+    "metadata": {
+      "pattern": "dr",
+      "scope": "infrastructure"
+    }
+  },
+  {
+    "id": "cloud_finops_arch",
+    "name": "FinOps & Cloud Cost Architecture",
+    "category": "cloud_architecture",
+    "description": "Architecture for cloud financial management — cost allocation, rightsizing, reserved instances, spot/preemptible usage, showback/chargeback, and budget alerting.",
+    "domain": "cloud_infrastructure",
+    "related_tools": [],
+    "tags": [
+      "cloud",
+      "finops",
+      "governance"
+    ],
+    "metadata": {
+      "pattern": "finops",
+      "scope": "governance"
+    }
+  },
+  {
+    "id": "cloud_container_orchestration",
+    "name": "Container Orchestration Architecture",
+    "category": "cloud_architecture",
+    "description": "Architecture for managing containerized workloads at scale — pod scheduling, service discovery, rolling deployments, auto-scaling, and namespace isolation.",
+    "domain": "cloud_infrastructure",
+    "related_tools": [],
+    "tags": [
+      "cloud",
+      "container_orch",
+      "platform"
+    ],
+    "metadata": {
+      "pattern": "container_orch",
+      "scope": "platform"
+    }
+  },
+  {
+    "id": "cloud_platform_engineering",
+    "name": "Platform Engineering Architecture",
+    "category": "cloud_architecture",
+    "description": "Internal developer platform architecture — self-service portals, golden paths, service catalogs, developer experience, and platform team patterns.",
+    "domain": "cloud_infrastructure",
+    "related_tools": [],
+    "tags": [
+      "cloud",
+      "platform_eng",
+      "Team Topologies"
+    ],
+    "metadata": {
+      "pattern": "platform_eng",
+      "reference": "Team Topologies"
+    }
   }
 ]

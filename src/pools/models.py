@@ -51,6 +51,11 @@ class SeedCategory(str, Enum):
     TMFORUM_FUNCTIONAL_BLOCK = "tmforum_functional_block"
     TECHNOLOGY_BUILDING_BLOCK = "technology_building_block"
     TEAM_TOPOLOGY = "team_topology"
+    # Domain-specific architecture seeds
+    SECURITY_ARCHITECTURE = "security_architecture"
+    DATA_ARCHITECTURE = "data_architecture"
+    INTEGRATION_ARCHITECTURE = "integration_architecture"
+    CLOUD_ARCHITECTURE = "cloud_architecture"
 
 
 class ExemplarFamily(str, Enum):

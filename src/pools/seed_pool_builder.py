@@ -1300,6 +1300,270 @@ def _team_topology_seeds() -> list[SeedConcept]:
 
 
 # =====================================================================
+# Security Architecture Seeds
+# =====================================================================
+
+def _security_architecture_seeds() -> list[SeedConcept]:
+    """Security architecture concepts and patterns."""
+    items = [
+        ("zero_trust", "Zero Trust Architecture",
+         "Security model eliminating implicit trust — every access request is verified regardless of network location. "
+         "Principles: verify explicitly, least-privilege access, assume breach.",
+         {"framework": "NIST SP 800-207", "pattern": "zero_trust"}),
+        ("identity_access_mgmt", "Identity & Access Management (IAM)",
+         "Centralized framework for managing digital identities, authentication, authorization, and access governance. "
+         "Covers SSO, MFA, RBAC, ABAC, and privileged access management.",
+         {"framework": "ISO 27001", "pattern": "iam"}),
+        ("security_by_design", "Security by Design",
+         "Architectural approach embedding security controls at every layer from inception — threat modeling, "
+         "secure coding, defense in depth, and fail-safe defaults.",
+         {"framework": "OWASP", "pattern": "secure_sdlc"}),
+        ("data_protection_arch", "Data Protection Architecture",
+         "Encryption at rest and in transit, tokenization, data masking, key management, and DLP controls "
+         "to protect sensitive data across the enterprise.",
+         {"framework": "GDPR/PCI-DSS", "pattern": "data_protection"}),
+        ("soc_architecture", "Security Operations Center (SOC) Architecture",
+         "Architecture for centralized security monitoring — SIEM integration, incident response workflows, "
+         "threat intelligence feeds, and automated playbook execution.",
+         {"framework": "NIST CSF", "pattern": "soc"}),
+        ("api_security", "API Security Architecture",
+         "Security patterns for API ecosystems — OAuth 2.0/OIDC, API key management, rate limiting, "
+         "input validation, and API gateway security policies.",
+         {"framework": "OWASP API Security Top 10", "pattern": "api_security"}),
+        ("network_segmentation", "Network Segmentation & Micro-segmentation",
+         "Architecture for isolating network zones — DMZ, internal segments, micro-segmentation with "
+         "software-defined perimeters and east-west traffic controls.",
+         {"framework": "CIS Controls", "pattern": "segmentation"}),
+        ("devsecops", "DevSecOps Pipeline Architecture",
+         "Integrating security testing into CI/CD — SAST, DAST, SCA, container scanning, "
+         "secrets detection, and compliance-as-code in deployment pipelines.",
+         {"framework": "OWASP DevSecOps", "pattern": "devsecops"}),
+        ("cloud_security_arch", "Cloud Security Posture Management",
+         "Architecture for securing cloud workloads — CSPM, CWPP, cloud-native firewalls, "
+         "identity federation, and shared responsibility model implementation.",
+         {"framework": "CSA CCM", "pattern": "cloud_security"}),
+        ("privacy_arch", "Privacy-by-Design Architecture",
+         "Architecture patterns implementing privacy principles — data minimization, purpose limitation, "
+         "consent management, right to erasure, and privacy impact assessments.",
+         {"framework": "GDPR Art. 25", "pattern": "privacy"}),
+        ("threat_intelligence", "Threat Intelligence Platform Architecture",
+         "Architecture for collecting, correlating, and operationalizing threat intelligence — "
+         "STIX/TAXII feeds, IOC management, threat hunting workflows.",
+         {"framework": "MITRE ATT&CK", "pattern": "threat_intel"}),
+        ("cryptographic_arch", "Cryptographic Architecture",
+         "Enterprise-wide cryptographic standards — algorithm selection, key lifecycle management, "
+         "PKI, certificate management, post-quantum readiness assessment.",
+         {"framework": "NIST SP 800-57", "pattern": "cryptography"}),
+    ]
+    seeds = []
+    for key, name, desc, meta in items:
+        seeds.append(SeedConcept(
+            id=f"sec_{key}", name=name,
+            category=SeedCategory.SECURITY_ARCHITECTURE,
+            description=desc, domain="security",
+            tags=["security", meta["pattern"], "architecture"],
+            metadata=meta,
+        ))
+    return seeds
+
+
+# =====================================================================
+# Data Architecture Seeds
+# =====================================================================
+
+def _data_architecture_seeds() -> list[SeedConcept]:
+    """Data architecture concepts and patterns."""
+    items = [
+        ("master_data_mgmt", "Master Data Management (MDM)",
+         "Strategy and architecture for creating a single authoritative source of master data — "
+         "golden records, data stewardship, match/merge logic, and cross-domain consistency.",
+         {"pattern": "mdm", "scope": "enterprise"}),
+        ("data_mesh", "Data Mesh Architecture",
+         "Decentralized data architecture treating data as a product — domain ownership, "
+         "self-serve data platform, federated computational governance, and data product thinking.",
+         {"pattern": "data_mesh", "reference": "Dehghani 2022"}),
+        ("data_lakehouse", "Data Lakehouse Architecture",
+         "Unified architecture combining data lake flexibility with warehouse reliability — "
+         "ACID transactions on data lakes, schema enforcement, and unified batch/streaming.",
+         {"pattern": "lakehouse", "scope": "analytics"}),
+        ("data_governance_framework", "Data Governance Framework",
+         "Enterprise data governance architecture — data catalog, lineage tracking, quality rules, "
+         "stewardship roles, policy enforcement, and metadata management.",
+         {"pattern": "governance", "scope": "enterprise"}),
+        ("event_sourcing_cqrs", "Event Sourcing & CQRS",
+         "Architectural pattern storing state changes as immutable events — event store, projections, "
+         "command/query separation, and eventual consistency handling.",
+         {"pattern": "event_sourcing", "scope": "application"}),
+        ("data_quality_arch", "Data Quality Architecture",
+         "Architecture for continuous data quality management — profiling, cleansing, monitoring, "
+         "DQ scorecards, anomaly detection, and remediation workflows.",
+         {"pattern": "data_quality", "scope": "enterprise"}),
+        ("real_time_analytics", "Real-Time Analytics Architecture",
+         "Architecture for sub-second analytics — stream processing (Flink/Spark Streaming), "
+         "materialized views, time-series databases, and dashboarding.",
+         {"pattern": "streaming_analytics", "scope": "analytics"}),
+        ("data_catalog_arch", "Enterprise Data Catalog Architecture",
+         "Searchable inventory of enterprise data assets — automated discovery, business glossary, "
+         "lineage visualization, and usage tracking.",
+         {"pattern": "data_catalog", "scope": "enterprise"}),
+        ("graph_data_arch", "Graph Data Architecture",
+         "Architecture using graph databases for relationship-rich data — knowledge graphs, "
+         "graph analytics, ontology management, and semantic querying.",
+         {"pattern": "graph_data", "scope": "application"}),
+        ("data_privacy_arch", "Data Privacy & Compliance Architecture",
+         "Architecture implementing data privacy regulations — consent management, data subject access requests, "
+         "anonymization, pseudonymization, and cross-border data transfer controls.",
+         {"pattern": "data_privacy", "scope": "compliance"}),
+    ]
+    seeds = []
+    for key, name, desc, meta in items:
+        seeds.append(SeedConcept(
+            id=f"data_{key}", name=name,
+            category=SeedCategory.DATA_ARCHITECTURE,
+            description=desc, domain="data",
+            tags=["data_architecture", meta["pattern"], meta.get("scope", "")],
+            metadata=meta,
+        ))
+    return seeds
+
+
+# =====================================================================
+# Integration Architecture Seeds
+# =====================================================================
+
+def _integration_architecture_seeds() -> list[SeedConcept]:
+    """Integration and API architecture concepts."""
+    items = [
+        ("event_driven_arch", "Event-Driven Architecture (EDA)",
+         "Architecture where components communicate through asynchronous events — event brokers, "
+         "event schemas, choreography vs orchestration, and eventual consistency.",
+         {"pattern": "eda", "scope": "enterprise"}),
+        ("api_first_design", "API-First Design",
+         "Architecture strategy where APIs are the primary interface — contract-first development, "
+         "OpenAPI specifications, API versioning strategy, and developer experience.",
+         {"pattern": "api_first", "scope": "enterprise"}),
+        ("saga_pattern", "Saga Pattern for Distributed Transactions",
+         "Pattern for managing distributed transactions without 2PC — choreography sagas, "
+         "orchestration sagas, compensating transactions, and failure handling.",
+         {"pattern": "saga", "scope": "microservices"}),
+        ("api_gateway_pattern", "API Gateway & BFF Pattern",
+         "Centralized API gateway for routing, composition, and cross-cutting concerns — "
+         "Backend-for-Frontend (BFF), request aggregation, and protocol translation.",
+         {"pattern": "api_gateway", "scope": "microservices"}),
+        ("integration_hub", "Enterprise Integration Hub",
+         "Centralized integration platform — ESB, iPaaS, canonical data model, "
+         "message transformation, protocol mediation, and integration monitoring.",
+         {"pattern": "integration_hub", "scope": "enterprise"}),
+        ("webhook_arch", "Webhook & Callback Architecture",
+         "Asynchronous notification architecture — webhook registration, delivery guarantees, "
+         "retry logic, signature verification, and dead letter handling.",
+         {"pattern": "webhook", "scope": "application"}),
+        ("graphql_federation", "GraphQL Federation Architecture",
+         "Federated API architecture with GraphQL — schema composition, subgraph services, "
+         "query planning, and unified graph API across domains.",
+         {"pattern": "graphql", "scope": "application"}),
+        ("cdc_arch", "Change Data Capture Architecture",
+         "Real-time data synchronization via transaction log capture — Debezium, "
+         "outbox pattern, event publishing from databases, and consistency guarantees.",
+         {"pattern": "cdc", "scope": "data_integration"}),
+        ("service_mesh_arch", "Service Mesh Communication Architecture",
+         "Infrastructure layer managing service-to-service communication — sidecar proxies, "
+         "mTLS, traffic management, observability, and circuit breakers.",
+         {"pattern": "service_mesh", "scope": "microservices"}),
+        ("async_messaging", "Asynchronous Messaging Patterns",
+         "Enterprise messaging patterns — request/reply, publish/subscribe, competing consumers, "
+         "message deduplication, ordering guarantees, and dead letter queues.",
+         {"pattern": "messaging", "scope": "enterprise"}),
+        ("etl_elt_arch", "ETL/ELT Pipeline Architecture",
+         "Data integration pipeline architecture — batch ETL, ELT with in-warehouse transforms, "
+         "incremental loading, data validation, and orchestration.",
+         {"pattern": "etl", "scope": "data_integration"}),
+        ("contract_testing", "Contract Testing Architecture",
+         "Architecture for API contract verification — consumer-driven contracts, Pact testing, "
+         "schema compatibility checks, and breaking change detection.",
+         {"pattern": "contract_testing", "scope": "testing"}),
+    ]
+    seeds = []
+    for key, name, desc, meta in items:
+        seeds.append(SeedConcept(
+            id=f"integ_{key}", name=name,
+            category=SeedCategory.INTEGRATION_ARCHITECTURE,
+            description=desc, domain="integration",
+            tags=["integration", meta["pattern"], meta.get("scope", "")],
+            metadata=meta,
+        ))
+    return seeds
+
+
+# =====================================================================
+# Cloud Architecture Seeds
+# =====================================================================
+
+def _cloud_architecture_seeds() -> list[SeedConcept]:
+    """Cloud and infrastructure architecture concepts."""
+    items = [
+        ("cloud_native_arch", "Cloud-Native Architecture",
+         "Architecture designed for cloud from the ground up — 12-factor apps, containerization, "
+         "microservices, CI/CD, infrastructure-as-code, and dynamic scaling.",
+         {"pattern": "cloud_native", "reference": "CNCF"}),
+        ("multi_cloud_strategy", "Multi-Cloud Architecture Strategy",
+         "Architecture spanning multiple cloud providers — workload placement, cloud abstraction layers, "
+         "vendor lock-in mitigation, and cost optimization across providers.",
+         {"pattern": "multi_cloud", "scope": "strategy"}),
+        ("hybrid_cloud_arch", "Hybrid Cloud Architecture",
+         "Architecture bridging on-premises and cloud — workload distribution, network connectivity, "
+         "data sovereignty, consistent operations, and identity federation.",
+         {"pattern": "hybrid_cloud", "scope": "infrastructure"}),
+        ("serverless_arch", "Serverless Architecture",
+         "Event-driven compute without server management — FaaS, BaaS, cold starts, "
+         "execution limits, state management, and serverless anti-patterns.",
+         {"pattern": "serverless", "scope": "compute"}),
+        ("resilience_chaos", "Resilience & Chaos Engineering",
+         "Architecture for system resilience — circuit breakers, bulkheads, retry policies, "
+         "chaos experiments, game days, and failure injection testing.",
+         {"pattern": "resilience", "reference": "Netflix"}),
+        ("iac_gitops", "Infrastructure-as-Code & GitOps",
+         "Architecture managing infrastructure through version-controlled code — Terraform, "
+         "Pulumi, ArgoCD, declarative configuration, and drift detection.",
+         {"pattern": "iac", "scope": "operations"}),
+        ("observability_arch", "Observability Architecture",
+         "Architecture for system observability — distributed tracing, metrics, logs, "
+         "OpenTelemetry, SLO/SLI definitions, and alerting pipelines.",
+         {"pattern": "observability", "scope": "operations"}),
+        ("edge_computing", "Edge Computing Architecture",
+         "Architecture distributing compute to network edge — edge nodes, content caching, "
+         "IoT gateways, latency optimization, and edge-cloud synchronization.",
+         {"pattern": "edge", "scope": "infrastructure"}),
+        ("disaster_recovery", "Disaster Recovery Architecture",
+         "Architecture ensuring business continuity — RPO/RTO targets, active-active/active-passive, "
+         "geo-redundancy, automated failover, and recovery testing.",
+         {"pattern": "dr", "scope": "infrastructure"}),
+        ("finops_arch", "FinOps & Cloud Cost Architecture",
+         "Architecture for cloud financial management — cost allocation, rightsizing, reserved instances, "
+         "spot/preemptible usage, showback/chargeback, and budget alerting.",
+         {"pattern": "finops", "scope": "governance"}),
+        ("container_orchestration", "Container Orchestration Architecture",
+         "Architecture for managing containerized workloads at scale — pod scheduling, "
+         "service discovery, rolling deployments, auto-scaling, and namespace isolation.",
+         {"pattern": "container_orch", "scope": "platform"}),
+        ("platform_engineering", "Platform Engineering Architecture",
+         "Internal developer platform architecture — self-service portals, golden paths, "
+         "service catalogs, developer experience, and platform team patterns.",
+         {"pattern": "platform_eng", "reference": "Team Topologies"}),
+    ]
+    seeds = []
+    for key, name, desc, meta in items:
+        seeds.append(SeedConcept(
+            id=f"cloud_{key}", name=name,
+            category=SeedCategory.CLOUD_ARCHITECTURE,
+            description=desc, domain="cloud_infrastructure",
+            tags=["cloud", meta["pattern"], meta.get("scope", meta.get("reference", ""))],
+            metadata=meta,
+        ))
+    return seeds
+
+
+# =====================================================================
 # Build complete pool
 # =====================================================================
 
@@ -1325,6 +1589,11 @@ def build_seed_pool() -> list[SeedConcept]:
     seeds.extend(_tmforum_oda_seeds())
     seeds.extend(_technology_building_block_seeds())
     seeds.extend(_team_topology_seeds())
+    # Domain-specific architecture seeds
+    seeds.extend(_security_architecture_seeds())
+    seeds.extend(_data_architecture_seeds())
+    seeds.extend(_integration_architecture_seeds())
+    seeds.extend(_cloud_architecture_seeds())
     return seeds
 
 
