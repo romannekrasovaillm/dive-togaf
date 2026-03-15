@@ -22,6 +22,10 @@ class ToolDomain(str, Enum):
     GENERAL = "general"
     ANALYSIS = "analysis"
     TECHNOLOGY_RADAR = "technology_radar"
+    SECURITY = "security"
+    DATA_ARCHITECTURE = "data_architecture"
+    INTEGRATION = "integration"
+    CLOUD_INFRASTRUCTURE = "cloud_infrastructure"
 
 
 class SeedCategory(str, Enum):

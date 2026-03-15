@@ -9282,5 +9282,610 @@
       "evolutionary",
       "quality"
     ]
+  },
+  {
+    "id": "security_threat_model",
+    "name": "security_threat_model",
+    "description": "Performs threat modeling on an architecture component using STRIDE or other frameworks. Identifies threats, risk scores, and priority mitigations for specified assets.",
+    "tool_type": "processing",
+    "domain": "security",
+    "parameters": [
+      {
+        "name": "system",
+        "type": "string",
+        "description": "Name of the system or component to analyze",
+        "required": true,
+        "enum": null,
+        "default": null
+      },
+      {
+        "name": "assets",
+        "type": "array",
+        "description": "Critical assets to assess (e.g. user data, API keys)",
+        "required": true,
+        "enum": null,
+        "default": null
+      },
+      {
+        "name": "threat_framework",
+        "type": "string",
+        "description": "Threat framework to use",
+        "required": false,
+        "enum": null,
+        "default": "STRIDE"
+      }
+    ],
+    "return_schema": {
+      "type": "object",
+      "properties": {
+        "threats": {
+          "type": "array"
+        },
+        "overall_risk": {
+          "type": "number"
+        },
+        "priority_mitigations": {
+          "type": "array"
+        }
+      }
+    },
+    "examples": [],
+    "tags": [
+      "security",
+      "threat_modeling",
+      "risk"
+    ]
+  },
+  {
+    "id": "security_control_assessment",
+    "name": "security_control_assessment",
+    "description": "Assesses the effectiveness of security controls against a compliance framework (ISO27001, NIST, CIS). Evaluates implementation status, effectiveness scores, and gaps.",
+    "tool_type": "processing",
+    "domain": "security",
+    "parameters": [
+      {
+        "name": "controls",
+        "type": "array",
+        "description": "Security controls to assess",
+        "required": true,
+        "enum": null,
+        "default": null
+      },
+      {
+        "name": "compliance_framework",
+        "type": "string",
+        "description": "Compliance framework",
+        "required": false,
+        "enum": null,
+        "default": "ISO27001"
+      },
+      {
+        "name": "scope",
+        "type": "string",
+        "description": "Assessment scope",
+        "required": false,
+        "enum": null,
+        "default": null
+      }
+    ],
+    "return_schema": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array"
+        },
+        "compliance_rate": {
+          "type": "number"
+        },
+        "critical_gaps": {
+          "type": "array"
+        }
+      }
+    },
+    "examples": [],
+    "tags": [
+      "security",
+      "compliance",
+      "controls"
+    ]
+  },
+  {
+    "id": "data_quality_assessment",
+    "name": "data_quality_assessment",
+    "description": "Assesses data quality across multiple dimensions (completeness, accuracy, timeliness, consistency) for specified datasets. Returns per-dataset and overall quality scores.",
+    "tool_type": "processing",
+    "domain": "data_architecture",
+    "parameters": [
+      {
+        "name": "datasets",
+        "type": "array",
+        "description": "Datasets to assess",
+        "required": true,
+        "enum": null,
+        "default": null
+      },
+      {
+        "name": "dimensions",
+        "type": "array",
+        "description": "Quality dimensions to evaluate",
+        "required": false,
+        "enum": null,
+        "default": null
+      }
+    ],
+    "return_schema": {
+      "type": "object",
+      "properties": {
+        "assessments": {
+          "type": "array"
+        },
+        "overall_quality": {
+          "type": "number"
+        },
+        "priority_issues": {
+          "type": "array"
+        }
+      }
+    },
+    "examples": [],
+    "tags": [
+      "data",
+      "quality",
+      "assessment"
+    ]
+  },
+  {
+    "id": "data_lineage_trace",
+    "name": "data_lineage_trace",
+    "description": "Traces data lineage upstream and downstream for a data entity. Shows source systems, transformations, consumers, and quality impact.",
+    "tool_type": "retrieval",
+    "domain": "data_architecture",
+    "parameters": [
+      {
+        "name": "entity",
+        "type": "string",
+        "description": "Data entity to trace",
+        "required": true,
+        "enum": null,
+        "default": null
+      },
+      {
+        "name": "direction",
+        "type": "string",
+        "description": "Trace direction: upstream, downstream, or both",
+        "required": false,
+        "enum": null,
+        "default": "both"
+      },
+      {
+        "name": "max_depth",
+        "type": "integer",
+        "description": "Maximum trace depth",
+        "required": false,
+        "enum": null,
+        "default": 5
+      }
+    ],
+    "return_schema": {
+      "type": "object",
+      "properties": {
+        "upstream": {
+          "type": "array"
+        },
+        "downstream": {
+          "type": "array"
+        },
+        "transformations": {
+          "type": "array"
+        }
+      }
+    },
+    "examples": [],
+    "tags": [
+      "data",
+      "lineage",
+      "traceability"
+    ]
+  },
+  {
+    "id": "data_classification_scan",
+    "name": "data_classification_scan",
+    "description": "Classifies data stores by sensitivity level, regulatory requirements, and retention policies. Identifies high-sensitivity stores and regulatory applicability.",
+    "tool_type": "processing",
+    "domain": "data_architecture",
+    "parameters": [
+      {
+        "name": "data_stores",
+        "type": "array",
+        "description": "Data stores to classify",
+        "required": true,
+        "enum": null,
+        "default": null
+      },
+      {
+        "name": "classification_scheme",
+        "type": "string",
+        "description": "Classification scheme",
+        "required": false,
+        "enum": null,
+        "default": "sensitivity"
+      }
+    ],
+    "return_schema": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array"
+        },
+        "high_sensitivity_count": {
+          "type": "integer"
+        },
+        "regulatory_summary": {
+          "type": "array"
+        }
+      }
+    },
+    "examples": [],
+    "tags": [
+      "data",
+      "classification",
+      "security",
+      "regulation"
+    ]
+  },
+  {
+    "id": "integration_pattern_analyze",
+    "name": "integration_pattern_analyze",
+    "description": "Recommends integration patterns based on system characteristics, data volume, and latency requirements. Evaluates REST, event-driven, gRPC, and other patterns.",
+    "tool_type": "processing",
+    "domain": "integration",
+    "parameters": [
+      {
+        "name": "source_system",
+        "type": "string",
+        "description": "Source system name",
+        "required": true,
+        "enum": null,
+        "default": null
+      },
+      {
+        "name": "target_system",
+        "type": "string",
+        "description": "Target system name",
+        "required": true,
+        "enum": null,
+        "default": null
+      },
+      {
+        "name": "data_volume",
+        "type": "string",
+        "description": "Expected data volume: low, medium, high",
+        "required": false,
+        "enum": null,
+        "default": "medium"
+      },
+      {
+        "name": "latency_requirement",
+        "type": "string",
+        "description": "Latency requirement: real-time, seconds, minutes, hours",
+        "required": false,
+        "enum": null,
+        "default": "seconds"
+      }
+    ],
+    "return_schema": {
+      "type": "object",
+      "properties": {
+        "recommended_pattern": {
+          "type": "string"
+        },
+        "alternatives": {
+          "type": "array"
+        },
+        "evaluation": {
+          "type": "object"
+        }
+      }
+    },
+    "examples": [],
+    "tags": [
+      "integration",
+      "patterns",
+      "api"
+    ]
+  },
+  {
+    "id": "api_maturity_assess",
+    "name": "api_maturity_assess",
+    "description": "Assesses API maturity level using Richardson model or custom framework. Evaluates versioning, documentation, deprecation policies.",
+    "tool_type": "processing",
+    "domain": "integration",
+    "parameters": [
+      {
+        "name": "apis",
+        "type": "array",
+        "description": "API names to assess",
+        "required": true,
+        "enum": null,
+        "default": null
+      },
+      {
+        "name": "model",
+        "type": "string",
+        "description": "Maturity model to use",
+        "required": false,
+        "enum": null,
+        "default": "Richardson"
+      }
+    ],
+    "return_schema": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array"
+        },
+        "average_maturity": {
+          "type": "number"
+        },
+        "recommendations": {
+          "type": "array"
+        }
+      }
+    },
+    "examples": [],
+    "tags": [
+      "api",
+      "maturity",
+      "assessment"
+    ]
+  },
+  {
+    "id": "cloud_readiness_assess",
+    "name": "cloud_readiness_assess",
+    "description": "Assesses workload readiness for cloud migration using the 6R framework (Rehost, Replatform, Refactor, Repurchase, Retire, Retain). Evaluates readiness scores, effort estimates, and blockers.",
+    "tool_type": "processing",
+    "domain": "cloud_infrastructure",
+    "parameters": [
+      {
+        "name": "workloads",
+        "type": "array",
+        "description": "Workloads to assess for cloud readiness",
+        "required": true,
+        "enum": null,
+        "default": null
+      },
+      {
+        "name": "target_cloud",
+        "type": "string",
+        "description": "Target cloud model: public, private, hybrid",
+        "required": false,
+        "enum": null,
+        "default": "hybrid"
+      },
+      {
+        "name": "strategy",
+        "type": "string",
+        "description": "Migration strategy framework",
+        "required": false,
+        "enum": null,
+        "default": "6R"
+      }
+    ],
+    "return_schema": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array"
+        },
+        "overall_readiness": {
+          "type": "number"
+        },
+        "total_effort_months": {
+          "type": "integer"
+        }
+      }
+    },
+    "examples": [],
+    "tags": [
+      "cloud",
+      "migration",
+      "readiness"
+    ]
+  },
+  {
+    "id": "infrastructure_cost_model",
+    "name": "infrastructure_cost_model",
+    "description": "Models infrastructure costs across services with growth projections. Calculates monthly/annual costs, projected growth, and optimization opportunities.",
+    "tool_type": "processing",
+    "domain": "cloud_infrastructure",
+    "parameters": [
+      {
+        "name": "services",
+        "type": "array",
+        "description": "Infrastructure services to model",
+        "required": true,
+        "enum": null,
+        "default": null
+      },
+      {
+        "name": "period_months",
+        "type": "integer",
+        "description": "Projection period in months",
+        "required": false,
+        "enum": null,
+        "default": 12
+      },
+      {
+        "name": "growth_rate",
+        "type": "number",
+        "description": "Expected monthly growth rate",
+        "required": false,
+        "enum": null,
+        "default": 0.1
+      }
+    ],
+    "return_schema": {
+      "type": "object",
+      "properties": {
+        "cost_items": {
+          "type": "array"
+        },
+        "total_monthly": {
+          "type": "number"
+        },
+        "savings_opportunity": {
+          "type": "number"
+        }
+      }
+    },
+    "examples": [],
+    "tags": [
+      "infrastructure",
+      "cost",
+      "planning"
+    ]
+  },
+  {
+    "id": "raci_matrix_generate",
+    "name": "raci_matrix_generate",
+    "description": "Generates a RACI (Responsible, Accountable, Consulted, Informed) responsibility matrix for activities and roles. Validates that each activity has exactly one accountable role.",
+    "tool_type": "processing",
+    "domain": "governance",
+    "parameters": [
+      {
+        "name": "activities",
+        "type": "array",
+        "description": "Activities or decisions to assign",
+        "required": true,
+        "enum": null,
+        "default": null
+      },
+      {
+        "name": "roles",
+        "type": "array",
+        "description": "Roles to assign responsibilities to",
+        "required": true,
+        "enum": null,
+        "default": null
+      }
+    ],
+    "return_schema": {
+      "type": "object",
+      "properties": {
+        "matrix": {
+          "type": "array"
+        },
+        "validation_issues": {
+          "type": "array"
+        },
+        "coverage": {
+          "type": "number"
+        }
+      }
+    },
+    "examples": [],
+    "tags": [
+      "governance",
+      "raci",
+      "organizational"
+    ]
+  },
+  {
+    "id": "architecture_decision_record",
+    "name": "architecture_decision_record",
+    "description": "Generates and evaluates an Architecture Decision Record (ADR). Scores alternatives against criteria (cost, complexity, scalability, time_to_market) and recommends the best option.",
+    "tool_type": "processing",
+    "domain": "governance",
+    "parameters": [
+      {
+        "name": "decision",
+        "type": "string",
+        "description": "Decision to be made",
+        "required": true,
+        "enum": null,
+        "default": null
+      },
+      {
+        "name": "options",
+        "type": "array",
+        "description": "Options to evaluate",
+        "required": true,
+        "enum": null,
+        "default": null
+      },
+      {
+        "name": "context",
+        "type": "string",
+        "description": "Context and constraints",
+        "required": false,
+        "enum": null,
+        "default": null
+      }
+    ],
+    "return_schema": {
+      "type": "object",
+      "properties": {
+        "evaluations": {
+          "type": "object"
+        },
+        "recommended": {
+          "type": "string"
+        },
+        "consequences": {
+          "type": "array"
+        }
+      }
+    },
+    "examples": [],
+    "tags": [
+      "governance",
+      "adr",
+      "decision"
+    ]
+  },
+  {
+    "id": "compliance_regulation_check",
+    "name": "compliance_regulation_check",
+    "description": "Checks architecture elements against regulatory requirements (GDPR, PCI-DSS, SOC2). Reports compliance status per element per regulation with remediation recommendations.",
+    "tool_type": "processing",
+    "domain": "governance",
+    "parameters": [
+      {
+        "name": "regulations",
+        "type": "array",
+        "description": "Regulations to check against",
+        "required": true,
+        "enum": null,
+        "default": null
+      },
+      {
+        "name": "architecture_elements",
+        "type": "array",
+        "description": "Architecture elements to verify",
+        "required": true,
+        "enum": null,
+        "default": null
+      }
+    ],
+    "return_schema": {
+      "type": "object",
+      "properties": {
+        "checks": {
+          "type": "array"
+        },
+        "compliance_rate": {
+          "type": "number"
+        },
+        "remediations": {
+          "type": "array"
+        }
+      }
+    },
+    "examples": [],
+    "tags": [
+      "governance",
+      "compliance",
+      "regulation"
+    ]
   }
 ]
