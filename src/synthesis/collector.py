@@ -66,6 +66,7 @@ class EvidenceSet:
     """Accumulated evidence across iterations."""
     items: list[EvidenceItem] = field(default_factory=list)
     _seen_keys: set[tuple[str, str]] = field(default_factory=set, repr=False)
+    _last_dedup_count: int = field(default=0, repr=False)
 
     def add(self, item: EvidenceItem) -> None:
         key = _canonical_key(item.tool_name, item.arguments)
@@ -74,8 +75,10 @@ class EvidenceSet:
                 "Dedup: skipping duplicate evidence %s(%s)",
                 item.tool_name, json.dumps(item.arguments, ensure_ascii=False)[:120],
             )
+            self._last_dedup_count += 1
             return
         self._seen_keys.add(key)
+        self._last_dedup_count = 0
 
         # Flag low-value results so generator can deprioritize them
         if _is_low_value_result(item.result):
