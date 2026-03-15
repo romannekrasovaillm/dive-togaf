@@ -94,7 +94,7 @@ class KimiClient:
         self._client = OpenAI(
             api_key=_get_api_key(),
             base_url=base_url,
-            timeout=300.0,
+            timeout=600.0,
             max_retries=3,
         )
         # Session-level cache key for prompt caching (per Moonshot docs)
