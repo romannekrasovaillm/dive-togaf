@@ -206,13 +206,22 @@ def _validate_grounding(
             f"Complexity {complexity} but only {len(answer_cited)} evidence items cited in answer"
         )
 
-    # Check 5: count simulated and parse-failed evidence items
+    # Check 5: count simulated, parse-failed, and truncated evidence items
     simulated_cited = set()
     parse_failed_cited = set()
+    truncated_cited = set()
+    _EVIDENCE_TRUNCATION_LIMIT = 800  # must match _build_generation_prompt
     for eid in all_cited:
         if 0 <= eid <= max_eid:
             item = evidence.items[eid]
             result = item.result
+            result_len = len(
+                json.dumps(result, ensure_ascii=False)
+                if isinstance(result, (dict, list))
+                else str(result)
+            )
+            if result_len > _EVIDENCE_TRUNCATION_LIMIT:
+                truncated_cited.add(eid)
             if isinstance(result, dict):
                 if result.get("_simulated"):
                     simulated_cited.add(eid)
@@ -221,6 +230,12 @@ def _validate_grounding(
     if parse_failed_cited:
         violations.append(
             f"Evidence items with parse failures cited: {parse_failed_cited}"
+        )
+    if truncated_cited:
+        logger.warning(
+            "Cited evidence was truncated in generator prompt: E%s "
+            "(result > %d chars). Key facts may be beyond truncation boundary.",
+            truncated_cited, _EVIDENCE_TRUNCATION_LIMIT,
         )
 
     # Compute grounding score

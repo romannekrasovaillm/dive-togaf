@@ -224,6 +224,8 @@ class KimiClient:
         self._dump_prompt(messages, tools, call_id)
 
         last_err = None
+        consecutive_same_type = 0
+        last_error_type = ""
         for attempt in range(1, self.max_retries + 1):
             try:
                 start = time.monotonic()
@@ -278,10 +280,11 @@ class KimiClient:
             except Exception as e:
                 last_err = e
                 elapsed = time.monotonic() - start
+                err_type = type(e).__qualname__
 
                 # --- Enhanced error logging ---
                 error_info: dict[str, Any] = {
-                    "type": type(e).__name__,
+                    "type": err_type,
                     "message": str(e)[:300],
                     "elapsed": f"{elapsed:.1f}s",
                     "payload_bytes": payload_bytes,
@@ -305,11 +308,32 @@ class KimiClient:
                 if status and 400 <= status < 500 and status != 429:
                     logger.error("Kimi API fatal error: %s", json.dumps(error_info, ensure_ascii=False, default=str))
                     raise
+
+                # Early exit: 3 consecutive errors of the same type means
+                # the problem is persistent (e.g. payload too large),
+                # retrying won't help — just wastes time
+                if err_type == last_error_type:
+                    consecutive_same_type += 1
+                else:
+                    consecutive_same_type = 1
+                    last_error_type = err_type
+
+                if consecutive_same_type >= 3:
+                    logger.error(
+                        "Kimi API early exit: %d consecutive %s errors. "
+                        "Likely persistent issue (payload size? rate limit?). %s",
+                        consecutive_same_type, err_type,
+                        json.dumps(error_info, ensure_ascii=False, default=str),
+                    )
+                    raise RuntimeError(
+                        f"Kimi API: {consecutive_same_type} consecutive {err_type} errors"
+                    ) from e
+
                 if attempt < self.max_retries:
                     wait = min(2 ** attempt, 30)
                     logger.warning(
                         "Kimi API attempt %d/%d failed (%s): %s. Retry in %ds",
-                        attempt, self.max_retries, type(e).__qualname__,
+                        attempt, self.max_retries, err_type,
                         json.dumps(error_info, ensure_ascii=False, default=str),
                         wait,
                     )
