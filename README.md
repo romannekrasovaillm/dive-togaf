@@ -28,31 +28,36 @@
 │                        Три декуплированных пула                      │
 ├──────────────────┬──────────────────┬────────────────────────────────┤
 │   Tool Pool      │   Seed Pool      │   Exemplar Pool               │
-│   172 инструмента│   501 концепт    │   265 шаблонов                │
+│   184 записей    │   547 концептов  │   265 шаблонов                │
+│   82 unique tools│                  │                                │
+│                  │   22 категории:  │   12 семейств:                │
+│   11 доменов:    │   TOGAF phases,  │   retrieve_compute,           │
+│   ADM, ArchiMate,│   deliverables,  │   multi_hop_retrieval,        │
+│   Repository,    │   artifacts,     │   compare_decide,             │
+│   Governance,    │   ArchiMate,     │   gap_analysis,               │
+│   General,       │   BIAN, TMForum, │   compliance_check, ...       │
+│   Analysis,      │   Security,      │                                │
+│   Security,      │   Data, Integ.,  │   complexity: 1-5             │
+│   Data, Integ.,  │   Cloud, ...     │   sub_questions: 1-5          │
+│   Cloud, TechRad │                  │                                │
 │                  │                  │                                │
-│   5 доменов:     │   15 категорий:  │   12 семейств:                │
-│   ADM, ArchiMate,│   TOGAF phases,  │   retrieve_compute,           │
-│   Repository,    │   deliverables,  │   multi_hop_retrieval,        │
-│   Governance,    │   artifacts,     │   compare_decide,             │
-│   General        │   ArchiMate,     │   gap_analysis,               │
-│                  │   BIAN, ...      │   compliance_check, ...       │
 │   2 типа:        │                  │                                │
-│   retrieval (138)│                  │   complexity: 1-5             │
-│   processing (34)│                  │   sub_questions: 1-5          │
+│   retrieval (139)│                  │                                │
+│   processing (45)│                  │                                │
 └──────────────────┴──────────────────┴────────────────────────────────┘
                             │
                     PoolSampler.sample_config()
-                    (независимая выборка из каждого пула)
+                    (soft-affinity sampling: ≥3 domain-relevant tools)
                             │
                             ▼
 ┌──────────────────────────────────────────────────────────────────────┐
 │                     Synthesis Pipeline                               │
 │                                                                      │
-│   FOR k = 1..K:                                                     │
+│   FOR k = 1..K:   (per-iteration tool resampling: 70% keep, 30% swap)│
 │     ┌──────────────────────────────────────────────────────────┐    │
-│     │ CollectorAgent: сбор evidence через tool calls           │    │
-│     │   → вызывает 3-6 инструментов за раунд                  │    │
-│     │   → каждая итерация углубляет предыдущие находки         │    │
+│     │ CollectorAgent (single-rollout):                         │    │
+│     │   → 1 prompt → 1 model response → ≤6 tool calls         │    │
+│     │   → K>1: compressed evidence summary (~1KB vs ~5KB raw)  │    │
 │     │   → результат: EvidenceSet с реальными tool outputs      │    │
 │     └──────────────────────────────────────────────────────────┘    │
 │                          │                                           │
@@ -69,6 +74,13 @@
 │     SynthesizedTask с evidence_trajectory                           │
 │                                                                      │
 │   DatasetWriter → dataset.jsonl, full_results.jsonl, summary.json   │
+│                                                                      │
+│   ┌──────────────────────────────────────────────────────────┐      │
+│   │ SFT Stage (DIVE §3.4):                                   │      │
+│   │   TeacherAgent.rollout(Q, T) → trajectory τ               │      │
+│   │   verify(τ.final_answer, A) → rejection sampling          │      │
+│   │   → sft_dataset.jsonl                                     │      │
+│   └──────────────────────────────────────────────────────────┘      │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -110,12 +122,10 @@ python3 run_synthesis.py [OPTIONS]
 
   --batch-size N         Количество циклов синтеза (default: 3)
   --k-iterations K       Итерации углубления на цикл (default: 3)
-  --max-tool-rounds M    Макс. tool calls на итерацию (default: 8)
   --seed-category CAT    Фильтр по категории seed'ов (напр. bian_service_domain)
   --random-seed S        Фиксированный seed для воспроизводимости
   --output-dir DIR       Директория вывода (default: output/)
   --model MODEL          Модель Kimi (default: kimi-k2.5)
-  --temperature T        Температура LLM (игнорируется для kimi-k2.5)
   --verbose              Debug-логирование
 ```
 
@@ -134,36 +144,52 @@ python3 run_synthesis.py --verbose --batch-size 1 --k-iterations 1
 
 ## Три пула
 
-### Tool Pool (172 инструмента)
+### Tool Pool (184 записи, 82 уникальных инструмента)
 
-Два типа инструментов, семь доменов:
+Два типа инструментов, 11 доменов:
 
 | Домен | Retrieval | Processing | Всего |
 |-------|-----------|------------|-------|
 | ADM (фазы A-H) | 47 | 5 | 52 |
 | ArchiMate | 33 | 1 | 34 |
 | Repository | 28 | 1 | 29 |
-| Governance | 19 | 4 | 23 |
-| General | 8 | 11 | 19 |
+| Governance | 19 | 7 | 26 |
+| General | 10 | 9 | 19 |
 | Analysis | 0 | 12 | 12 |
 | Technology Radar | 1 | 2 | 3 |
+| Data Architecture | 1 | 2 | 3 |
+| Security | 0 | 2 | 2 |
+| Integration | 0 | 2 | 2 |
+| Cloud Infrastructure | 0 | 2 | 2 |
 
 Каждый инструмент содержит: `id`, `name`, `description`, `parameters` (с типами и enum'ами), `return_schema`, `examples`.
 
-### Seed Pool (501 концепт)
+### Seed Pool (547 концептов, 22 категории)
 
-| Категория | Количество | Примеры |
-|-----------|-----------|---------|
+| Категория | Кол-во | Примеры |
+|-----------|--------|---------|
+| `archimate_element` | 60 | Business Process, Application Service |
+| `bian_service_domain` | 57 | Loan Origination, Customer Management |
+| `togaf_artifact` | 51 | Stakeholder Map, Gap Analysis Matrix |
+| `tmforum_functional_block` | 44 | Service Ordering, Party Management |
+| `technology_building_block` | 40 | Kubernetes, Kafka, PostgreSQL |
+| `togaf_metamodel_entity` | 31 | Actor, BusinessFunction, ApplicationComponent |
+| `industry_case` | 29 | Banking Reference Architecture |
+| `archimate_viewpoint` | 24 | Layered, Motivation |
+| `stakeholder` | 23 | CIO, Enterprise Architect |
+| `togaf_deliverable` | 22 | Architecture Vision Document |
+| `capability` | 22 | Business Capability Map |
+| `building_block` | 22 | Architecture Building Blocks |
+| `standard` | 19 | ISO 27001, COBIT |
+| `togaf_technique` | 14 | Business Scenarios, Capability-Based Planning |
+| `archimate_relationship` | 13 | Serving, Composition, Realization |
+| `security_architecture` | 12 | Zero Trust, IAM, DevSecOps, Privacy-by-Design |
+| `integration_architecture` | 12 | Event-Driven Architecture, Saga, CDC, API-First |
+| `cloud_architecture` | 12 | Cloud-Native, Serverless, FinOps, GitOps |
 | `togaf_phase` | 10 | Preliminary, Phase A-H, Requirements Mgmt |
-| `togaf_deliverable` | ~60 | Architecture Vision, Business Capability Map |
-| `togaf_artifact` | ~40 | Stakeholder Map, Gap Analysis Matrix |
-| `togaf_technique` | ~25 | Business Scenarios, Capability-Based Planning |
-| `metamodel_entity` | ~30 | Actor, BusinessFunction, ApplicationComponent |
-| `archimate_element` | ~50 | Business Process, Application Service |
-| `archimate_relationship` | ~30 | Serving, Composition, Realization |
-| `bian_service_domain` | ~10 | Loan Origination, Customer Management |
-| `industry_case` | ~10 | Banking Reference Architecture |
-| `togaf_viewpoint` | ~20 | Business Process Viewpoint |
+| `togaf_viewpoint` | 10 | Business Process Viewpoint |
+| `team_topology` | 10 | Stream-Aligned, Platform Team |
+| `data_architecture` | 10 | Data Mesh, MDM, Data Lakehouse, Event Sourcing |
 
 ### Exemplar Pool (265 шаблонов)
 
@@ -182,9 +208,58 @@ python3 run_synthesis.py --verbose --batch-size 1 --k-iterations 1
 | `architecture_kata` | 8 | 2-5 | Учебные упражнения |
 | `aggregate` | 8 | 2-3 | Агрегация из нескольких источников |
 
+## Soft-Affinity Toolset Sampling
+
+Проблема: при чистом random sampling нишевые seeds (TMForum, Security, Data) получают toolset без релевантных инструментов → ~33% waste в tool calls.
+
+Решение — stratified sampling с мягкой гарантией:
+
+```
+sample_tools_with_affinity(seed, pool, toolset_size=15, min_affinity=3):
+  1. CATEGORY_DOMAIN_MAP[seed.category] → affinity_domains (1-3 домена)
+  2. Partition pool: affinity_tools ∩ other_tools
+  3. Гарантировать ≥3 affinity tools в toolset
+  4. Остальные слоты (~75%) — random из полного пула
+  5. Shuffle для устранения позиционного bias
+```
+
+| Seed | Без affinity | С affinity | Гарантия |
+|------|-------------|------------|----------|
+| TMForum ODA | 2.2 avg | 4.7 avg | ≥3 |
+| Security Architecture | ~2 avg | 5-6 avg | ≥3 |
+| Data Architecture | ~2 avg | 5 avg | ≥3 |
+| TOGAF Phase | ~5 avg | 8 avg | ≥3 |
+
+Per-iteration resampling (K>1) также поддерживает affinity: после 30% swap проверяется порог, при нехватке — affinity repair.
+
+## Payload Stabilization (Single-Rollout Collector)
+
+Проблема: multi-round tool-calling loop (до 8 rounds) накапливал сообщения → ~34KB payload на K=3 → `RemoteProtocolError`.
+
+Решение — single-rollout архитектура:
+
+```
+Phase 1 — Single-rollout per iteration:
+  Было:  prompt → model → tool calls → results → model → tool calls → ... (до 8 rounds)
+  Стало: prompt → model → ≤6 tool calls → collect evidence → done
+
+Phase 2 — Evidence compression:
+  Было:  K>1 prompt содержит raw JSON evidence (~5KB)
+  Стало: compressed_summary() — одна строка на evidence item (~1KB):
+    - [E0] compute_coupling: Ca=3.9, components: 3 items, health_score=0.88
+    - [E1] current_state_query: maturity_level=2, issues=[debt, scalability]
+```
+
+| Метрика | Было | Стало |
+|---------|------|-------|
+| Messages per iteration | ~20 | 3 |
+| Evidence in K>1 prompt | ~5KB | ~1KB |
+| Total payload K=3 | ~34KB | ≤15KB |
+| RemoteProtocolError | частый | устранён |
+
 ## Live Tools
 
-Из 172 инструментов пула большинство имеет live-реализацию на статических справочниках или реальных библиотеках:
+Из 82 уникальных инструментов большинство имеет live-реализацию на статических справочниках или реальных библиотеках:
 
 | Источник данных | Инструменты | Описание |
 |----------------|------------|----------|
@@ -268,6 +343,21 @@ GROUNDING INVARIANT -- THIS IS NON-NEGOTIABLE:
 }
 ```
 
+## SFT Trajectory Generation (DIVE §3.4)
+
+После синтеза D_task, отдельный этап генерирует SFT-данные через teacher rollout + rejection sampling:
+
+```python
+for (Q, A, T) in D_task:
+    τ = teacher.rollout(Q, T)        # teacher решает задачу с tool calls
+    if verify(τ.final_answer, A):    # rejection sampling
+        D_sft.append((Q, A, T, τ))
+```
+
+`TeacherAgent` использует ту же модель и тот же toolset для решения задач из D_task. Траектория записывается в chat-формате с `<think>` блоками и `<tool_call>` разметкой. `verify_answer()` сравнивает финальный ответ teacher'а с reference answer по ключевым токенам (числа, имена, метрики).
+
+Результат: `sft_dataset.jsonl` с полными траекториями для fine-tuning.
+
 ## Выходные файлы
 
 | Файл | Формат | Содержание |
@@ -275,12 +365,14 @@ GROUNDING INVARIANT -- THIS IS NON-NEGOTIABLE:
 | `output/dataset.jsonl` | JSONL | Одна строка на задачу: question, answer, cited_evidence_ids, evidence_trajectory, grounding_score |
 | `output/full_results.jsonl` | JSONL | Полные результаты цикла: seed, все evidence items, все tasks |
 | `output/summary.json` | JSON | Статистика: grounding_rate, complexity_distribution, seed_categories, task_families |
+| `output/sft_dataset.jsonl` | JSONL | SFT-траектории: messages с tool calls, final_answer, verified flag |
+| `output/sft_summary.json` | JSON | Acceptance rate, pass/fail counts |
 
 ## Тесты
 
 ```bash
-# Все тесты
-python -m pytest tests/ -v
+# Все тесты (54 теста)
+python -m pytest tests/ -v --ignore=tests/test_live_tools.py
 
 # Только пулы (быстро, без API)
 python -m pytest tests/test_pools.py -v
@@ -292,9 +384,7 @@ python -m pytest tests/test_core_tools.py -v
 python -m pytest tests/test_live_tools.py -v
 ```
 
-17 тестов пулов проверяют: размеры (>= 150 tools, >= 400 seeds, >= 200 exemplars), уникальность ID, покрытие типов/доменов/категорий/семейств, сериализацию, декуплированность пулов.
-
-30+ тестов core tools проверяют: граф-операции NetworkX, парсинг ArchiMate XML, centrality/coupling/critical path, интеграцию ArchiMate-to-NetworkX pipeline.
+54 теста проверяют: размеры пулов (≥ 150 tools, ≥ 500 seeds, ≥ 200 exemplars), уникальность ID, покрытие всех 22 категорий/11 доменов/12 семейств, граф-операции NetworkX, парсинг ArchiMate XML, centrality/coupling/critical path, интеграцию ArchiMate-to-NetworkX pipeline.
 
 ## Структура проекта
 
@@ -305,21 +395,21 @@ dive-togaf/
 ├── run_synthesis.sh                  # Shell-обёртка с проверками
 │
 ├── pools/                            # Сгенерированные JSON-пулы
-│   ├── tools/tool_pool.json
-│   ├── seeds/seed_pool.json
-│   └── exemplars/exemplar_pool.json
+│   ├── tools/tool_pool.json          #   184 записей (82 unique)
+│   ├── seeds/seed_pool.json          #   547 концептов
+│   └── exemplars/exemplar_pool.json  #   265 шаблонов
 │
 ├── src/
 │   ├── pools/                        # Построители пулов
-│   │   ├── models.py                 # Enum'ы и dataclass'ы
-│   │   ├── tool_pool_builder.py      # 172 инструмента
-│   │   ├── seed_pool_builder.py      # 501 seed-концепт
+│   │   ├── models.py                 # Enum'ы и dataclass'ы (22 SeedCategory, 11 ToolDomain)
+│   │   ├── tool_pool_builder.py      # 82 инструмента × параметрические варианты
+│   │   ├── seed_pool_builder.py      # 547 seed-концептов
 │   │   ├── exemplar_pool_builder.py  # 265 шаблонов задач
-│   │   ├── sampler.py               # Декуплированная выборка
-│   │   └── live_tools/              # Реальные реализации
-│   │       ├── togaf_adm_tools.py     # TOGAF ADM справочник (~47 tools)
-│   │       ├── repository_reference_tools.py  # BIAN, compliance, repo (~50 tools)
-│   │       ├── archimate_reference_tools.py   # ArchiMate элементы/viewpoints (~40 tools)
+│   │   ├── sampler.py                # Soft-affinity sampling + CATEGORY_DOMAIN_MAP
+│   │   └── live_tools/               # Реальные реализации
+│   │       ├── togaf_adm_tools.py
+│   │       ├── repository_reference_tools.py
+│   │       ├── archimate_reference_tools.py
 │   │       ├── networkx_tools.py     # 20 граф-инструментов (NetworkX)
 │   │       ├── archimate_parser_tools.py  # 10 ArchiMate XML парсер (lxml)
 │   │       ├── wikipedia_tools.py    # 5 GitHub API
@@ -327,14 +417,15 @@ dive-togaf/
 │   │
 │   └── synthesis/                    # Pipeline синтеза
 │       ├── kimi_client.py            # Клиент Moonshot/Kimi K2.5
-│       ├── collector.py              # Сбор evidence (K итераций)
-│       ├── generator.py             # Генерация Q/A + grounding validation
-│       ├── orchestrator.py          # Оркестрация + запись датасета
-│       └── tool_executor.py         # Live + LLM-симуляция инструментов
+│       ├── collector.py              # Single-rollout evidence collection (≤6 tools/iter)
+│       ├── generator.py              # Генерация Q/A + grounding validation
+│       ├── teacher.py                # Teacher rollout + rejection sampling (SFT)
+│       ├── orchestrator.py           # Оркестрация + affinity resampling + запись
+│       └── tool_executor.py          # Live + LLM-симуляция инструментов
 │
 └── tests/
-    ├── test_pools.py                 # 17 тестов валидации пулов
-    ├── test_core_tools.py            # 30+ тестов NetworkX + ArchiMate
+    ├── test_pools.py                 # Валидация пулов (размеры, категории, домены)
+    ├── test_core_tools.py            # NetworkX + ArchiMate тесты
     └── test_live_tools.py            # Тесты с реальными API
 ```
 
@@ -346,16 +437,17 @@ dive-togaf/
 - Temperature: не настраивается для kimi-k2.5 (ограничение API Moonshot)
 - Retry: до 3 попыток с exponential backoff (2s, 4s, 8s)
 - Tool calling: нативный через OpenAI-format function calling
+- Streaming: включен для thinking models (избежание timeout'ов)
 
 ## Комбинаторное пространство
 
-При 172 инструментах, 501 seed'е и 265 exemplar'ах:
+При 82 уникальных инструментах, 547 seed'ах и 265 exemplar'ах:
 
 ```
-N_configs = 501 × C(172, 30) × C(265, 4) ≈ 10^36
+N_configs = 547 × C(184, 15) × C(265, 4) ≈ 10^30
 ```
 
-Каждый цикл синтеза работает с уникальной комбинацией (seed, tools_subset, exemplars_subset), обеспечивая высокое разнообразие генерируемого датасета.
+С учётом per-iteration resampling (30% swap на K=2,3) и soft-affinity (уникальный affinity partition на seed), каждый цикл работает с уникальной комбинацией. Seed diversity enforcement (shuffled queue) гарантирует, что все 547 seeds будут использованы до первого повтора.
 
 ## Лицензия
 
