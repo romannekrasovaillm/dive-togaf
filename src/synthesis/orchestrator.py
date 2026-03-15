@@ -68,15 +68,13 @@ class SynthesisOrchestrator:
         sampler: PoolSampler,
         k_iterations: int = 3,
         max_tool_rounds_per_iter: int = 4,
-        enable_teacher: bool = True,
+        enable_teacher: bool = False,
     ):
         self._kimi = kimi_client
         self._sampler = sampler
         self._k = k_iterations
         self._max_tool_rounds = max_tool_rounds_per_iter
         self._generator = TaskGenerator(kimi_client)
-        self._enable_teacher = enable_teacher
-        self._teacher = TeacherAgent(kimi_client) if enable_teacher else None
 
     def run_single(
         self,
@@ -125,7 +123,6 @@ class SynthesisOrchestrator:
         # Iterative evidence collection + task generation
         evidence = EvidenceSet()
         tasks: list[SynthesizedTask] = []
-        teacher_verifications: list[dict[str, Any]] = []
         prev_query: str | None = None
 
         for k in range(1, self._k + 1):
@@ -155,27 +152,6 @@ class SynthesisOrchestrator:
                 k, len(evidence), task.complexity, task.grounding_score, task.question[:100],
             )
 
-            # Teacher rollout for RLVR verification
-            if self._teacher and task.question and task.grounding_score >= 0.5:
-                logger.info(
-                    "K=%d: running teacher rollout for Q='%s'",
-                    k, task.question[:80],
-                )
-                try:
-                    teacher_result = self._teacher.rollout(
-                        question=task.question,
-                        tool_executor=executor,
-                        tool_schemas=tool_schemas,
-                        student_answer=task.answer,
-                    )
-                    teacher_verifications.append(teacher_result.to_dict())
-                    logger.info(
-                        "K=%d: teacher verification=%s, agreement=%.2f",
-                        k, teacher_result.verified, teacher_result.agreement_score,
-                    )
-                except Exception as e:
-                    logger.warning("Teacher rollout failed for K=%d: %s", k, e)
-
             # Rate limit pacing between iterations
             if k < self._k:
                 time.sleep(3)
@@ -197,7 +173,6 @@ class SynthesisOrchestrator:
             simulated_tool_count=executor.simulated_count,
             iterations=self._k,
             elapsed_seconds=round(elapsed, 2),
-            teacher_verifications=teacher_verifications,
         )
 
     def run_batch(
@@ -250,6 +225,132 @@ class SynthesisOrchestrator:
                 continue
 
         return results
+
+
+# =====================================================================
+# Teacher Verifier — separate post-synthesis stage
+# =====================================================================
+
+class TeacherVerifier:
+    """Runs teacher verification as a separate post-synthesis stage.
+
+    Reads completed dataset, runs teacher rollouts for each task,
+    and writes verification results to a separate file. This decouples
+    verification cost from synthesis and avoids pipeline failures
+    from teacher timeouts.
+    """
+
+    def __init__(
+        self,
+        kimi_client: KimiClient,
+        sampler: PoolSampler,
+        max_tool_rounds: int = 6,
+    ):
+        self._kimi = kimi_client
+        self._sampler = sampler
+        self._teacher = TeacherAgent(kimi_client, max_tool_rounds=max_tool_rounds)
+
+    def verify_results(
+        self,
+        results: list[SynthesisResult],
+        output_dir: Path,
+    ) -> list[dict[str, Any]]:
+        """Run teacher verification on completed synthesis results.
+
+        Args:
+            results: Completed synthesis results.
+            output_dir: Directory to write verification results.
+
+        Returns:
+            List of verification dicts.
+        """
+        output_dir.mkdir(parents=True, exist_ok=True)
+        verifications: list[dict[str, Any]] = []
+        verify_path = output_dir / "teacher_verifications.jsonl"
+
+        for r_idx, result in enumerate(results):
+            logger.info(
+                "=== Teacher verification %d/%d: %s ===",
+                r_idx + 1, len(results), result.config_id,
+            )
+
+            # Build tool executor for this result's seed context
+            seed_context = f"{result.seed.get('name', '')}: {result.seed.get('description', '')}"
+            # Re-sample config to get the same tools
+            config = self._sampler.sample_config(seed_category=result.seed.get("category"))
+            executor = ToolExecutor(
+                tool_pool=config.tools,
+                kimi_client=self._kimi,
+                seed_context=seed_context,
+            )
+            tool_schemas = executor.get_openai_tool_schemas(config.tools)
+
+            for t_idx, task in enumerate(result.tasks):
+                question = task.get("question", "")
+                answer = task.get("answer", "")
+                grounding = task.get("grounding_score", 0.0)
+
+                if not question or grounding < 0.5:
+                    logger.info("  Skipping task %d (grounding=%.2f)", t_idx, grounding)
+                    continue
+
+                logger.info(
+                    "  Teacher rollout for task %d: Q='%s'",
+                    t_idx, question[:80],
+                )
+
+                try:
+                    teacher_result = self._teacher.rollout(
+                        question=question,
+                        tool_executor=executor,
+                        tool_schemas=tool_schemas,
+                        student_answer=answer,
+                    )
+                    verification = {
+                        "config_id": result.config_id,
+                        "task_index": t_idx,
+                        "iteration": task.get("iteration", 0),
+                        **teacher_result.to_dict(),
+                    }
+                    verifications.append(verification)
+
+                    # Incremental save
+                    with open(verify_path, "a", encoding="utf-8") as f:
+                        f.write(json.dumps(verification, ensure_ascii=False) + "\n")
+
+                    logger.info(
+                        "  Verified: %s (agreement=%.2f, matched=%d/%d)",
+                        teacher_result.verified,
+                        teacher_result.agreement_score,
+                        teacher_result.matched_facts,
+                        teacher_result.total_facts,
+                    )
+                except Exception as e:
+                    logger.warning("  Teacher rollout failed for task %d: %s", t_idx, e)
+
+                # Rate limit pacing
+                time.sleep(3)
+
+        # Write summary
+        if verifications:
+            verified_count = sum(1 for v in verifications if v.get("verified"))
+            scores = [v.get("agreement_score", 0) for v in verifications]
+            avg_score = sum(scores) / len(scores)
+            summary = {
+                "total_rollouts": len(verifications),
+                "verified_count": verified_count,
+                "verification_rate": round(verified_count / len(verifications), 3),
+                "avg_agreement_score": round(avg_score, 3),
+            }
+            summary_path = output_dir / "teacher_summary.json"
+            with open(summary_path, "w", encoding="utf-8") as f:
+                json.dump(summary, f, indent=2, ensure_ascii=False)
+            logger.info(
+                "Teacher verification complete: %d/%d verified (%.1f%% agreement)",
+                verified_count, len(verifications), avg_score * 100,
+            )
+
+        return verifications
 
 
 # =====================================================================

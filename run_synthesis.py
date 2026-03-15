@@ -17,6 +17,8 @@ Options:
     --model MODEL        Kimi model name (default: kimi-k2.5)
     --temperature T      LLM temperature (default: 0.6)
     --verbose            Enable debug logging
+    --teacher            Run teacher verification as a separate post-synthesis stage
+    --teacher-only       Run teacher verification on existing results (skip synthesis)
 """
 
 from __future__ import annotations
@@ -30,7 +32,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from src.pools.sampler import PoolSampler
 from src.synthesis.kimi_client import KimiClient
-from src.synthesis.orchestrator import DatasetWriter, SynthesisOrchestrator
+from src.synthesis.orchestrator import DatasetWriter, SynthesisOrchestrator, TeacherVerifier
 
 
 def parse_args() -> argparse.Namespace:
@@ -55,8 +57,10 @@ def parse_args() -> argparse.Namespace:
                         help="LLM temperature (default: 0.6)")
     parser.add_argument("--verbose", action="store_true",
                         help="Enable debug logging")
-    parser.add_argument("--no-teacher", action="store_true",
-                        help="Disable teacher rollout verification")
+    parser.add_argument("--teacher", action="store_true",
+                        help="Run teacher verification after synthesis (separate stage)")
+    parser.add_argument("--teacher-only", action="store_true",
+                        help="Run teacher verification on existing results (skip synthesis)")
     return parser.parse_args()
 
 
@@ -81,6 +85,7 @@ def main() -> None:
     print(f"  Seed category:   {args.seed_category or 'any'}")
     print(f"  Random seed:     {args.random_seed or 'none'}")
     print(f"  Output:          {args.output_dir}/")
+    print(f"  Teacher:         {'post-synthesis' if args.teacher else 'only' if args.teacher_only else 'disabled'}")
     print("=" * 70)
 
     # Initialize components
@@ -103,66 +108,105 @@ def main() -> None:
     print(f"  Exemplars: {stats['exemplar_pool_size']}")
     print()
 
-    orchestrator = SynthesisOrchestrator(
-        kimi_client=kimi,
-        sampler=sampler,
-        k_iterations=args.k_iterations,
-        max_tool_rounds_per_iter=args.max_tool_rounds,
-        enable_teacher=not args.no_teacher,
-    )
+    output_path = Path(args.output_dir)
+    results = []
 
-    # Prepare writer for incremental saves
-    writer = DatasetWriter(output_dir=Path(args.output_dir))
-    dataset_path = Path(args.output_dir) / "dataset.jsonl"
-    full_path = Path(args.output_dir) / "full_results.jsonl"
+    # ---- Stage 1: Synthesis ----
+    if not args.teacher_only:
+        orchestrator = SynthesisOrchestrator(
+            kimi_client=kimi,
+            sampler=sampler,
+            k_iterations=args.k_iterations,
+            max_tool_rounds_per_iter=args.max_tool_rounds,
+        )
 
-    # Run synthesis batch — results saved to disk after each cycle
-    print("Starting synthesis (results saved incrementally)...")
-    results = orchestrator.run_batch(
-        batch_size=args.batch_size,
-        seed=args.random_seed,
-        seed_category=args.seed_category,
-        writer=writer,
-    )
+        writer = DatasetWriter(output_dir=output_path)
+        dataset_path = output_path / "dataset.jsonl"
+        full_path = output_path / "full_results.jsonl"
 
-    if not results:
-        print("ERROR: No synthesis results produced.")
-        sys.exit(1)
+        print("Starting synthesis (results saved incrementally)...")
+        results = orchestrator.run_batch(
+            batch_size=args.batch_size,
+            seed=args.random_seed,
+            seed_category=args.seed_category,
+            writer=writer,
+        )
 
-    # Write final summary (uses all accumulated results)
-    summary_path = writer.write_summary(results, "summary.json")
+        if not results:
+            print("ERROR: No synthesis results produced.")
+            sys.exit(1)
 
-    # Print summary
-    total_tasks = sum(len(r.tasks) for r in results)
-    total_evidence = sum(len(r.evidence) for r in results)
-    total_calls = sum(r.tool_call_count for r in results)
-    total_live = sum(r.live_tool_count for r in results)
-    total_simulated = sum(r.simulated_tool_count for r in results)
-    total_time = sum(r.elapsed_seconds for r in results)
-    live_rate = total_live / max(total_calls, 1)
+        summary_path = writer.write_summary(results, "summary.json")
 
-    # Teacher verification stats
-    total_teacher = sum(len(r.teacher_verifications) for r in results)
-    teacher_verified = sum(
-        1 for r in results for tv in r.teacher_verifications if tv.get("verified")
-    )
+        # Print synthesis summary
+        total_tasks = sum(len(r.tasks) for r in results)
+        total_evidence = sum(len(r.evidence) for r in results)
+        total_calls = sum(r.tool_call_count for r in results)
+        total_live = sum(r.live_tool_count for r in results)
+        total_simulated = sum(r.simulated_tool_count for r in results)
+        total_time = sum(r.elapsed_seconds for r in results)
+        live_rate = total_live / max(total_calls, 1)
 
-    print()
-    print("=" * 70)
-    print("Synthesis Complete")
-    print("=" * 70)
-    print(f"  Cycles completed: {len(results)}/{args.batch_size}")
-    print(f"  Tasks generated:  {total_tasks}")
-    print(f"  Evidence items:   {total_evidence}")
-    print(f"  Tool calls:       {total_calls} ({total_live} live, {total_simulated} simulated, {live_rate:.0%} live rate)")
-    if total_teacher > 0:
-        print(f"  Teacher verified: {teacher_verified}/{total_teacher} ({teacher_verified/total_teacher:.0%})")
-    print(f"  Total time:       {total_time:.1f}s")
-    print()
-    print(f"  Dataset:          {dataset_path}")
-    print(f"  Full results:     {full_path}")
-    print(f"  Summary:          {summary_path}")
-    print("=" * 70)
+        print()
+        print("=" * 70)
+        print("Synthesis Complete")
+        print("=" * 70)
+        print(f"  Cycles completed: {len(results)}/{args.batch_size}")
+        print(f"  Tasks generated:  {total_tasks}")
+        print(f"  Evidence items:   {total_evidence}")
+        print(f"  Tool calls:       {total_calls} ({total_live} live, {total_simulated} simulated, {live_rate:.0%} live rate)")
+        print(f"  Total time:       {total_time:.1f}s")
+        print()
+        print(f"  Dataset:          {dataset_path}")
+        print(f"  Full results:     {full_path}")
+        print(f"  Summary:          {summary_path}")
+        print("=" * 70)
+
+    # ---- Stage 2: Teacher Verification (separate) ----
+    if args.teacher or args.teacher_only:
+        if not results and args.teacher_only:
+            # Load results from disk
+            import json
+            full_path = output_path / "full_results.jsonl"
+            if not full_path.exists():
+                print(f"ERROR: No results found at {full_path}")
+                sys.exit(1)
+            from src.synthesis.orchestrator import SynthesisResult
+            results = []
+            with open(full_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    data = json.loads(line)
+                    results.append(SynthesisResult(
+                        config_id=data["config_id"],
+                        seed=data["seed"],
+                        evidence=data["evidence"],
+                        tasks=data["tasks"],
+                        tool_call_count=data["tool_call_count"],
+                        live_tool_count=data.get("live_tool_count", 0),
+                        simulated_tool_count=data.get("simulated_tool_count", 0),
+                        iterations=data.get("iterations", 0),
+                        elapsed_seconds=data.get("elapsed_seconds", 0),
+                    ))
+            print(f"Loaded {len(results)} results from {full_path}")
+
+        print()
+        print("=" * 70)
+        print("Stage 2: Teacher Verification")
+        print("=" * 70)
+
+        verifier = TeacherVerifier(
+            kimi_client=kimi,
+            sampler=sampler,
+        )
+        verifications = verifier.verify_results(results, output_path)
+
+        if verifications:
+            verified = sum(1 for v in verifications if v.get("verified"))
+            scores = [v.get("agreement_score", 0) for v in verifications]
+            print(f"  Verified:         {verified}/{len(verifications)}")
+            print(f"  Avg agreement:    {sum(scores)/len(scores):.2f}")
+            print(f"  Results:          {output_path / 'teacher_verifications.jsonl'}")
+        print("=" * 70)
 
 
 if __name__ == "__main__":

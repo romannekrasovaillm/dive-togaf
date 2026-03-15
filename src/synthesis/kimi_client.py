@@ -408,8 +408,16 @@ class KimiClient:
         temperature: float | None = None,
         max_tokens: int = 32768,
     ) -> str:
-        """Simple text-only chat completion. Returns assistant content string."""
-        resp = self.chat(messages, temperature=temperature, max_tokens=max_tokens)
+        """Simple text-only chat completion. Returns assistant content string.
+
+        Uses streaming for thinking models (kimi-k2.5) to avoid
+        connection timeouts on long reasoning responses.
+        """
+        use_stream = self.model in _FIXED_TEMP_MODELS or "thinking" in self.model
+        resp = self.chat(
+            messages, temperature=temperature,
+            max_tokens=max_tokens, stream=use_stream,
+        )
         return resp.choices[0].message.content or ""
 
     def chat_with_tools(
