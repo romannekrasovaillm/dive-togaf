@@ -60,6 +60,8 @@ def parse_args() -> argparse.Namespace:
                         help="LLM temperature (default: 0.6)")
     parser.add_argument("--verbose", action="store_true",
                         help="Enable debug logging")
+    parser.add_argument("--collector-thinking", action="store_true",
+                        help="Enable reasoning/thinking mode for collector (disabled by default to avoid timeouts)")
     parser.add_argument("--teacher", action="store_true",
                         help="Run teacher rollout (Stage 2) after synthesis")
     parser.add_argument("--teacher-only", action="store_true",
@@ -144,6 +146,7 @@ def main() -> None:
             sampler=sampler,
             k_iterations=args.k_iterations,
             max_tool_rounds_per_iter=args.max_tool_rounds,
+            collector_thinking=args.collector_thinking,
         )
 
         writer = DatasetWriter(output_dir=output_path)
